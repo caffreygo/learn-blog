@@ -1,5 +1,5 @@
 module.exports = {
-  base: '/',
+  base: '/blog/',
   title: 'CaffreyGo',
   description: 'Something just like thiss',
   themeConfig: {
