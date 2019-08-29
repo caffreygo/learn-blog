@@ -7,22 +7,22 @@ module.exports = {
   ],
   themeConfig: {
     nav: [
-      { text: 'Git', link: '/git/' },
       { text: 'Daily', link: '/daily/' },
+      { text: 'Git', link: '/git/' },
       { text: 'Promise', link: '/promise/' },
       { text: 'Github', link: 'https://github.com/caffreygo' },
     ],
     sidebar: {
-      '/daily/': [
-        'desc',
-        '',
-        'note'
-      ],
       '/promise/': [
         '',
       ],
       '/git/': [
         ''
+      ],
+      '/daily/': [
+        '',
+        'step-4',
+        'note'
       ],
 
     },
