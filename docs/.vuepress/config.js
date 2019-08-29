@@ -4,8 +4,8 @@ module.exports = {
   description: 'Something just like thiss',
   themeConfig: {
     nav: [
-      { text: 'Webpack', link: '/daily/' },
       { text: 'Git', link: '/git/' },
+      { text: 'Webpack', link: '/daily/' },
       { text: 'Promise', link: '/promise/' },
       { text: 'Github', link: 'https://github.com/caffreygo' },
     ],
