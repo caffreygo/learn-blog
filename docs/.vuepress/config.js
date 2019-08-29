@@ -14,6 +14,7 @@ module.exports = {
     ],
     sidebar: {
       '/daily/': [
+        'desc',
         '',
         'note'
       ],
