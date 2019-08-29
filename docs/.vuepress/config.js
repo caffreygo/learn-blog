@@ -8,22 +8,24 @@ module.exports = {
   themeConfig: {
     nav: [
       { text: 'Git', link: '/git/' },
-      { text: 'Webpack', link: '/daily/' },
+      { text: 'Daily', link: '/daily/' },
       { text: 'Promise', link: '/promise/' },
       { text: 'Github', link: 'https://github.com/caffreygo' },
     ],
     sidebar: {
       '/daily/': [
-        ''
+        '',
+        'note'
       ],
       '/promise/': [
-        ''
+        '',
       ],
       '/git/': [
         ''
       ],
 
     },
-    sidebarDepth: 2
+    sidebarDepth: 2,
+    lastUpdated: 'Last Updated'
   }
 }

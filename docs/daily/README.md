@@ -1,4 +1,4 @@
-# DAILY NOTE
+# webpack
 
 ## performance
 
