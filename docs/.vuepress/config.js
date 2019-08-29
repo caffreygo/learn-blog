@@ -2,6 +2,9 @@ module.exports = {
   base: '/learn-blog/',
   title: 'CaffreyGo',
   description: 'Something just like thiss',
+  head: [
+    ['link', { rel: 'icon', href: '/gift.png' }]
+  ],
   themeConfig: {
     nav: [
       { text: 'Git', link: '/git/' },
