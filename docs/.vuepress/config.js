@@ -7,7 +7,7 @@ module.exports = {
   ],
   themeConfig: {
     nav: [
-      { text: 'Daily', link: '/daily/' },
+      { text: 'Webpack', link: '/webpack/' },
       { text: 'Git', link: '/git/' },
       { text: 'Promise', link: '/promise/' },
       { text: 'Github', link: 'https://github.com/caffreygo' },
@@ -19,9 +19,11 @@ module.exports = {
       '/git/': [
         ''
       ],
-      '/daily/': [
+      '/webpack/': [
         '',
+        'step-1',
         'step-4',
+        'step-5',
         'note'
       ],
 
