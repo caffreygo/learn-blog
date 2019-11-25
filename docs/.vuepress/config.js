@@ -9,14 +9,23 @@ module.exports = {
     nav: [
       { text: 'Webpack', link: '/webpack/' },
       { text: 'Git', link: '/git/' },
+      { text: 'HTTP', link: '/http/' },
+      { text: 'Element', link: '/element/' },
       { text: 'Promise', link: '/promise/' },
       { text: 'Github', link: 'https://github.com/caffreygo' },
     ],
     sidebar: {
       '/promise/': [
         '',
+        'demo'
       ],
       '/git/': [
+        ''
+      ],
+      '/http/': [
+        ''
+      ],
+      '/element/': [
         ''
       ],
       '/webpack/': [
