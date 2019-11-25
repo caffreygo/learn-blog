@@ -88,3 +88,34 @@ http code：定义服务器对请求的处理结果
 
 [More]: http://www.ruanyifeng.com/blog/2019/09/curl-reference.html	"CURL"
 
+## 跨域
+
+#### Access-Control-Allow-Origin
+
+![跨域实例](../img/http/img4.png)
+
+在8888端口下返回test.html文件，在test中访问8887端口
+
+**跨域会导致浏览器拦截response：**Access to XMLHttpRequest at 'http://localhost:8887/' from origin 'http://localhost:8888' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+```js
+response.writeHead(200, {
+	'Access-Control-Allow-Origin': '*'
+})
+```
+
+*： 表示允许任何服务都接受，可以设置特地域名
+
+```js
+response.writeHead(200, {
+	'Access-Control-Allow-Origin': 'http://localhost:8888'
+})
+```
+
+
+
+### JSONP
+
+原理：浏览器允许link script和img标签加载数据，不需要设置允许跨域Access-Control-Allow-Origin
+
+![JSONP](../img/http/img5.png)
