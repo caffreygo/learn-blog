@@ -8,7 +8,7 @@
 4. 数据链路层
 5. 物理层
 
-![通信协议](../img/http/协议.jpg)
+![通信协议](../img/http/img1.jpg)
 
 
 
@@ -20,7 +20,7 @@
 
 为了提供可靠的传送，TCP在发送新的数之前，以特定的顺序将数据包的序号，并需要这些包传送给目标机之后的确认消息。TCP总是用来发送大批量的数据。当应用程序在收到数据后要做出确认时也要用到TCP
 
-![三次握手](../img/http/三次握手.jpg)
+![三次握手](../img/http/img2.jpg)
 
 
 
@@ -48,7 +48,7 @@
 
 ## HTTP报文格式
 
-![](../img/http/http格式.jpg)
+![](../img/http/img3.jpg)
 
 http方法：用来定义对资源的操作（GET、POST...）
 
@@ -64,27 +64,27 @@ http code：定义服务器对请求的处理结果
 
 ![1574690272753](../img/http/curlV.png)
 
-1. 不带有任何参数时，curl 就是发出 GET 请求。
+- 不带有任何参数时，curl 就是发出 GET 请求。
 
-   > ```bash
-   > $ curl https://www.example.com
-   > ```
+> ```bash
+> $ curl https://www.example.com
+> ```
 
-   上面命令向`www.example.com`发出 GET 请求，服务器返回的内容会在命令行输出。
+上面命令向`www.example.com`发出 GET 请求，服务器返回的内容会在命令行输出。
 
-2. ## **-v**
+- **-v**
 
-   `-v`参数输出通信的整个过程，用于调试。
+`-v`参数输出通信的整个过程，用于调试。
 
-   > ```bash
-   > $ curl -v https://www.example.com
-   > ```
+> ```bash
+> $ curl -v https://www.example.com
+> ```
 
-   `--trace`参数也可以用于调试，还会输出原始的二进制数据。
+`--trace`参数也可以用于调试，还会输出原始的二进制数据。
 
-   > ```bash
-   > $ curl --trace - https://www.example.com
-   > ```
+> ```bash
+> $ curl --trace - https://www.example.com
+> ```
 
 [More]: http://www.ruanyifeng.com/blog/2019/09/curl-reference.html	"CURL"
 
