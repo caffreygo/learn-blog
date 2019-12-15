@@ -37,7 +37,7 @@ module.exports = {
       ],
 
     },
-    sidebarDepth: 1,
+    sidebarDepth: 2,
     lastUpdated: 'Last Updated'
   }
 }
