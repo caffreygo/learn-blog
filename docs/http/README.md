@@ -517,3 +517,75 @@ if (resquest.url === '/new') {
 }
 ```
 
+## CSP
+
+### Content-security-Policy
+
+- 限制资源获取
+- 报告资源获取越权
+
+### 限制方式
+
+default-src限制全局、connect-src、img-src、manifest-src、style-src、script-src、frame-src、media-src、font-src...
+
+```js
+response.writeHead(200, {
+    'Content-Type':'text/html',
+    'Content-Srcurity-Policy':'default-src http:https'
+    //只能通过https的方式加载，此时inline script无法加载
+})
+
+response.writeHead(200, {
+    'Content-Type':'text/html',
+    'Content-Srcurity-Policy':'default-src \'self\''
+    //不能引入外链的JavaScript
+})
+
+response.writeHead(200, {
+    'Content-Type':'text/html',
+    'Content-Srcurity-Policy':'default-src \'self\' https://source.com/'
+    //不能引入外链的JavaScript,允许该域名内的数据加载
+})
+```
+
+### 限制form表单的提交
+
+- form表单不受default-src的限制
+
+```js
+response.writeHead(200, {
+    'Content-Type':'text/html',
+    'Content-Srcurity-Policy':'default-src \'self\' form-action \'self\''
+    //form提交范围被限制
+})
+```
+
+### 个别资源限制
+
+```js
+response.writeHead(200, {
+    'Content-Type':'text/html',
+    'Content-Srcurity-Policy':'img-src \'self\'; report-uri /report'
+    //在遇到限制之后可以想/report发送一个csp的报告
+    //默认disposition enforce不允许加载
+    //Content-Srcurity-Policy-Report-Only 会做report工作但是仍然会加载
+    //report只能在head里面设置，在meta中无效
+})
+```
+
+```js
+response.writeHead(200, {
+    'Content-Type':'text/html',
+    'Content-Srcurity-Policy':'connect-src \'self\''
+    // ajax请求的资源限制
+})
+```
+
+### Meta设置CSP
+
+```html
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' form-action 'self'">
+
+<meta http-equiv="Content-Security-Policy" content="connect 'self'>
+```
+
