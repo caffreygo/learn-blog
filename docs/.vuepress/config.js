@@ -6,20 +6,20 @@ module.exports = {
   themeConfig: {
     nav: [
       { text: 'TypeScript', link: '/typescript/' },
+      { text: 'JavaScript', link: '/javascript/' },
       { text: 'Git', link: '/git/' },
       { text: 'HTTP', link: '/http/' },
-      { text: 'Element', link: '/element/' },
-      { text: 'Promise', link: '/promise/' },
+      { text: 'Note', link: '/basic/' },
       { text: 'Webpack', link: '/webpack/' },
       { text: 'Github', link: 'https://github.com/caffreygo' }
     ],
     sidebar: {
-      '/typescript/': [''],
-      '/promise/': ['', 'demo'],
-      '/git/': [''],
+      '/typescript/': ['', 'crawler'],
+      '/javascript/': [''],
+      '/webpack/': ['', 'step-1', 'step-4', 'step-5'],
       '/http/': [''],
-      '/element/': [''],
-      '/webpack/': ['', 'step-1', 'step-4', 'step-5', 'note']
+      '/git/': [''],
+      '/basic/': ['', 'promise', 'promiseDemo', 'element', 'css']
     },
     sidebarDepth: 2,
     lastUpdated: 'Last Updated'
