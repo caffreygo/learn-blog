@@ -14,7 +14,7 @@ module.exports = {
       { text: 'Github', link: 'https://github.com/caffreygo' }
     ],
     sidebar: {
-      '/typescript/': ['', 'crawler'],
+      '/typescript/': ['', 'crawler', 'step2'],
       '/javascript/': [''],
       '/webpack/': ['', 'step-1', 'step-4', 'step-5'],
       '/http/': [''],

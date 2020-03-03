@@ -176,5 +176,106 @@ console.log('' || 'abc')        // 'abc'
 console.log(!window.abc)        // true
 ```
 
+## 原型和原型链
 
+JavaScript是一个基于原型继承的，ES6的class其实也是原型继承
 
+### class和继承
+
+- constructor
+- 属性
+- 方法
+
+```javascript
+class Student {
+    constructor (name,number) {
+        this.name = name
+        this,number = number
+    }
+    sayHi () {
+        console.log(`姓名 ${this.name}, 学号 ${this.number}`)
+    }
+}
+
+// 通过类 new 实例/对象
+const caffrey = new Student('caffrey', 18)
+console.log(caffrey.name)
+console.log(caffrey.number)
+caffrey.sayHi()
+```
+
+- class继承(extends)
+
+```javascript
+// 父类
+class People {
+    constructor (name) {
+        this.name = name
+    }
+    eat() {
+        console.log(`${this.name} eat a log`)
+    }
+}
+
+// 子类
+class Student extends People {
+    constructor(name,number) {
+        super(name)
+        this.age = number
+    }
+    sayHi () {
+        console.log(`姓名 ${this.name}, 学号 ${this.number}`)
+    }
+}
+
+// 通过类 new 实例/对象
+const caffrey = new Student('caffrey', 18)
+console.log(caffrey.name)
+console.log(caffrey.number)
+caffrey.eat()
+caffrey.sayHi()
+```
+
+### 原型
+
+- 类型判断 - instanceof
+
+```javascript
+caffrey instanceof Student    // true
+caffrey instanceof People     // true
+caffrey instanceof Object     // true
+
+[] instanceof Array     // true
+[] instanceof Object    // true
+
+{} instanceof Object    // true
+```
+
+- 原型
+
+```
+// class 实际上是函数， 可见是语法糖
+typeof People   // 'function'
+typeof Student   // 'function'
+
+// 隐式原型和显式原型
+console.log( caffrey.__proto__ )
+console.log( Student.prototype )
+console.log( caffrey.__proto === Student.prototype )    // true
+```
+
+![原型](../img/javascript/原型.png)
+
+- **原型关系**
+
+1. 每个class都有显式原型
+2. 每个实例都有隐式原型
+3. 实例的隐式原型指向对应 class 的prototype(显式原型)
+
+- **基于原型的执行规则**
+
+1. 获取属性 caffrey.name 或执行方法 caffrey.sayHi( )时
+2. 现在自身属性和方法寻找
+3. 如果找不到则自动去隐式原型中寻找
+
+#### 
