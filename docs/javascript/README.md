@@ -264,7 +264,7 @@ console.log( Student.prototype )
 console.log( caffrey.__proto === Student.prototype )    // true
 ```
 
-![原型](../img/javascript/原型.png)
+![原型](../img/javascript/yuanxing.png)
 
 - **原型关系**
 
@@ -277,5 +277,3 @@ console.log( caffrey.__proto === Student.prototype )    // true
 1. 获取属性 caffrey.name 或执行方法 caffrey.sayHi( )时
 2. 现在自身属性和方法寻找
 3. 如果找不到则自动去隐式原型中寻找
-
-#### 
