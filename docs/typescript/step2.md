@@ -138,3 +138,137 @@ function addSecond (first : object | NumberObj, second : object | NumberObj) {
 }
 ```
 
+## Enum 枚举类型
+
+```powershell
+npm init -y
+npm install ts-node -D
+npm install typescript -D
+```
+
+- JavaScript(场景：某个状态的值固定)
+
+```javascript
+const Status = {
+  OFFLINE: 0,
+  ONLINE: 1,
+  DELETED: 2
+};
+
+function getResult(status) {
+  if (status === Status.OFFLINE) {
+    return 'offline';
+  } else if (status === Status.ONLINE) {
+    return 'online';
+  } else if (status === Status.DELETED) {
+    return 'deleted';
+  }
+  return 'error';
+}
+
+const result = getResult(Status.ONLINE);
+console.log(result);
+
+```
+
+- 枚举类型
+
+```typescript
+// 枚举类型的默认值从0开始，  0，1，2...
+enum Status {
+  OFFLINE,
+  ONLINE,
+  DELETED
+}
+
+function getResult(status: any) {
+  if (status === Status.OFFLINE) {
+    return 'offline';
+  } else if (status === Status.ONLINE) {
+    return 'online';
+  } else if (status === Status.DELETED) {
+    return 'deleted';
+  }
+  return 'error';
+}
+
+const result = getResult(1);     //	online
+console.log(Status.OFFLINE);     // 0
+console.log(Status.ONLINE);		 // 1
+console.log(Status.DELETED);	 // 2
+console.log(Status[0]);	   // OFFLINE     反向映射   
+```
+
+```typescript
+// 如果中间的某个值被设置了，后续的+1自增
+enum Status {
+  OFFLINE,
+  ONLINE = 4,
+  DELETED
+}
+// 0 4 5
+// Status[0]    undefined
+```
+
+## 函数泛型
+
+- 场景
+
+```typescript
+function join(first: string | number, second: string | number) {
+  return `${first}${second}`;
+}
+
+join('1', 1);
+
+// 需求如果fisrt是number或者string,second也要一样?
+```
+
+- 泛型 generic **泛指的类型**，在使用的时候才会知道具体的类型，可以显式得声明，也可以让typescript进行类型推断
+
+```typescript
+// ABC 泛型（任意类型）
+function join<ABC>(first: ABC,second: ABC) {
+  return `${first}${second}`
+}
+
+// 报错：类型“1”的参数不能赋给类型“string”的参数
+join("1",1)
+join<string>('1',1)
+// success
+join<string>('1','1')
+join<number>(1,1)
+```
+
+- 泛型的使用
+
+```typescript
+function map<ABC>(params: ABC) {
+  return params
+}
+map<string>('123')     //  123
+
+// T[]  与  Array<T>  等价
+function map1<T>(params: T[]) {
+  return params
+}
+map1<string>(['123'])     //  ['123']
+
+function map1<T>(params: Array<T>) {
+  return params
+}
+map2<string>(['123'])     //  ['123']
+```
+
+- 多个泛型的定义
+
+```typescript
+function join<T, P>(first: T, second: P) {
+  return `${first}${second}`
+}
+
+join<number, string>(1,'1')
+// 如果没有写类型，typescript会类型推断
+join(1,'1')
+```
+

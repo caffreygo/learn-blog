@@ -277,3 +277,92 @@ console.log( caffrey.__proto === Student.prototype )    // true
 1. 获取属性 caffrey.name 或执行方法 caffrey.sayHi( )时
 2. 现在自身属性和方法寻找
 3. 如果找不到则自动去隐式原型中寻找
+
+### 原型链和instanceof
+
+**实例的隐式原型指向构造函数的显式原型**
+
+```
+// student继承于People  
+console.log( Student.prototype.__proto__ )
+console.log( People.prototype )
+console.log( Student.prototype.__proto__ === People.prototype )    // true
+```
+
+![原型链](../img/javascript/yuanxinglian.png)
+
+#### hasOwnProperty
+
+```javascript
+// hasOwnProperty检测是不是自身属性（非继承）
+caffrey.name                            // 'caffrey'
+caffrey.hasOwnProperty('name')          // true
+
+caffrey.sayHi()                         // '姓名 caffrey , 学号 18'
+caffrey.hasOwnProperty('sayHi')         // false
+caffrey.hasOwnProperty('eat')           // false
+```
+
+![原型链](../img/javascript/yuanxinglian2.png)
+
+#### instanceof
+
+实例沿着隐式原型链往上寻找，如果隐式原型能对应到class(构造函数)的显示原型，则返回true,否则返回false
+
+
+
+1. class是ES6语法规范，由ECMA委员会发布
+2. ECMA只规定语法规则，即我们的代码的书写规范，不规定如何实现
+3. 以上实现方式都是V8引擎（yinqing）的实现方式，也是主流的
+
+### 回顾
+
+- 手写一个简易的jQuery,考虑插件和扩展性
+
+```javascript
+class jQuery {
+    constructor(selector) {
+        const result = document.querySelectorAll(selector)
+        const length = result.length
+        for(let i =0; i<length; i++) {
+            this[i] = result[i]
+        }
+        this.length = length
+        this.selector = selector
+    }
+    get(index) {
+        return this[index]
+    }
+    each(fn) {
+        for(let i =0; i<length; i++) {
+            const elem = this[i]
+            fn(elem)
+        }
+    }
+    on(type, fn) {
+        return this.each(elem => {
+            elem.addEventListener(type, fn, false)
+        })
+    }
+    ......
+}
+    
+// 插件
+   	jQuery.prototype.dialog = function (info) { alert(info) }
+// "造轮子"
+	class myJQuery extends jQuery {
+        constructor(selector) {
+            super(selector)
+        }
+        // 扩展自己的方法
+        addClass(className) {
+            ...
+        }
+    }
+    
+//  const $p = new jQuery('p')
+//  $p.get(1)
+//  $p.each(elem=> console.log(elem.nodeName))
+//  $p.on('click',()=>alert('clicked'))
+```
+
