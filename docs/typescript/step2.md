@@ -272,3 +272,216 @@ join<number, string>(1,'1')
 join(1,'1')
 ```
 
+## 类中的泛型以及泛型类型、
+
+### 类中的泛型
+
+```typescript
+class DataManager {
+	// 可以传string或者number类型的数组...
+	constructor (private data: string [] | number[]) {}
+	getItem(index: number): string|number {
+		return this.data[index]
+	}
+}
+
+const data = new DataManager(['1']);
+data.getItem(0)           //   '1'
+```
+
+为了能传入各种类型的参数，并且返回和传入相应的类型，减少代码量
+
+```typescript
+class DataManager<T> {
+	constructor (private data: T[]) {}
+	getItem(index: number): T {
+		return this.data[index]
+	}
+}
+
+// const data = new DataManager(['1']);    类型推断
+const data = new DanaManager<number>([1]);
+data.getItem(0)           //   '1'
+```
+
+- 泛型类型约束（extends）
+
+如果要求this.data[index].name有值,传入T类型一定要包含name属性，此时返回值是string
+
+```typescript
+interface Item {
+	name: string;
+}
+
+class DataManager<T extends Item> {
+	constructor (private data: T[]) {}
+	getItem(index: number): string {
+		return this.data[index].name;
+	}
+}
+
+const data = new DanaManager([
+	{
+		name: 'caffrey'
+	}
+]);
+
+
+//  interface Test {
+//  	name: string
+//  }
+//  const data = new DanaManager<Test>([{name: 'caffrey'}]);
+```
+
+- 类接收的泛型的具体类型只能是number和string
+
+```typescript
+class DataManager<T extends number | string> {
+	constructor (private data: T[]) {}
+	getItem(index: number): T {
+		return this.data[index]
+	}
+}
+
+const data = new DataManager<string>([1])
+
+```
+
+### 泛型声明类型
+
+```typescript
+// 如何使用泛型作为一个具体的类型注解
+function hello<T>(params: T) {
+    return params;
+}
+
+//  const func: (T)=>string = <T>() => {
+//  	return '123'
+//  }
+const func: <T>(patams: T) => T = hello;
+```
+
+## 命名空间
+
+```shell
+npm init -y
+tsc -init
+```
+
+tsconfig.json
+
+```json
+"outDir": "./dist",
+"rootDir": "./src"
+```
+
+index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./page.js"></script>
+  </head>
+  <body>
+    <script>
+      new Page();
+    </script>
+  </body>
+</html>
+```
+
+page.ts
+
+```typescript
+class Header {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is header';
+    document.body.appendChild(elem);
+  }
+}
+
+class Content {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is content';
+    document.body.appendChild(elem);
+  }
+}
+
+class Footer {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is footer';
+    document.body.appendChild(elem);
+  }
+}
+
+class Page {
+  constructor() {
+    new Header();
+    new Content();
+    new Footer();
+  }
+}
+```
+
+运行 tsc -w (自动检测变化编译)
+
+```shell
+|-- namespace
+|   |-- dist
+|   |   |-- page.js
+|   |   |-- index.html
+|   |-- src
+|   |   |-- page.ts
+|   |-- package.json
+|   |-- tsconfig.json
+```
+
+问题：编译后的page.js文件暴露了很多的全局变量（控制台能够拿到Header、Content、Footer、Page）,而实际上需要保留的只有Page这个全局变量，需要在typescript中融入一些**模块化**的思想。
+
+### namespace
+
+```typescript
+namespace Home {
+  class Header {
+    constructor() {
+      const elem = document.createElement('div');
+      elem.innerText = 'this is header';
+      document.body.appendChild(elem);
+    }
+  }
+
+  class Content {
+    constructor() {
+      const elem = document.createElement('div');
+      elem.innerText = 'this is content';
+      document.body.appendChild(elem);
+    }
+  }
+
+  class Footer {
+    constructor() {
+      const elem = document.createElement('div');
+      elem.innerText = 'this is footer';
+      document.body.appendChild(elem);
+    }
+  }
+  // 如果没有export,此时在控制台只能拿到一个空对象Home,export编译后（Home.Page = Page）
+  // new Home.page()
+  export class Page {
+    constructor() {
+      new Header();
+      new Content();
+      new Footer();
+    }
+  }
+}
+```
+
+全局变量只有一个Home,而且Home只暴露了一个Page方法（export）

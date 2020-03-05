@@ -293,6 +293,8 @@ console.log( Student.prototype.__proto__ === People.prototype )    // true
 
 #### hasOwnProperty
 
+hasOwnProperty方法是继承自Object的
+
 ```javascript
 // hasOwnProperty检测是不是自身属性（非继承）
 caffrey.name                            // 'caffrey'
@@ -364,5 +366,160 @@ class jQuery {
 //  $p.get(1)
 //  $p.each(elem=> console.log(elem.nodeName))
 //  $p.on('click',()=>alert('clicked'))
+```
+
+## 作用域和闭包
+
+### 作用域和自由变量
+
+```js
+// 创建10个`<a>`标签，点击的时候弹出对应的序号
+let i, a
+for(i=0;i<10,i++) {
+    a = document.createElement('a')
+    a.innerText = i +'<br>'
+    a.addEventListener('click',function(e){
+        e.preventDefault()
+        alert(i)
+    })
+    document.body.appendChild(a)
+}
+```
+
+![函数作用域](../img/javascript/hanshuzuoyongyu.png)
+
+#### 作用域
+
+代表了一个变量的合法使用范围，超出范围使用则报错
+
+1. 全局作用域
+2. 函数作用域
+3. 块级作用域（ES6新增）
+
+```
+// 块级作用域 { }  let/const
+if (true) {
+	let x = 100
+}
+console.log(x)  // 会报错
+```
+
+#### 自由变量
+
+1. 一个变量在当前作用域没有**定义**，但被使用了
+2. 向上级作用域，一层一层依次寻找，直到找到为止
+3. 如果到了全局作业域，则报错 ××× not defined
+
+### 闭包
+
+- 作用域应用的特殊情况，有两种表现（函数的声明和调用不在一个位置）
+- 函数作为参数被传递
+- 函数作为返回值被返回
+
+```javascript
+// 函数作为返回值
+function create() {
+	const a = 100
+	return function () {
+		console,log(a)
+	}
+}
+
+const fn = create()
+const a = 200
+fn()  // 100   在create作用域声明，在全局作用域执行
+
+```
+
+```javascript
+// 函数作为参数被传递
+function print (fn) {
+	const a = 200
+	fn ()
+}
+const a = 100
+function fn() {
+	console.log(a)
+}
+print(fn)  // 100  在全局作用域声明，在print作用域执行
+```
+
+所有的自由变量的查找： 是在**定义**的地方，向上级作用域查找，不是在执行的地方！！
+
+### this
+
+- 作为普通函数
+- 使用call apply bind （改变this指向）
+- 作为对象方法被调用
+- 在class方法中调用
+- 箭头函数
+
+this取什么值，是在函数**执行**的时候确认的，不是在函数定义的时候确认的
+
+```javascript
+function fn1 {
+	console.log(this)
+}
+
+fn1()   // window
+
+// 区别：call可以直接调用，bind返回一个新的函数来执行
+fn1.call({x:100})     // {x: 100}
+
+const fn2 = fn1.bind({x:200})
+fn2()   // {x:200}
+```
+
+
+
+```javascript
+const zhangsan = {
+	name: '张三'，
+	sayHi() {
+		// this 即当前zhangsan对象
+		console.log(this)
+	}
+	wait () {
+		setTimeout (function () {
+			// this === window,这个函数被执行是setTimeout本身被触发的执行，它并不是						// zhangsan.sayHi()这种方式的执行，作为一个普通函数被执行
+			console.log(this)
+		})
+	}
+}
+```
+
+**箭头函数**的this永远是取它**上级作用域**的this
+
+```javascript
+const zhangsan = {
+	name: '张三'，
+	sayHi() {
+		// this 即当前zhangsan对象
+		console.log(this)
+	}
+	wait () {
+        // this 即当前zhangsan对象
+		setTimeout (()=> {
+			// this 即当前zhangsan对象
+			console.log(this)
+		})
+	}
+}
+```
+
+**class**中的this
+
+```javascript
+class People {
+	constructor(name) {
+		this.name = name
+		this.age = 20
+	}
+	sayHi () {
+		console.log(this)
+	}
+}
+const cc = new People('caffrey')
+cc.sayHi()   // cc 对象
 ```
 
