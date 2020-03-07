@@ -485,3 +485,259 @@ namespace Home {
 ```
 
 全局变量只有一个Home,而且Home只暴露了一个Page方法（export）
+
+### 命名空间相互引用
+
+将组件放在单独的文件中去管理，与页面逻辑分开（component / page两个全局变量）
+
+```typescript
+// Components
+namespace Components {
+  export class Header {
+    constructor() {
+      const elem = document.createElement('div');
+      elem.innerText = 'this is header';
+      document.body.appendChild(elem);
+    }
+  }
+
+  export class Content {
+    constructor() {
+      const elem = document.createElement('div');
+      elem.innerText = 'this is content';
+      document.body.appendChild(elem);
+    }
+  }
+
+  export class Footer {
+    constructor() {
+      const elem = document.createElement('div');
+      elem.innerText = 'this is footer';
+      document.body.appendChild(elem);
+    }
+  }
+}
+```
+
+```typescript
+// Home
+namespace Home {
+  export class Page {
+    constructor() {
+      new Components.Header();
+      new Components.Content();
+      new Components.Footer();
+    }
+  }
+}
+```
+
+引用
+
+```typescript
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/components.js"></script>
+    <script src="./dist/page.js"></script>
+  </head>
+  <body>
+    <script>
+      new Home.Page();
+    </script>
+  </body>
+</html>
+```
+
+### 打包生成单个文件
+
+这样导致出现了多个js文件的引入，如果希望只生成一个单独的文件，修改tsconfig.json(这种情况下module只支持amd和system)，不支持commonjs的模块化规范（修改后由于IDE延迟需要重新打开编辑器）
+
+```json
+"module": "amd",
+"outFile": "./build/page.js"
+```
+
+打包后：
+
+```sh
+|-- namespace
+|   |-- build
+|   |   |-- page.js
+|   |-- src
+|   |   |-- components.ts
+|   |   |-- page.ts
+|   |   |-- index.html
+|   |-- package.json
+|   |-- tsconfig.json
+```
+
+### 命名空间依赖声明
+
+namespace依赖之前的相互引用可以做一个声明
+
+Home这个命名空间依赖于Components
+
+```typescript
+///<reference path='./components.ts' />
+
+namespace Home {
+  export class Page {
+    constructor() {
+      new Components.Header();
+      new Components.Content();
+      new Components.Footer();
+    }
+  }
+}
+```
+
+### 内部其他声明
+
+- 命名空间内部声明interface
+
+- 命名空间导出子命名空间
+
+```typescript
+namespace Components {
+  // new Components.SubComponents.Test()
+  export namespace SubComponents {
+    export class Test {}
+  }
+  // 声明interface
+  export interface User {
+    name: string;
+  }
+  
+  ...Header Content Footer...
+}
+```
+
+```typescript
+///<reference path='./components.ts' />
+
+namespace Home {
+  export class Page {
+    // interface使用
+    user: Components.User = {
+      name: 'caffrey'
+    }
+    constructor() {
+      new Components.Header();
+      new Components.Content();
+      new Components.Footer();
+    }
+  }
+}
+```
+
+## import对应的模块化
+
+修改Components
+
+```typescript
+export class Header {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is header';
+    document.body.appendChild(elem);
+  }
+}
+
+export class Content {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is content';
+    document.body.appendChild(elem);
+  }
+}
+
+export class Footer {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is footer';
+    document.body.appendChild(elem);
+  }
+}
+```
+
+```typescript
+import { Header, Content, Footer } from './components';
+
+class Page {
+  constructor() {
+    new Header();
+    new Content();
+    new Footer();
+  }
+}
+```
+
+打包生成AMD某块语法的js文件（module: amd）,浏览器不支持AMD(define => require)语法，需要引入能够识别define语法支持的文件。而且现在是在page这个模块定义了Page这个class
+
+```typescript
+import { Header, Content, Footer } from './components';
+
+export default class Page {
+  constructor() {
+    new Header();
+    new Content();
+    new Footer();
+  }
+}
+```
+
+```typescript
+export class Header {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is header';
+    document.body.appendChild(elem);
+  }
+}
+
+export class Content {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is content';
+    document.body.appendChild(elem);
+  }
+}
+
+export class Footer {
+  constructor() {
+    const elem = document.createElement('div');
+    elem.innerText = 'this is footer';
+    document.body.appendChild(elem);
+  }
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.js"></script>
+    <script src="./build/page.js"></script>
+  </head>
+  <body>
+    <script>
+      require([
+        'page',
+        function(page) {
+          new page.default();
+        }
+      ]);
+    </script>
+  </body>
+</html>
+```
+
+这种引入require.js文件的方式有些麻烦，可以结合webpack进行处理
+
