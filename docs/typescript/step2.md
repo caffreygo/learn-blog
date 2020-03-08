@@ -741,3 +741,104 @@ export class Footer {
 
 这种引入require.js文件的方式有些麻烦，可以结合webpack进行处理
 
+## 使用parcel打包代码
+
+[parcel]: https://www.github.com/parcel-bundler/parcel
+
+```sh
+npm install parcel@next -D
+```
+
+```
+"scripts": {
+	"start": "parcel ./src/index.html"
+}
+```
+
+运行parcel对TS代码进行编译，然后在本地（localhost:1234）起一个服务器，然后我们便可以直接访问index.html文件，引入的ts代码以及被编译
+
+```html
+// index.html
+<script src="./page.ts"></script>
+```
+
+## 描述文件中的全局类型
+
+- 定义全局变量 declare var
+- 定义全局函数 declare function
+- 定义全局对象 declare namespace
+
+仍然使用parcel对代码进行编译，引入jquery代码
+
+```html
+<--! index.html -->
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="./page.ts"></script>
+```
+
+```js
+// page.ts
+$(function() {
+    alert(123)
+})
+// $里面传一个字符串，如果没继续声明会报错，但是parcel会尝试打包，正常运行
+$(function() {
+    $('body').html('<div>123</div>')
+})
+```
+
+此时运行**npm run start**代码可以运行，但是typescript下编辑器会对$进行报错；此时需要类型定义文件**.d.ts**
+
+类型定义文件如果不引入，如何**自己写一个类型定义文件**？
+
+### 定义全局变量/函数
+
+```typescript
+// jquery.d.ts
+// $是一个返回值为空的函数，接收的参数也是一个返回值为空的函数
+// 定义全局变量
+// declare var $: (param: () => void) => void；
+
+interface JqueryInstance {
+    html: (html: string) => JqueryInstance;
+}
+
+// 定义全局函数
+declare function $(readyFuc: () => void): void;
+// 函数重载，$还可以接收一个字符串，返回也是一个jquery对象，有html方法
+declare function $(selector: string): JqueryInstance;
+```
+
+### interface进行函数重载
+
+interface里面如果定义了多个函数的声明，就是函数的重载
+
+当$既要是一个函数也是对象，使用declare声明；而如果只是函数的重载，interface也支持
+
+```typescript
+interface JQuery {
+    (readyFunc: ()=> void): void;
+    (selector: string): JqueryInstance;
+}
+
+declare $:JQuery;
+```
+
+### 定义全局对象
+
+```typescript
+$(function() {
+    $('body').html('<div>123</div>');
+    // $ 还是一个对象, new一个class
+    new $.fn.init();
+})
+```
+
+```typescript
+declare namespace {
+    namespace fn {
+    	class init {}
+	}
+}
+```
+

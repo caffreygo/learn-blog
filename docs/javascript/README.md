@@ -372,20 +372,6 @@ class jQuery {
 
 ### 作用域和自由变量
 
-```js
-// 创建10个`<a>`标签，点击的时候弹出对应的序号
-let i, a
-for(i=0;i<10,i++) {
-    a = document.createElement('a')
-    a.innerText = i +'<br>'
-    a.addEventListener('click',function(e){
-        e.preventDefault()
-        alert(i)
-    })
-    document.body.appendChild(a)
-}
-```
-
 ![函数作用域](../img/javascript/hanshuzuoyongyu.png)
 
 #### 作用域
@@ -521,5 +507,93 @@ class People {
 }
 const cc = new People('caffrey')
 cc.sayHi()   // cc 对象
+```
+
+- Tips:
+
+  ```js
+  // sayHi是对象方法，this指向caffrey
+  caffrey.sayHi()               // name caffrey, age 18
+  
+  // 此时是隐式原型的对象方法，没有name和number,sayHi方法是在隐式原型中查找的
+  caffrey.__proto__.sayHi()     // name undefined, age undefined
+  ```
+
+  
+
+### 实例
+
+#### 手写bind函数
+
+- bind函数的使用
+
+```js
+function fn1(a, b) {
+    console.log('this', this)
+    console.log(a, b)
+    return 'this is fn1'
+}
+
+const fn2 = fn1.bind({x: 100},10,20)
+const res = fn2()    // this {x: 100}; 10 20
+console.log(res)	 // this is fn1
+```
+
+- 手写bind函数
+
+```js
+Function.prototype.bind1 = function() {
+    // 将参数拆解为数组
+    const args = Array.prototype.slice.call(arguments)
+    
+    // 获取this(数组的第一项)
+    const t = args.shift()
+    
+    // fn1.bind(...) 中的 fn1
+    const self = this
+    
+    // 返回一个函数
+    return function () {
+        return self.apply(t,args)
+    }
+}
+```
+
+#### 闭包的应用
+
+- 隐藏数据
+
+```js
+function createCache () {
+    const data = {}
+    return {
+        get: function(key) {
+            return data[key]
+        },
+        set: function(key,value) {
+            data[key] = value
+        }
+    }
+}
+
+const c = createCache ()
+c.set('a',100)
+c.get('a')       // 100
+```
+
+- 创建10个a标签，点击弹出对应值
+
+```js
+let a
+// i在块级作用域内
+for(let i=0;i<10,i++) {
+    a = document.createElement('a')
+    a.innerText = i +'<br>'
+    a.addEventListener('click',function(e){
+        e.preventDefault()
+        alert(i)
+    })
+    document.body.appendChild(a)
+}
 ```
 
