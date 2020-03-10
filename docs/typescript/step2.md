@@ -842,3 +842,130 @@ declare namespace {
 }
 ```
 
+## 模块代码的类型描述文件
+
+使用模块包的方式安装jquery
+
+```shell
+npm install --save jquery
+```
+
+使用import引入模块包，需要声明juqery的模块**declare module 'jquery'**
+
+```typescript
+// Es6 模块化 (jquery.d.ts)
+declare module 'jquery' {
+  interface JqueryInstance {
+    html: (html: string) => JqueryInstance;
+  }
+  // 混合类型,不需要再declare
+  function $(readyFunc: () => void): void;
+  function $(selector: string): JqueryInstance;
+  namespace $ {
+    namespace fn {
+      class init {}
+    }
+  }
+  // 模块化定义.d.ts，需要export
+  export = $;
+}
+```
+
+```typescript
+// page.ts
+import $ from 'jquery';
+
+$(function() {
+  $('body').html('<div>123</div>');
+  new $.fn.init();
+});
+```
+
+common和umd模块的声明和ES6略有不同，需查阅
+
+## 泛型中keyof语法的使用
+
+```typescript
+// page.ts
+interface Person {
+  name: string;
+  age: number;
+  gender: string;
+}
+
+class Teacher {
+  constructor(private info: Person) {}
+    
+  getInfo(key: string) {
+    // getInfo返回值为any
+    // return this.info[key];
+      
+    // (method) Teacher.getInfo(key: string): string | number | undefined
+   	if (key === 'name' || key === 'age' || key === 'gender') {
+      return this.info[key];
+    }
+  }
+}
+
+const teacher = new Teacher({
+  name: 'caffrey',
+  age: 18,
+  gender: 'male'
+});
+
+// const test = teacher.getInfo('name') as string;
+const test = teacher.getInfo('name');
+console.log(test);
+```
+
+如果有类是一个对象，希望通过key值获取对象的内容，并且能够获取到正确的类型推断：
+
+通过泛型结合**keyof**来确定返回值类型
+
+```typescript
+interface Person {
+  name: string;
+  age: number;
+  gender: string;
+}
+
+// T extends 'name'
+// type T = 'name'
+// key: 'name'
+// Person['name']
+
+// type T = 'age'
+// key: 'age'
+// Person['age']
+class Teacher {
+  constructor(private info: Person) {}
+  getInfo<T extends keyof Person>(key: T): Person[T] {
+    return this.info[key];
+  }
+}
+
+const teacher = new Teacher({
+  name: 'caffrey',
+  age: 18,
+  gender: 'male'
+});
+
+// const test: string
+const test = teacher.getInfo('name');
+// const test: number
+const test = teacher.getInfo('age');
+// 类型“"abc"”的参数不能赋给类型“"name" | "age" | "gender"”的参数
+const test = teacher.getInfo('abc');
+console.log(test);
+```
+
+类型的值可以是一个字符串
+
+```typescript
+type NAME = 'name';
+const abc: NAME = 'name';
+
+// 不能将类型“"hello"”分配给类型“"name"”
+const abc: NAME = 'hello';
+```
+

@@ -349,10 +349,6 @@ export default function CreateAvatar() {
 
 改写`index.js`，引入`createAvatar.js`并调用
 
- 
-
- 
-
 ```js
 import avatar from './avatar.jpg';
 import createAvatar from './createAvatar';
@@ -376,8 +372,6 @@ root.appendChild(img);
 我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-sass.sass`样式文件的影响，如果要消除这种影响，需要我们开启对`css`样式文件的模块化打包。
 
 进一步改写`webpack.config.js`
-
- 
 
 ```js
 // path为Node的核心模块
@@ -411,10 +405,6 @@ module.exports = {
 ```
 
 开启`css`模块化打包后，我们需要在`index.js`中做一点小小的改动，像下面这样子
-
- 
-
- 
 
 ```js
 import avatar from './avatar.jpg';
