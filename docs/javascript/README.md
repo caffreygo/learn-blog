@@ -2,6 +2,9 @@
 
 ## 变量类型和引用类型
 
+- JS基础知识，规定语法（ECMA262标准）
+- JS Web API，网页操作的API（W3C标准）
+
 ### 值类型和引用类型
 
 ```javascript
@@ -1001,3 +1004,180 @@ setTimeout(function() {
 console.log(5)             // 1 3 5 4 2
 ```
 
+# JS Web API
+
+## DOM
+
+- DOM
+- BOM
+- 事件绑定
+- ajax
+- 存储
+
+### DOM的本质
+
+Document Object Model
+
+​		**xml**可扩展的一种语言，可以描述任何结构化的数据。
+
+note这里是一封信，从谁发，发给谁，标题，主体。
+
+结构树，从主干到分支。标签名字可以自定义，只要标签闭合就好了。HTML是xml一种特殊结构。
+
+​		**HTML**遵循W3C规定一种特殊的XML。各种规定，必须先写什么，怎么写什么。
+
+如果是一个字符串对象的话，让浏览器，js处理是非常不方便的。比如何如查询，如何操作等等比较麻烦。所以浏览器拿到代码之后，就是通过DOM把HTML结构化成浏览器和JS可以识别的东西，浏览器和js就比较容易处理。那么"如何结构化对象"呢？就是Document object model。有了结构化的树和相关规定，就很容易处理。DOM就是把传来的字符串给结构化了。
+
+### DOM节点操作
+
+```js
+const div1 = document.getElementById('div1')   // 元素 
+const divList = document.getElementsByTagName('div')   // 集合
+console.log(div1)
+console.log(divList[0])
+
+const containerList = document.getElementByClassName('.container')   // 集合
+const pList = document.querySelectorAll('p')       //集合   NodeList(n)
+```
+
+- #### DOM节点的property
+
+通过js属性操作（property是js对象的一个属性）
+
+```js
+const pList = document.querySelectorAll('p')       //集合   NodeList(n)
+const p1 = pList[0]             // <p>text</p>   本质是一个对象
+console.log(p1.style.width)     // 获取样式       style是p的一个对象属性
+p1.style.width = '100px'  
+p1.className = 'red'  
+// 修改样式       <p style="width: 100px;" class="red">text</p>
+console.log(p1.className)       // 获取class     class是个关键字
+p1.className = 'p1'			   // 修改class
+
+//获取nodeName 和 nodeType
+console.log(p.nodeName)
+console.log(p.nodeType)
+```
+
+- #### attribute
+
+```js
+p1.setAttribute('data-name', 'imooc')     // <p data-name="imooc">text</p>
+p1.getAttribute('data-name')              // imooc
+```
+
+- #### 区别
+
+1. property: 修改对象属性，不会体现到html结构中（better)
+2. attribute: 修改html属性，会改变html结构 
+3. 两者都有可能引起DOM的重新渲染
+
+### DOM结构操作
+
+```js
+const div1 = document.getElementById('div1')
+// 创建、添加节点
+const p1 = document.createElement('p1')
+p1.innerHTML = 'this is p1'
+div1.appendChild(p1)
+
+// 移动已有的节点   移动！
+const p2 = document.getElementById('p2')
+div1.appendChild(p2)
+
+// 获取父元素
+console.log(p1.parentNode)
+
+// 获取子元素列表  NodeList
+console.log(div1.childNodes)
+// div1.childNodes[n].nodeName        #text p ...
+// div1.childNodes[n].nodeType        3     1 ...
+
+// 将NodeList转化为数组   Array.prototype.slice.call(arr)
+// 过滤出nodeType为1的节点
+const div1ChildNodesP =  Array.prototype.slice.call(div1.childNodes).filter(item => {
+    return item.nodeType === 1
+})
+
+// 删除节点
+div1.removeChild(div1ChildNodesP[0])
+```
+
+### DOM性能
+
+1. DOM操作非常“昂贵” ，避免频繁的DOM操作
+2. 对DOM查询做缓存
+3. 将频繁操作改为一次性操作
+
+- #### DOM查询做缓存
+
+  ```js
+  // 不缓存DOM查询结果
+  for(let i=0,i<document.getElementByTagName('p').length;i++){
+      // 每次循环都会计算length, 频繁进行DOM查询
+  }
+  
+  // 缓存DOM查询结果
+  const pList = document.getElementByTagName('p')
+  const length = pList.length
+  for(let i=0,length;i++){
+      // 缓存length, 只进行一次DOM查询
+  }
+  ```
+
+- #### 将频繁操作改为一次性操作
+
+  ```js
+  const listNode = document.getElementById('list')
+  // 创建一个文档片段，此时还没有插入到DOM树中
+  const frag = document.createDocumentFragment()
+  // 执行插入
+  for(let x=0;x<10;x++) {
+      const li = document.createElement('li')
+      li.innerHTML = "List Item "+ x
+      frag.appendChild(li)
+  }
+  // 都完成之后，在插入到DOM树当中
+  listNode.appendChild(frag)
+  ```
+
+
+## BOM
+
+- navigator
+- screen
+- location
+- history
+
+1. ##### 识别浏览器类型
+
+2. ##### 分析拆解url各个部分
+
+```js
+// navigator  网络：详细的浏览器检查方案
+const ua = navigator.userAgent
+const isChrome = us.inexOf('Chrome')
+console.log(isChrome)
+
+// screen
+screen.width/height
+
+// location   https://www.youtube.com/watch?v=YQHsXMglC9A
+    location = {
+    origin: "https://www.youtube.com"
+    protocol: "https:"
+    host: "www.youtube.com"
+    hostname: "www.youtube.com"
+    port: ""
+    pathname: "/watch"
+    search: "?v=YQHsXMglC9A"
+    hash: ""     （#之后的内容）
+    href: "https://www.youtube.com/watch?v=YQHsXMglC9A"
+}
+
+// history
+history.back()
+history.forward()
+```
+
+### 
