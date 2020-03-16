@@ -16,7 +16,7 @@ npm install typescript --save
 - 装饰器本身是一个函数
 
 - 类装饰器接收的参数是constructor
-- 类的装饰器通过**@**decorator使用
+- 类的装饰器通过@decorator使用
 
 ```typescript
 function testDecorator(constructor: any) {
@@ -410,5 +410,247 @@ class Test {
 
 const test = new Test();
 test.getInfo('caffrey', 24);
+```
+
+## 实际使用例子
+
+```typescript
+const userInfo: any = undefined;
+
+
+class Test {
+  getName() {
+    try {
+      return userInfo.name;
+    } catch (e) {
+      console.log('userInfo.name 不存在');
+    }
+  }
+  getAge() {
+    try {
+      return userInfo.age;
+    } catch (e) {
+      console.log('userInfo.age 不存在');
+    }
+  }
+}
+
+const test = new Test();
+test.getName();
+```
+
+```typescript
+// 装饰器
+const userInfo: any = undefined;
+
+function catchError(target: any, key: string, descriptor: PropertyDescriptor) {
+  const fn = descriptor.value;
+  descriptor.value = function() {
+    try {
+      fn();
+    } catch (e) {
+      console.log('userInfo存在问题');
+    }
+  };
+}
+
+class Test {
+  @catchError
+  getName() {
+    return userInfo.name;
+  }
+  @catchError
+  getAge() {
+    return userInfo.age;
+  }
+}
+
+const test = new Test();
+test.getName();     // userInfo存在问题
+test.getAge();     // userInfo存在问题
+```
+
+进一步优化，通过函数返回装饰器，可传递参数
+
+```typescript
+const userInfo: any = undefined;
+
+function catchError(msg: string) {
+  return function(target: any, key: string, descriptor: PropertyDescriptor) {
+    const fn = descriptor.value;
+    descriptor.value = function() {
+      try {
+        fn();
+      } catch (e) {
+        console.log(msg);
+      }
+    };
+  };
+}
+
+class Test {
+  @catchError('userInfo.name不存在')
+  getName() {
+    return userInfo.name;
+  }
+  @catchError('userInfo.age不存在')
+  getAge() {
+    return userInfo.age;
+  }
+}
+
+const test = new Test();
+test.getName();      // userInfo.name不存在
+test.getAge();       // userInfo.age不存在
+```
+
+## reflect-metadata
+
+[github]: https://github.com/rbuckton/reflect-metadata	"github"
+
+存储一些额外的数据（元数据），无法打印获取
+
+```sh
+npm install reflect-metadata --save
+```
+
+```typescript
+// 对象上定义/获取元数据
+import 'reflect-metadata';
+
+const user = {
+  name: 'caffrey'
+};
+
+Reflect.defineMetadata('data', 'test', user);
+
+console.log(user);                                   // { name: 'caffrey' }
+console.log(Reflect.getMetadata('data', user));      // test
+```
+
+常用于类上定义/获取元数据
+
+```typescript
+import 'reflect-metadata';
+
+@Reflect.metadata('data', 'test')
+class User {
+  name = 'caffrey';
+}
+
+console.log(Reflect.getMetadata('data', User));    // test
+```
+
+定义在类的属性上
+
+```typescript
+import 'reflect-metadata';
+
+class User {
+  @Reflect.metadata('data', 'test')
+  name = 'caffrey';
+}
+
+console.log(Reflect.getMetadata('data', User.prototype, 'name'));      // test
+```
+
+定在类的方法上
+
+```typescript
+import 'reflect-metadata';
+
+class User {
+  name = 'caffrey';
+
+  @Reflect.metadata('data', 'test')
+  getName() {
+    return this.name;
+  }
+}
+
+console.log(Reflect.getMetadata('data', User.prototype, 'getName'));         // test
+console.log(Reflect.hasMetadata('data', User.prototype, 'getName'));         // true
+console.log(Reflect.hasMetadata('data', Teacher.prototype, 'getName'));      // true
+console.log(Reflect.hasOwnMetadata('data', Teacher.prototype, 'getName'));   // false
+
+// 获取类上方法的元数据有哪些
+console.log(Reflect.getMetadataKeys(User.prototype, 'getName'));
+console.log(Reflect.getMetadataKeys(Teacher.prototype, 'getName'));
+console.log(Reflect.getOwnMetadataKeys(User.prototype, 'getName'));
+// [ 'design:returntype', 'design:paramtypes', 'design:type', 'data' ]
+
+console.log(Reflect.getOwnMetadataKeys(Teacher.prototype, 'getName'));       // []
+
+// deleteMetadata删除
+```
+
+## 装饰器的执行顺序
+
+```typescript
+import 'reflect-metadata';
+
+// 类的构造器target：类的构造函数
+function showData(target: typeof User) {
+  for (let key in target.prototype) {
+    const data = Reflect.getMetadata('data', target.prototype, key);
+    console.log(data);
+  }
+}
+
+@showData
+class User {
+  @Reflect.metadata('data', 'name')
+  getName() {}
+
+  @Reflect.metadata('data', 'age')
+  getAge() {}
+}
+```
+
+执行结果
+
+```sh
+name
+age
+```
+
+类里面方法的装饰器是优先于类的装饰器执行的，这里`@Reflect.metadata`先绑定了方法上的元数据，然后才能被类上的装饰器读取到元数据。
+
+::: tip 
+
+​		类的装饰器是最后执行的
+
+​		而方法上的装饰器是优先执行的
+
+:::
+
+```typescript
+import 'reflect-metadata';
+
+// 类的构造器target：类的构造函数
+function showData(target: typeof User) {
+  for (let key in target.prototype) {
+    const data = Reflect.getMetadata('data', target.prototype, key);
+    console.log(data);
+  }
+}
+
+function setData(dataKey: string, data: string) {
+  // 方法的构造器就是类的prototype
+  return function(target: User, key: string) {
+    Reflect.defineMetadata(dataKey, data, target, key);
+  };
+}
+
+@showData
+class User {
+  @setData('data', 'name')
+  getName() {}
+
+  @setData('data', 'age')
+  getAge() {}
+} 
+// name
+// age
 ```
 

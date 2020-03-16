@@ -1180,4 +1180,439 @@ history.back()
 history.forward()
 ```
 
-### 
+## 事件
+
+### 事件绑定
+
+```js
+// 事件绑定
+const btn = document.getElementById('btn1')
+btn.addEventListener('click',event => {
+    console.log('click')
+})
+
+// 通用事件绑定函数
+function bindEvent(ele,type,selector,fn) {
+    if(fn==null) {
+        fn = selector
+        selector = null
+    }
+    ele.addEventListener(type, event => {
+        const target = event.target
+        if(selector) {
+            // 代理绑定
+            if(target.matches(selector)) {
+                fn.call(target,event)
+            }
+        } else {
+            fn.call(target,event)
+        }
+    })
+}
+
+const div1 = document.getElementById('pdiv1')
+const p1 = document.getElementById('p1')
+// 普通绑定
+bindEvent(p1,'click', function (e) {
+    e.preventDefault()
+    alert(this.inierHTML)
+})
+
+// 代理绑定
+bindEvent(div1,'click','a', function (e) {
+    e.preventDefault()
+    alert(this.inierHTML)
+})
+
+// 箭头函数 this这里指向上级作用域window
+bindEvent(div1,'click','a', e => {
+    e.preventDefault()
+    alert(e.target.inierHTML)
+})
+```
+
+### 事件冒泡
+
+::: tip 
+
+1. 基于DOM树形结构
+2. 事件会顺着触发元素往上冒泡
+3. 应用场景： 代理
+
+:::
+
+```html
+<body>
+	<div id='div1'>
+        <p id='p1'>激活</p>
+        <p id='p2'>取消</p>
+        <p id='p3'>取消</p>
+        <p id='p4'>取消</p>
+    </div>
+    <div id='div2'>
+        <p id='p5'>激活</p>
+        <p id='p6'>取消</p>
+    </div>
+</body>
+```
+
+```js
+const p1 = document.getElementById('p1')
+const body = document.body
+bundEvent(p1,'click',e => {
+    console.log(e.target)   // 获取触发的元素
+    e.stopPropagation()     // 阻止冒泡
+    alert('p1')
+})
+bindEvent(body,'click',e => {
+    console.log('body clicked')  
+})
+```
+
+事件的触发类似于**冒泡**，会沿着html结构一级一级向上触发。
+
+除了id为p1的p标签阻止了事件的冒泡`e.stopPropagation()` ，这里body、div、p标签的点击都会触发body这个事件绑定函数。
+
+### 事件代理
+
+```html
+<div id='div1'>
+    <a href="#">a1</a>
+    <a href="#">a2</a>
+    <a href="#">a3</a>
+    <a href="#">a4</a>
+    <button>button</button>
+</div>
+```
+
+```js
+const div1 = document.getElementById('div1')
+div1.addEventListener('click', e=> {
+    e.preventDefault()
+    const target = e.target
+    if(e.nodeName === 'A') {
+        alert(target.innerHTML)
+    }
+})
+```
+
+在外层div上绑定点击事件，每个a标签由于事件的冒泡机制，在点击时都会触发该绑定事件。
+
+::: tip 
+
+1. 代码简介
+2. 减少浏览器内存占用
+3. 但是，不要滥用
+
+:::
+
+## ajax
+
+### XMLHttpRequest
+
+ 实例化/open接口信息/监听状态变化函数/发送
+
+```js
+// get请求
+const xhr = new XMLHttpRequest()
+// true 异步请求; false 同步请求
+xhr.open('GET','/login',true)
+// XMLHttpRequest实例状态改变的时候触发的函数
+xhr.onreadystatechange = function () {
+    // 这里的函数异步执行
+    if(xhr.readyState === 4) {
+        if(xhr.status === 200) {
+            // JSON.parse(xhr.responseText)
+            console.log(xhr.responseText)
+        } else {
+            consoel.log('其他情况')
+        }
+    } 
+}
+xhr.send(null)
+```
+
+```js
+// post请求
+const xhr = new XMLHttpRequest()
+xhr.open('POST','/api',true)
+xhr.onreadystatechange = function () {
+    if(xhr.readyState === 4) {
+        if(xhr.status === 200) {
+            console.log(xhr.responseText)
+        } else {
+            consoel.log('其他情况')
+        }
+    } 
+}
+const postData = {
+	userName: 'caffrey',
+	password: 'xxxxxx'
+}
+// post发送的是一个JSON字符串
+xhr.send(JSON.stringify(postData))
+```
+
+​		**xhr.readyState**
+
+- 0 - (未初始化)  还没有调用send()方法
+
+- 1 - (载入) 已调用send()方法，正在发送请求
+
+- 2 - (载入完成) send()方法执行完成，已接收到全部的响应内容
+
+- 3 - (交互) 正在解析响应内容
+
+- 4 - (完成) 响应内容解析完成，可在客户端调用
+
+  **xhr.status**
+
+- 2xx - 表示成功处理请求，如200
+
+- 3xx - 需要重定向，浏览器直接跳转，如301(永久重定向)、302(临时重定向)、304(资源未改变，使用缓存)
+
+- 4xx - 客户端请求错误，如404、403
+
+- 5xx - 服务端错误
+
+```js
+if(xhr.readyState === 4) {
+    if(xhr.status === 200) {
+        console.log(xhr.responseText)
+    } else if(xhr.status === 404){
+        consoel.log('404 not found')
+    }
+}
+```
+
+### 跨域
+
+#### 同源策略
+
+- ajax请求时，**浏览器**要求当前网页和server必须同源（安全）
+- 同源：协议、域名、端口，三者必须一致
+- 前端：http://a.com:8080/   server：https://b.com/api/xxx 三者都不同
+
+::: tip 加载图片、CSS、JS可无视同源策略
+
+​		`<img src=跨域的图片地址 />`
+
+​		`<link href=跨域的css地址 />`
+
+​		`<script src=跨域的js地址></script>`
+
+:::
+
+- img标签可用于统计打点，可使用第三方统计服务
+- link script可用于CDN,CDN一般都是外域
+- script可实现JSONP
+
+#### 跨域
+
+- 所有的跨域，都必须经过server端的允许和配合
+- 未经server端允许就实现的跨域，说明浏览器有漏洞，危险信号
+
+### JSONP和CORS
+
+- 访问https://xxx.html/,服务端一定返回一个html文件吗？
+- 服务器可以任何动态拼接数据返回，只要符合html格式要求
+- 同理于`<script src="https://imooc.com/getData.js">`
+
+#### JSONP
+
+::: tip 
+
+​		`<script>`可绕过跨域限制
+
+​		服务器可以任意动态拼接数据返回
+
+​		所以，`<script>`就可以获得跨域的数据，只要服务端愿意返回
+
+:::
+
+```js
+// getData.js
+abc(
+	{name: 'caffrey'}
+)
+```
+
+```html
+<!-- html -->
+<script>
+	window.abc = function(data) {
+    	// 跨域得到的信息
+        console.log(data)
+}
+</script>
+<script src="https://imooc.com/getData.js?id=123&callback=abc"></script>
+<!--将返回 callback({x:100, y:200})-->
+```
+
+**jQuery实现jsonp**
+
+```js
+$.ajax({
+    url: 'http://localhost:8002/x-origin.json',
+    dataType:'jsonp',
+    jsonpCallback: 'callback',
+    success: function(data) {
+        console.log(data)
+    }
+})
+```
+
+#### CORS - 服务器设置http header
+
+```js
+// *表示接受所有的地址请求
+response.setHeader("Access-Control-Allow-Origin","http://localhost:8011");
+response.setHeader("Access-Control-Allow-Header","X-Request-With");
+response.setHeader("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+
+// 接收跨域的cookie
+response.setHeader("Access-Control-Allow-Credentials","true");
+```
+
+### 手写一个简易的ajax
+
+```js
+function ajax(url,success) {
+	const xhr = new XMLHttpRequest()
+	xhr.open("GET",url,true)
+	xhr.onreadystatechange = function () {
+    if(xhr.readyState === 4) {
+        if(xhr.status === 200) {
+            success(xhr.responseText)
+        }
+    }
+	xhr.send(null)
+}
+```
+
+```js
+function ajax(url) {
+	const promise = new Promise((resolve,reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open("GET",url, true)
+        xhr.onreadystatechange = function () {
+            if(xhr.readyState === 4) {
+                if(xhr.status === 200) {
+                    resolve(JSON.parse(xhr.responseText))
+                } else if (xhr.status === 404 || xhr.status === 500) {
+                    reject(new Error('404 not found'))
+                }
+            }
+        }
+        xhr.send(null)
+    })
+    return promise
+}
+
+const url = '/data/test.json'
+ajax(url).then(res => console.log(res)).catch(err => console.log(err))
+```
+
+### ajax常用的插件
+
+- jQuery
+
+- fetch
+
+- [axios]: https://www.kancloud.cn/yunye/axios/234845
+
+```js
+$(function(){
+    //请求参数
+    var list = {};
+    //
+    $.ajax({
+        //请求方式
+        type : "POST",
+        //请求的媒体类型
+        contentType: "application/json;charset=UTF-8",
+        //请求地址
+        url : "http://127.0.0.1/admin/list/",
+        //数据，json字符串
+        data : JSON.stringify(list),
+        //请求成功
+        success : function(result) {
+            console.log(result);
+        },
+        //请求失败，包含具体的错误信息
+        error : function(e){
+            console.log(e.status);
+            console.log(e.responseText);
+        }
+    });
+});
+```
+
+- [Fetch]: https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch
+
+  ```js
+  fetch('http://example.com/movies.json')
+  .then(function(response) {
+  	return response.json();
+  }).then(function(myJson) {
+      console.log(myJson);
+  });
+  ```
+
+## 存储
+
+### cookie
+
+::: tip cookie
+
+​		本身用于浏览器和server通讯，被‘借用’到本地存储
+
+​		前端可通过document.cookie = '...' 来修改
+
+:::
+
+```js
+document.cookie = 'a=100';
+document.cookie = 'b=200';
+document.cookie = 'a=300';
+
+console.log(document.cookie) // a=300;b=200
+```
+
+只要页面不清除，页面刷新cookie仍然存在
+
+**缺点**：
+
+1. 最大为4kb
+2. http请求时需要发送到服务端，增加请求数据量
+3. 只能通过document.cookie = '...' 来修改
+
+### lcoalStorage/sessionStorage
+
+::: tip lcoalStorage和sessionStorage
+
+​		HTML5专门为存储而设计，最大可存5M
+
+​		API简单易用 setTtem getItem
+
+​		不会随着请求被发送出去
+
+:::
+
+```js
+localStorage.setItem('a', 100)
+localStorage.getItem('a')        // "100"
+
+sessionStorage.setItem('b', '200')
+sessionStorage.getItem(b)        // "200"
+```
+
+- localStorage数据会永久存储，除非代码或者手动删除
+- sessionStorage数据只存在于当前会话，浏览器关闭则清空
+- 一般用localStorage会多一些（方便下次访问）
+
+### 区别
+
+1. 容量
+2. API易用性
+3. 是否跟随http请求发送出去
