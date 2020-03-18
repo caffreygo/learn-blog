@@ -7,19 +7,19 @@ module.exports = {
     nav: [
       { text: 'TypeScript', link: '/typescript/' },
       { text: 'JavaScript', link: '/javascript/' },
-      { text: 'Git', link: '/git/' },
       { text: 'HTTP', link: '/http/' },
-      { text: 'Note', link: '/basic/' },
       { text: 'Webpack', link: '/webpack/' },
+      { text: 'Git', link: '/git/' },
+      { text: 'Note', link: '/basic/' },
       { text: 'Github', link: 'https://github.com/caffreygo' }
     ],
     sidebar: {
-      '/typescript/': ['', 'crawler', 'step2', 'step3', 'step4'],
-      '/javascript/': [''],
+      '/typescript/': ['', 'crawler', 'step2', 'step3', 'step4', 'step5'],
+      '/javascript/': ['', 'demo'],
       '/webpack/': ['', 'step-2', 'step-3'],
       '/http/': [''],
       '/git/': [''],
-      '/basic/': ['', 'promise', 'promiseDemo', 'element', 'css']
+      '/basic/': ['']
     },
     sidebarDepth: 2,
     lastUpdated: 'Last Updated'
