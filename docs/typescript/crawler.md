@@ -2,7 +2,7 @@
 
 ## 初始化
 
-```
+```sh
 // 生成package.json
 npm init -y
 // tsconfig.json
