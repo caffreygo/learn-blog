@@ -72,8 +72,6 @@ import d from './d'         // 不能用解构赋值
 console.log(d.fn2, d.obj2)
 ```
 
-### 
-
 ## JavaScript解答
 
 ### new的过程
