@@ -17,6 +17,149 @@
 
 ​		在`created`周期函数中的DOM操作也是如此，而在`mounted`中则没有问题。
 
+## React
+
+### JSX
+
+::: tip 
+
+因为 JSX 语法上更接近 JavaScript 而不是 HTML，所以 React DOM 使用 `camelCase`（小驼峰命名）来定义属性的名称，而不使用 HTML 属性名称的命名约定。
+
+例如，JSX 里的 `class` 变成了 [`className`](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)，而 `tabindex` 则变为 [`tabIndex`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/tabIndex)。
+
+:::
+
+Babel 会把 JSX 转译成一个名为 `React.createElement()` 函数调用。
+
+以下两种示例代码完全等效：
+
+```react
+const element = (
+  <h1 className="greeting">
+    Hello, world!
+  </h1>
+);
+const element1 = React.createElement(
+  'h1',
+  {className: 'greeting'},
+  'Hello, world!'
+);
+```
+
+`React.createElement()` 会预先执行一些检查，以帮助你编写无错代码，但实际上它创建了一个这样的对象：
+
+```react
+// 注意：这是简化过的结构
+const element = {
+  type: 'h1',
+  props: {
+    className: 'greeting',
+    children: 'Hello, world!'
+  }
+};
+```
+
+这些对象被称为 “React 元素”。它们描述了你希望在屏幕上看到的内容。React 通过读取这些对象，然后使用它们来构建 DOM 以及保持随时更新。
+
+### 元素渲染
+
+`ReactDOM.render`
+
+```react
+const element = <h1>Hello, world</h1>;
+ReactDOM.render(element, document.getElementById('root'));
+```
+
+### 组件
+
+#### 函数组件、class组件
+
+```react
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+class Welcome1 extends React.Component {
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+```
+
+#### 渲染组件
+
+```react
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+const element = <Welcome name="Sara" />;
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+```
+
+- **注意：** 组件名称必须以大写字母开头。
+
+  React 会将以小写字母开头的组件视为原生 DOM 标签。例如，`` 代表 HTML 的 div 标签，而 `` 则代表一个组件，并且需在作用域内使用 `Welcome`。
+
+### state、生命周期
+
+官网实现更新时间的时间显示器：
+
+```react
+// ReactDom.render(JSX, rootElement)
+
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000
+    );
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+
+  tick() {
+    this.setState({
+      date: new Date()
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(
+  <Clock />,
+  document.getElementById('root')
+);
+```
+
+- 修改state:
+
+```react
+// Wrong
+this.state.comment = 'Hello';
+
+// Correct
+this.setState({comment: 'Hello'});
+```
+
 ## Promise
 
 ### Promise用法讲解
@@ -751,10 +894,67 @@ p2 rejected: reject
 
 Promise回调函数中的第一个参数`resolve`，会对Promise执行"拆箱"动作。即当`resolve`的参数是一个Promise对象时，`resolve`会"拆箱"获取这个Promise对象的状态和值，但这个过程是异步的。p1"拆箱"后，获取到Promise对象的状态是resolved，因此`fulfilled`回调被执行；p2"拆箱"后，获取到Promise对象的状态是rejected，因此`rejected`回调被执行。但Promise回调函数中的第二个参数`reject`不具备”拆箱“的能力，reject的参数会直接传递给`then`方法中的`rejected`回调。因此，即使p3 `reject`接收了一个resolved状态的Promise，`then`方法中被调用的依然是`rejected`，并且参数就是`reject`接收到的Promise对象。
 
-### CSS
+## CSS
 
-#### font-size
+### font-size
 
 - `px` (像素): 将像素的值赋予给你的文本。这是一个绝对单位， 它导致了在任何情况下，页面上的文本所计算出来的像素值都是一样的。
 - `em`: 1em 等于我们设计的当前元素的父元素上设置的字体大小 (更加具体的话，比如包含在父元素中的大写字母 M 的宽度) 如果你有大量设置了不同字体大小的嵌套元素，这可能会变得棘手, 但它是可行的，如下图所示。为什么要使用这个麻烦的单位呢? 当你习惯这样做时，那么就会变得很自然，你可以使用`em`调整任何东西的大小，不只是文本。你可以有一个单位全部都使用 em 的网站，这样维护起来会很简单。
 - `rem`: 这个单位的效果和 `em` 差不多，除了 1`rem` 等于 HTML 中的根元素的字体大小， (i.e. [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/html)) ，而不是父元素。这可以让你更容易计算字体大小，但是遗憾的是， `rem` 不支持 Internet Explorer 8 和以下的版本。如果你的项目需要支持较老的浏览器，你可以坚持使用`em` 或 `px`, 或者是 [polyfill](https://developer.mozilla.org/en-US/docs/Glossary/polyfill) 就像 [REM-unit-polyfill](https://github.com/chuckcarpenter/REM-unit-polyfill). 
+
+## Tinymce
+
+### 图片上传实现
+
+```js
+// 初始化
+tinymce.init({
+    selector: '#tinymce-editor',
+    language_url: "/tinymce/zh_CN.js",
+    statusbar: false,
+    menubar: false,
+    plugins: 'image link code textcolor toc',
+    height: 400,
+    toolbar: 'formatselect | fontsizeselect | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | undo redo | bold italic | underline | forecolor | link | code |  image | toc',
+    image_title: false,
+    automatic_uploads: true,
+    images_upload_handler: this.imgUpload       // 上传函数绑定
+}).then( resolve=>{
+    loading.close()
+});
+```
+
+```js
+// 上传函数
+imgUpload (blobInfo, success, failure) {
+    const formData = new FormData();
+    formData.append('files', blobInfo.blob(), blobInfo.filename());
+    axios.post('/api/file/post', formData).then((res) => {
+        if(res.data.success) {
+            this.$message({
+                message: '上传成功',
+                type: 'success',
+                center: true
+            });
+            let url = res.data.urls[0].url
+            // success回调函数返回图片地址
+            success(url)
+        } else {
+            this.$message({
+                message: '上传失败',
+                type: 'error',
+                center: true
+            });
+            failure('')
+        }
+    }).catch((err) => {
+        this.$message({
+            message: '上传失败',
+            type: 'error',
+            center: true
+        });
+        failure('')
+    })
+},
+```
+
