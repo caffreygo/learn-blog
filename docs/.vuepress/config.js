@@ -16,7 +16,7 @@ module.exports = {
     sidebar: {
       '/typescript/': ['', 'crawler', 'step2', 'step3', 'step4', 'step5'],
       '/javascript/': ['', 'demo'],
-      '/webpack/': ['', 'step-2', 'step-3'],
+      '/webpack/': ['', 'step-2', 'step-3', 'demo'],
       '/http/': [''],
       '/git/': [''],
       '/basic/': ['']

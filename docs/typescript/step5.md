@@ -134,4 +134,89 @@ export function get(path: string) {
 
    访问根路径（’/‘）和（’login‘）正常返回
 
-   
+
+## 多种请求方法装饰器
+
+- 增加method元数据区分各类请求方法
+- Method枚举类型解决method的any报错
+- getRequestDecorator工厂函数生成各种方法装饰器
+
+```typescript
+// decorators.ts
+import { Router } from 'express';
+export const router = Router();
+
+enum Method {
+  get = 'get',
+  post = 'post',
+  put = 'put',
+  delete = 'delete'
+}
+
+export function controller(target: any) {
+  for (let key in target.prototype) {
+    const path = Reflect.getMetadata('path', target.prototype, key);
+    const method: Method = Reflect.getMetadata('method', target.prototype, key);
+    const handler = target.prototype[key];
+    if (path && method && handler) {
+      router[method](path, handler);
+    }
+  }
+}
+
+function getRequestDecorator(type: string) {
+  return function(path: string) {
+    return function(target: any, key: string) {
+      Reflect.defineMetadata('path', path, target, key);
+      Reflect.defineMetadata('method', type, target, key);
+    };
+  };
+}
+
+export const get = getRequestDecorator('get');
+export const post = getRequestDecorator('post');
+export const put = getRequestDecorator('put');
+export const del = getRequestDecorator('delete');  // delete是关键字用del
+```
+
+```typescript
+// LoginController.ts
+import 'reflect-metadata';
+import { Request, Response } from 'express';
+import { controller, get, post } from './decorators';
+import { getResponseData } from '../utils/util';
+
+interface BodyRequest extends Request {
+  body: { [key: string]: string | undefined };
+}
+
+@controller
+class LoginController {
+  @post('/login')
+  login(req: BodyRequest, res: Response) {
+    const { password } = req.body;
+    const isLogin = req.session ? req.session.login : false;
+    if (isLogin) {
+      res.json(getResponseData(false, '已经登陆过'));
+    } else {
+      if (password === '123' && req.session) {
+        req.session.login = true;
+        res.json(getResponseData(true));
+      } else {
+        res.json(getResponseData(false, '登陆失败'));
+      }
+    }
+  }
+
+  @get('/logout')
+  logout(req: BodyRequest, res: Response) {
+	...
+  }
+
+  @get('/')
+  home(req: BodyRequest, res: Response) {
+    ...
+  }
+}
+```
+

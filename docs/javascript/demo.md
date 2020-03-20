@@ -1,6 +1,80 @@
-# JavaScript解答
+# JavaScript笔记
 
-## JavaScript基础面试题
+## ES6
+
+### ES6-module
+
+```js
+// a.js  导出多个
+export function fn() {
+	console.log('fn')
+}
+
+export const obj = {
+	name: 'zhangsan'
+}
+```
+
+```js
+// b.js  导出多个
+function fn1() {
+	console.log('fn')
+}
+
+const obj1 = {
+	name: 'zhangsan'
+}
+
+export {
+	fn1,
+	obj1
+}
+```
+
+```js
+// index.js
+import { fn, obj} from './a'
+import { fn1, obj1} from './b'
+```
+
+- 使用了default之后不能用解构赋值
+
+```js
+// c.js  导出单个
+const obj = {
+	data: 'hello c'
+}
+
+export default obj
+```
+
+```js
+// d.js  导出多个
+function fn2() {
+	console.log('fn')
+}
+
+const obj2 = {
+	name: 'zhangsan'
+}
+
+export default {
+	fn1,
+	obj1
+}
+```
+
+```js
+// index.js
+import obj from './c'
+import d from './d'         // 不能用解构赋值
+
+console.log(d.fn2, d.obj2)
+```
+
+### 
+
+## JavaScript解答
 
 ### new的过程
 
