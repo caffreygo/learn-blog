@@ -160,6 +160,390 @@ this.state.comment = 'Hello';
 this.setState({comment: 'Hello'});
 ```
 
+## vue-cli 4
+
+### 设置路径别名
+
+```js
+ // vue.config.js
+ chainWebpack: config => {
+    config.resolve.alias
+      .set('@', resolve('./src'))
+      .set('@c', resolve('./src/components'))
+      .set('img', resolve('./src/common/images'))
+  },
+```
+
+### 设置页面title
+
+```js
+ // vue.config.js
+ chainWebpack: config => {
+      config.plugin('html').tap(args => {
+        args[0].title = 'OA';
+        return args;
+      });
+  },
+```
+
+### 引入scss
+
+安装**node-sas**s和**sass-loader**
+
+#### scss全局变量
+
+1. 安装**style-resources-loader**
+
+2. 设置**vue.config.js**文件
+
+   ```js
+     pluginOptions: {
+       'style-resources-loader': {
+         preProcessor: 'scss',
+         patterns: ['./src/common/style/variable.scss']
+       }
+     }
+   ```
+
+### 引入vuex
+
+1. 命令行输入 `vue add vuex`
+
+2. 模块化状态管理
+
+   ```js
+   // store/index.js
+   import Vue from 'vue'
+   import Vuex from 'vuex'
+   import account from './account'
+   Vue.use(Vuex)
+   
+   export default new Vuex.Store({
+     modules: {
+       account
+     }
+   })
+   ```
+
+   ```js
+   // store/account.js
+   const state = {
+     token: localStorage.getItem('token') ? localStorage.getItem('token') : ''
+   }
+   
+   const getters = {
+     token: state => {
+       return state.token
+     }
+   }
+   
+   const mutations = {
+     setToken(state, token) {
+       state.token = token
+       localStorage.setItem('token', token);
+     }
+   }
+   
+   export default {
+     namespaced: true,
+     state,
+     getters,
+     mutations
+   }
+   ```
+
+3. 使用
+
+   ```js
+   import { mapGetters, mapMutations } from 'vuex';
+   
+     computed: {
+       ...mapGetters('account', ['token']);    // this.token获取
+     },
+     methods: {
+       // 获取store内namespace为account下的setToken这个mutations方法
+       ...mapMutations('account', ['setToken'])      // this.setToken(token)调用
+     }
+   ```
+
+### 引入Axios
+
+#### 引入和基本校验配置
+
+`vue add axios`
+
+```js
+// plugins/axios.js
+"use strict";
+
+import Vue from 'vue';
+import axios from "axios";
+import router from '../router';
+
+let config = {
+  baseURL: 'http://oa.jinrui.kooboo.site/api',
+  timeout: 60 * 1000,
+  withCredentials: true,
+};
+
+const _axios = axios.create(config);
+
+_axios.interceptors.request.use(
+  function (config) {
+    // 为请求带上token
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = token;
+    }
+    return config;
+  },
+  function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor
+_axios.interceptors.response.use(
+  function (response) {
+    // 响应失败且isLogin===false跳转到登录页
+    if (!response.data.success) {
+      const isServerLogin = response.data.isLogin
+      if (!isServerLogin && router.history.current.path !== '/login') {
+        router.push('/login')
+      }
+    }
+
+    return response;
+  },
+  function (error) {
+    // Do something with response error
+    return Promise.reject(error);
+  }
+);
+
+// Plugin.install = function(Vue, options) {
+Plugin.install = function (Vue) {
+  Vue.axios = _axios;
+  window.axios = _axios;
+  Object.defineProperties(Vue.prototype, {
+    axios: {
+      get() {
+        return _axios;
+      }
+    },
+    $axios: {
+      get() {
+        return _axios;
+      }
+    },
+  });
+};
+
+Vue.use(Plugin)
+
+export default Plugin;
+```
+
+#### 使用
+
+```js
+this.axios
+	.post('/login', data).then(res => {
+		if (res.data.success) {
+        	this.$message.success(this.$t('login.successTips'));
+            let token = res.data.token;
+            if (token) {
+            	this.setToken(res.data.token);
+            }
+        	this.$router.push({ path: '/home' });
+    	} else {
+        	this.$message.error(this.$t('login.failedTips'));
+        }
+     }).catch(err => {console.log(err);});
+```
+
+### 引入i18n
+
+`vue add i18n`自动生成配置文件
+
+```js
+// pungins/i18n.js
+import Vue from 'vue'
+import VueI18n from 'vue-i18n'
+
+Vue.use(VueI18n)
+
+function loadLocaleMessages () {
+  const locales = require.context('@/locales', true, /[A-Za-z0-9-_,\s]+\.json$/i)
+  const messages = {}
+  locales.keys().forEach(key => {
+    const matched = key.match(/([A-Za-z0-9-_]+)\./i)
+    if (matched && matched.length > 1) {
+      const locale = matched[1]
+      messages[locale] = locales(key)
+    }
+  })
+  return messages
+}
+
+export default new VueI18n({
+  locale: process.env.VUE_APP_I18N_LOCALE || 'zh',
+  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'zh',
+  messages: loadLocaleMessages()
+})
+
+
+// this.$i18n.locale = 'en'可以显示获取和设置，或者通过浏览器cookie自动设置
+```
+
+### 引入vue router
+
+`npm install vue-router` || 初始化时选择安装
+
+```js
+import Vue from 'vue'
+import Router from 'vue-router'
+
+Vue.use(Router)  // 在vue中注入Router
+import Login from '@c/login/Login'
+import HomePage from '@c/main/HomePage'
+
+
+const routes = [
+    {
+        path: '/',
+        redirect: '/login'
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: Login
+    },
+    {
+        path: '/date',
+        name: '/date',
+        component: HomePage,
+        meta: {
+            requireAuth: true
+        }
+    }
+]
+
+
+// 将路径注入到Router中
+var router = new Router({
+    'mode': 'history',
+    routes
+})
+
+const isLogin = () => Boolean(localStorage.getItem('token') || sessionStorage.getItem('token'))
+router.beforeEach((to, from, next) => {
+    // matched   date及其子页面requireAuth: true
+    if (to.matched.some(item => item.meta.requireAuth)) {
+        if (!isLogin()) {
+            next({
+                path: '/',
+                replace: true
+            })
+        } else {
+            next()
+        }
+    } else {
+        next()
+    }
+})
+// 导出路由
+export default router;
+```
+
+### 打包优化
+
+安装`vue add webpack-bundle-analyzer`可以发现直接install的ElementUI占具了过大的体积，vender-chunk太大导致spa页面首屏加载缓慢
+
+#### CDN引入ElementUI
+
+- 删除main.js文件内Vue.use(ElementUI)
+
+```js
+// main.js
+import Vue from 'vue'
+import router from './router'
+import store from './store'
+import './plugins/axios'
+import ELEMENT from 'element-ui';
+import App from './App.vue'
+import i18n from './plugins/i18n'
+
+Vue.use(ELEMENT);
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  store,
+  i18n,
+  render: h => h(App)
+}).$mount('#app')
+```
+
+- CDN引入Vue和ElemntUI的资源, 通过打包环境判断引入的是压缩版还是开发版的vue
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.13.0/lib/theme-chalk/index.css"></link>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <script src="https://unpkg.com/vue@2.6.11/dist/vue<%= process.env.NODE_ENV==='development'?'.js':'.min.js' %>"></script>
+    <script src="https://unpkg.com/element-ui@2.13.0/lib/index.js"></script>
+  </body>
+</html>
+```
+
+- 修改`vue.config.js`,同时如果不希望生产模式下看到vue源码，不生产对应的map文件，可以设置productionSourceMap为false
+
+```js
+  configureWebpack: {
+    externals: {
+      'vue': 'Vue',
+      'element-ui': 'ELEMENT'
+    }
+  },
+  productionSourceMap: false,
+```
+
+#### 大组件按需引入
+
+组件的按需引入能够让webpack打包时生成不同模块的JS文件，在使用时进行引入。注意不需要将组件都按需引入，这样会导致生成过多的chunk,太多的模块js请求反而得不偿失。
+
+ES6的import,组件由一个函数返回，只有在使用时执行导入
+
+```js
+// 组件懒加载  vue组件内引用
+const FullCalendar = ()=>import("./schedule/FullCalendar");
+```
+
+#### 路由懒加载
+
+```js
+// 路由懒加载  router  index.js
+const Login = ()=>import("@c/login/Login")
+const PageHeader = ()=>import("@c/PageHeader")
+const ScheduleView = ()=>import("@c/ScheduleView")
+```
+
+
+
 ## Promise
 
 ### Promise用法讲解
@@ -895,6 +1279,32 @@ p2 rejected: reject
 Promise回调函数中的第一个参数`resolve`，会对Promise执行"拆箱"动作。即当`resolve`的参数是一个Promise对象时，`resolve`会"拆箱"获取这个Promise对象的状态和值，但这个过程是异步的。p1"拆箱"后，获取到Promise对象的状态是resolved，因此`fulfilled`回调被执行；p2"拆箱"后，获取到Promise对象的状态是rejected，因此`rejected`回调被执行。但Promise回调函数中的第二个参数`reject`不具备”拆箱“的能力，reject的参数会直接传递给`then`方法中的`rejected`回调。因此，即使p3 `reject`接收了一个resolved状态的Promise，`then`方法中被调用的依然是`rejected`，并且参数就是`reject`接收到的Promise对象。
 
 ## CSS
+
+### hover添加动画
+
+```css
+.btn-theme:hover {
+    transition-duration: .3s;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(.7,1,.7,1);
+}
+```
+
+### background fixed
+
+可以实现背景固定效果
+
+```css
+.promo-banner {
+    position: relative;
+    z-index: 1;
+    background: url(/aironepage/HTML/img/1920x1080/02.jpg) center center no-repeat fixed;
+    background-size: cover;
+    min-height: 100%;
+}
+```
+
+
 
 ### font-size
 
