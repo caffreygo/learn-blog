@@ -8,7 +8,7 @@
 
 :::
 
-::: warn 注意
+::: warning 注意
 
 Tree Shaking 只适用于`ES Module`语法(既通过`export`导出，`import`引入)，因为它依赖于`ES Module`的静态结构特性。
 
@@ -135,9 +135,11 @@ module.exports = {
 
 像上一节那样，如果我们要区分`Tree Shaking`的开发环境和生产环境，那么我们每次打包的都要去更改`webpack.config.js`文件，有没有什么办法能让我们少改一点代码呢？ 答案是有的！
 
-说明
+::: tip 说明
 
 区分开发环境和生产环境，最好的办法是把公用配置提取到一个配置文件，生产环境和开发环境只写自己需要的配置，在打包的时候再进行合并即可，**`webpack-merge`** 可以帮我们做到这个事情。
+
+:::
 
 首先，我们效仿各大框架的脚手架的形式，把 Webpack 相关的配置都放在根目录下的`build`文件夹下，所以我们需要新建一个`build`文件夹，随后我们要在此文件夹下新建三个`.js`文件和删除`webpack.config.js`，它们分别是：
 
@@ -525,9 +527,11 @@ module.exports = {
 
 minSize 和 maxSize
 
-说明
+::: tip 说明
 
 `minSize`默认值是30000，也就是30kb，当代码超过30kb时，才开始进行代码分割，小于30kb的则不会进行代码分割；与`minSize`相对的，`maxSize`默认值为0，为0表示不限制打包后文件的大小，一般这个属性不推荐设置，一定要设置的话，它的意思是：打包后的文件最大不能超过设定的值，超过的话就会进行代码分割。
+
+::: 
 
 为了测试以上两个属性，我们来写一个小小的例子，在`src`目录下新建一个`math.js`文件，它的代码如下：
 
@@ -548,11 +552,13 @@ console.log(add(1, 2));
 
 ### minChunks
 
-说明
+::: tip 说明
 
 默认值为1，表示某个模块复用的次数大于或等于一次，就进行代码分割。
 
 如果将其设置大于1，例如：`minChunks:2`，在不考虑其他模块的情况下，以下代码不会进行代码分割：
+
+:::
 
 ```js
 // 配置了minChunks: 2，以下lodash不会进行代码分割，因为只使用了一次 
@@ -571,9 +577,11 @@ console.log(_.join(['Dell', 'Lee'], '-'));
 
 ### cacheGroups
 
-说明
+::: tip 说明
 
 在进行代码分割时，会把符合条件的放在一组，然后把一组中的所有文件打包在一起，默认配置项中有两个分组，一个是`vendors`和`default`
+
+:::
 
 **vendors组：** 以下代码的含义是，将所有通过引用`node_modules`文件夹下的都放在`vendors`组中
 
@@ -643,9 +651,11 @@ module.exports = {
 
 ## Lazy Loading懒加载
 
-理解
+::: tip 理解
 
 `Lazy Loading`懒加载的理解是：通过异步引入代码，这里说的异步，并不是在页面一开始就加载，而是在合适的时机进行加载。
+
+:::
 
 `Lazy Loading`懒加载的实际案例我们已经在上一小节书写了一个例子，不过我们依然可以做一下小小的改动，让它使用`async/await`进行异步加载，它的代码如下：
 
@@ -668,9 +678,11 @@ async function getComponet() {
 
 ## PreLoading 和Prefetching
 
-理解
+::: tip 理解
 
 在以上`Lazy Loading`的例子中，只有当我们在页面点击时才会加载`lodash`，也有一些模块虽然是异步导入的，但我们希望能提前进行加载，`PreLoading`和`Prefetching`可以帮助我们实现这一点，它们的用法类似，但它们还是有区别的：`Prefetching`不会跟随主进程一起下载，而是等到主进程加载完毕，带宽释放后才进行加载，`PreLoading`会随主进程一起加载。
+
+:::
 
 实现`PreLoading`或者`Prefetching`非常简单，我们只需要在上一节的例子中加一点点代码即可(参考高亮部分)：
 
@@ -703,9 +715,11 @@ async function getComponet() {
 
 ## CSS代码分割
 
-理解
+::: tip 理解
 
 当我们在使用`style-loader`和`css-loader`打包`.css`文件时会直接把CSS文件打包进`.js`文件中，然后直接把样式通过``的方式写在页面，如果我们要把CSS单独打包在一起，然后通过`link`标签引入，那么可以使用`mini-css-extract-plugin`插件进行打包。
+
+:::
 
 截止到写此文档时，此插件还未支持HMR，意味着我们要使用这个插件进行打包CSS时，为了开发效率，我们需要配置在生产环境下，开发环境依然还是使用`style-loader`进行打包。
 **此插件的最新版已支持HMR**。
@@ -797,15 +811,19 @@ root.innerHTML = 'Hello,world'
 |   |-- main.js.map
 ```
 
-注意
+::: warning 注意
 
 如果发现并没有打包生成`main.css`文件，可能是`Tree Shaking`的副作用，应该在`package.json`中添加属性`sideEffects:['*.css']`
 
+:::
+
 ### CSS压缩
 
-理解
+::: tip 理解
 
 `CSS`压缩的理解是：当我们有两个相同的样式分开写的时候，我们可以把它们合并在一起；为了减少`CSS`文件的体积，我们需要像压缩`JS`文件一样，压缩一下`CSS`文件。
+
+:::
 
 我们再在`src`目录下新建`style1.css`文件，内容如下：
 
@@ -975,9 +993,11 @@ $('#root').append(dom);
 
 以上场景完美再现了我们最开始提到的问题，那么我们接下来就通过配置解决，首先在`webpack.common.js`文件中使用`ProvidePlugin`插件：
 
-说明
+::: tip 说明
 
 配置`$:'jquery'`，只要我们文件中使用了`$`符号，它就会自动帮我们引入`jquery`，相当于`import $ from 'jquery'`
+
+:::
 
 ```js
 const webpack = require('webpack');
@@ -1007,7 +1027,7 @@ console.log(this===window);
 
 如上所示，如果我们使用`npm run dev`运行项目，运行`index.html`时，会在浏览器的`console`面板输出`false`，证明在模块中`this`指向模块自身，而不是全局的`window`对象，那么我们有什么办法来解决这个问题呢？
 
-解决办法
+**解决办法**
 
 安装使用`imports-loader`来解决这个问题
 
