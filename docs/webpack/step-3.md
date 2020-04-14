@@ -915,9 +915,19 @@ if(module.hot) {
 
 ## 处理ES6语法
 
+### Babel
+
 ::: tip 说明
 
 我们在项目中书写的`ES6`代码，由于考虑到低版本浏览器的兼容性问题，需要把`ES6`代码转换成低版本浏览器能够识别的`ES5`代码。使用`babel-loader`和`@babel/core`来进行`ES6`和`ES5`之间的链接，使用`@babel/preset-env`来进行`ES6`转`ES5`
+
+- webpack使用**babel-loader**来使用babel，**@babel/core**实现通过Babel的API转码
+- **@babel/preset-env**定义语法转化的配置
+  1. preset就是在babel编译之前，让babel知道你的编译规则，看是用什么样的规范去编译
+  2. 例如babel-preset-es2015就是安装es6标准编译
+  3. babel-preset-env可以直接实现使用最新的规范编译，包括了babel-preset-es2015,babel-preset-es2016 and babel-preset-es2017...
+
+- @babel/polyfill补全浏览器中缺失的方法（promise、map....）
 
 :::
 
@@ -1008,19 +1018,61 @@ module.exports = {
 - 箭头函数被转成了普通的函数形式
 - 如果你仔细观察这次打包输出的话，你会发现打包体积会非常大，有几百K，这是因为我们将`@babel/polyfill`中的代码全部都打包进了我们的代码中
 
+### useBuiltIns配置
+
 针对以上最后一个问题，我们希望，我们使用了哪些`ES6`代码，就引入它对应的`polyfill`包，达到一种按需引入的目的，要实现这样一个效果，我们需要在`.babelrc`文件中做一下小小的改动，像下面这样：
 
 ```json
 {
   "presets": [["@babel/preset-env", {
-    "corejs": 2,
+    // "corejs": 2,
     "useBuiltIns": "usage"
   }]]
 }
 ```
 
-同时需要注意的时，我们使用了`useBuiltIns:"usage"`后，在`index.js`中就不用使用`import '@babel/polyfill'`这样的写法了，因为它已经帮我们自动这样做了。
+**usage**的配置实现了**只对使用到的方法补全**。进行了同时需要注意的时，我们使用了`useBuiltIns:"usage"`后，在`index.js`中就不用使用`import '@babel/polyfill'`这样的写法了，因为它已经帮我们自动这样做了。
 
 在以上配置完毕后，我们再次使用`npx webpack`进行打包，如下图，可以看到此次打包后，`main.js`的大小明显变小了。
 
 ![打包结果](../img/webpack/es6-2.png)
+
+### targets配置目标浏览器
+
+可以设置targets属性设置需要转换的目标浏览器，例如下面设置了转化之后要让67版本以上的chrome的支持ES6语法，因为本身67版本以上的chrome本身就支持ES6,这个配置下的打包几乎对打包体积没影响。
+
+```js
+{
+  "presets": [["@babel/preset-env", {
+      targets: {
+          chrome: '67'
+      },
+      "useBuiltIns": "usage"
+  }]]
+}
+```
+
+### 组件库或类库下
+
+通过preset打包的babel补全的polyfill会注入到全局变量，如果希望打包一个组件库或者类库，可以使用@babel/plugin-transform-runtime和@babel/runtime配合实现
+
+```shell
+npm i -D @babel/plugin-transform-runtime
+npm i -S @babel/runtime
+```
+
+**.babelrc**文件去掉presets的配置，添加plugins的配置
+
+```js
+{
+  "plugins": [["@babel/plugin-transform-runtime", {
+      "core-js": 2,
+      "helpers": true,
+      "regenerator": true,
+      "useESModules": false
+  }]]
+}
+```
+
+**core-js**从默认false改成 2 需要安装`npm i -S @babel/runtime-corejs2`，core-js为2才能实现当没有promise、map这些方法的时候会把方法打包到库文件中
+
