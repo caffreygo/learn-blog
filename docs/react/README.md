@@ -71,3 +71,47 @@ ReactDOM.render(
 
   `<div onScroll={ ()=> {this.scroll() } } className="field-wrap"></div>`
 
+## PWA
+
+::: tip progressive web application
+
+在https协议的服务器上，在用户二次访问网页的，即使是断网也能够访问，serviceWorker能够缓存网页
+
+:::
+
+::: tip mainfest.json
+
+如果配置了pwa设置，那么便可以把网页创建一个桌面快捷方式进行访问
+
+:::
+
+icons src设置了桌面快捷图标的icon
+
+```json
+{
+  "short_name": "React App",
+  "name": "Create React App Sample",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
+```
+

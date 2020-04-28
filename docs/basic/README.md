@@ -1348,6 +1348,37 @@ Promise回调函数中的第一个参数`resolve`，会对Promise执行"拆箱"�
 }
 ```
 
+### 简单旋转动画
+
+```html
+<img src={logo} className="App-logo" alt="logo" />
+```
+
+```css
+/* 
+  prefers-reduced-motion:用于检测用户的系统是否被开启了动画减弱功能
+  no-preference
+  用户未修改系统动画相关特性。
+  reduce
+  这个值意味着用户修改了系统设置，将动画效果最小化，最好所有的不必要的移动都能被移除。
+*/
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+```
+
 
 
 ### font-size
