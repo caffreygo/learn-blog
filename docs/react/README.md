@@ -4,7 +4,7 @@
 
 ### 官方
 
-```react
+```js
 class Toggle extends React.Component {
   constructor(props) {
     super(props);
@@ -63,6 +63,7 @@ ReactDOM.render(
 
 
 - JSX中的this执行当前Reack组件,所以onClick = { this.handleClick }可以拿到当前组件的函数
+
 - class定义中，当定义React组件时，`extends React.Component`时，不会将`this`继承下来。所以handClick函数中如果使用`this`是`undefined`。 以下两种方式可以指定`this`:
   1. `this.handleClick = this.handleClick.bind(this)` ，推荐这种在构造函数绑定的方式
   2. ` <button onClick={this.handleClick.bind(this)}></button>`
@@ -71,7 +72,9 @@ ReactDOM.render(
 
   `<div onScroll={ ()=> {this.scroll() } } className="field-wrap"></div>`
 
-## PWA
+## 基础
+
+### PWA
 
 ::: tip progressive web application
 
@@ -115,3 +118,58 @@ icons src设置了桌面快捷图标的icon
 }
 ```
 
+### class component
+
+render函数返回JSX
+
+```js
+import React, { Component } from 'react';
+
+class App extends Component {
+  render() {
+    return (
+      <div>
+        hello world..
+      </div>
+    )
+  }
+}
+export default App;
+```
+
+### ReactDOM.render
+
+- ReactDOM的render方法能够实现将一个React组件挂载到DOM节点上
+- ReactDOM展示组件内容的时候，`<App />`使用了JSX语法，必需引入React，才能进行编译
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import App from './App';
+
+ReactDOM.render(
+  // JSX
+  <App />,
+  document.getElementById('root')
+);
+```
+
+### JSX语法
+
+- JSX语法直接写标签，不需要引号包裹 
+
+  ```jsx
+  render() {
+      return <div>hello world..</div>
+  }
+  ```
+
+- JSX语法中的标签不仅可以是**原生标签**，也可以使用**组件**，组件开头必需**大写字母**开头`<App />`
+
+  ```jsx
+  import App from './App';  // 大写字母开头
+  ReactDOM.render(<App />, document.getElementById('root'));
+  ```
+
+  

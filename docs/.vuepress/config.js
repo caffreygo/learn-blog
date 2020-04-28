@@ -9,6 +9,7 @@ module.exports = {
       { text: 'JavaScript', link: '/javascript/' },
       { text: 'HTTP', link: '/http/' },
       { text: 'Webpack', link: '/webpack/' },
+      { text: 'React', link: '/react/' },
       { text: 'Git', link: '/git/' },
       { text: 'Note', link: '/basic/' },
       { text: 'Github', link: 'https://github.com/caffreygo' }
@@ -17,6 +18,7 @@ module.exports = {
       '/typescript/': ['', 'crawler', 'step2', 'step3', 'step4', 'step5'],
       '/javascript/': ['', 'demo'],
       '/webpack/': ['', 'step-2', 'step-3', 'step-4', 'step-5'],
+      '/react/': [''],
       '/http/': [''],
       '/git/': [''],
       '/basic/': ['']
