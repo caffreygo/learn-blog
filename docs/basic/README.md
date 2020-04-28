@@ -17,6 +17,50 @@
 
 ​		在`created`周期函数中的DOM操作也是如此，而在`mounted`中则没有问题。
 
+## jQuery
+
+### 根据元素css状态获取元素
+
+- :selected
+
+```html
+<select id="reserve-membershipSize" class="listSelect" name="">
+    <option value="未选择">-- 请选择贵司的会员数据库规模-- </option>
+    <option value="2万人以内">2万人以内</option>
+    <option value="2万~10万人">2万~10万人</option>
+    <option value="10万人以上">10万人以上</option>
+</select>
+```
+
+```js
+$("#reserve-membershipSize option:selected").val();
+```
+
+- :checked
+
+```html
+<input type="checkbox" value="全域数据互通">
+<input type="checkbox" value="数据深度洞察">
+```
+
+```js
+ $('input:checkbox').each(function() { 
+     if ($(this).is(':checked') ==true) { 
+         interestedService.push($(this).val())
+     } 
+ })
+```
+
+**is(':checked')对应于原生js的matches**
+
+### 根据属性操作元素
+
+```js
+$("#j-reserve div[data-name='reserve-tip']").show();
+```
+
+
+
 ## React
 
 ### JSX
