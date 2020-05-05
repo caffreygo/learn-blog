@@ -169,11 +169,214 @@ ReactDOM.render(
   }
   ```
 
-- JSX语法中的标签不仅可以是**原生标签**，也可以使用**组件**，组件开头必需**大写字母**开头`<App />`
+- JSX语法中的标签不仅可以是**原生标签**，也可以使用**组件**，组件开头必需**大写字母**开头`<App />`，Fragment也是一个组件
 
   ```jsx
   import App from './App';  // 大写字母开头
   ReactDOM.render(<App />, document.getElementById('root'));
   ```
 
-  
+
+- JSX注释
+
+  ```jsx
+  {/* 开发模式下的注释，不会显示在页面上 */}
+  ```
+
+  ```jsx
+  {
+  	//单行注释要把花括号单独放一行
+  }
+  ```
+
+- 引入和添加class, for等属性
+
+  ::: tip 关键字
+
+  ​	class使用className, for使用htmlFor
+
+  :::
+
+  ```js
+  import './style.css'
+  ```
+
+  ```jsx
+  <label htmlFor="insertArea">输入内容</label>
+  <input
+      id="insertArea"
+      className="input"
+      value={this.state.inputValue}
+      onChange={this.handleInputChange.bind(this)}
+  />
+  ```
+
+- innerHtml
+
+  外层花括号表示JSX语法，内层花括号表示接受一个对象
+
+  ```jsx
+  <li
+      key={index}
+      onClick={this.handleItemDelete.bind(this, index)}
+      dangerouslySetInnerHTML={{ __html: item }}
+      >
+  </li>
+  ```
+
+### immutable
+
+::: tip immutable
+
+​	react建议state不允许我们做任何的改变（直接改变会影响性能）
+
+​	可以考虑拷贝一个副本, 然后操作赋值 [...this.state.list] ）
+
+:::
+
+```js
+  handleItemDelete(index) {
+    const list = [...this.state.list]  // 拷贝
+    list.splice(index, 1)
+    this.setState({
+      list: list
+    })
+  }
+```
+
+### 拆分组件和组件传值
+
+::: tip 组件
+
+​	在constructor里面做this统一绑定，会比在jsx中绑定的性能好
+
+​	父组件通过属性向子组件传值，子组件通过props接收
+
+​	子组件通过属性获取父组件方法，调用向外传递事件（父组件在传递方法时, 要记得绑定父组件的this）
+
+​	setState可以传递一个函数实现异步，并且带来性能提升，函数参数prevState(修改之前的state)
+
+:::
+
+```jsx
+// TodoList.js
+import React, { Component, Fragment } from 'react';
+import './style.css'
+import TodoItem from "./TodoItem"
+
+class TodoList extends Component {
+
+  constructor(props) {
+    super(props)
+    this.handleInputChange = this.handleInputChange.bind(this)
+    this.handleBtnClick = this.handleBtnClick.bind(this)
+    this.handleItemDelete = this.handleItemDelete.bind(this)
+    this.state = {
+      inputValue: '',
+      list: []
+    }
+  }
+
+  render() {
+    return (
+      <Fragment>
+        <div>
+          <label htmlFor="insertArea">输入内容</label>
+          <input
+            id="insertArea"
+            className="input"
+            value={this.state.inputValue}
+            onChange={this.handleInputChange}
+          />
+          <button onClick={this.handleBtnClick}>提交</button>
+        </div>
+        <ul>
+          {this.getTodoItem()}
+        </ul>
+      </Fragment>
+    )
+  }
+
+  getTodoItem() {
+    return (
+      this.state.list.map((item, index) => {
+        return (
+          <TodoItem
+            content={item}
+            key={index}
+            index={index}
+            deleteItem={this.handleItemDelete}
+          />
+        )
+      })
+    )
+  }
+
+  handleInputChange(e) {
+    const value = e.target.value
+    this.setState(() => ({
+      inputValue: value
+    }))
+  }
+
+  handleBtnClick() {
+    if (this.state.inputValue.trim().length === 0) return
+    this.setState((prevState) => ({
+      list: [...prevState.list, prevState.inputValue],
+      inputValue: ''
+    }))
+  }
+
+  handleItemDelete(index) {
+    this.setState((prevState) => {
+      const list = [...prevState.list]
+      list.splice(index, 1)
+      return { list }
+    })
+  }
+}
+
+export default TodoList
+```
+
+```jsx
+// TodoItem.js
+import React, { Component } from 'react'
+
+class TodoItem extends Component {
+    constructor(props) {
+        super(props)
+        this.handleClick = this.handleClick.bind(this)
+    }
+
+    render() {
+        const { content } = this.props
+        return (
+            <li onClick={this.handleClick}>{content}</li>
+        )
+    }
+
+    handleClick() {
+        const { deleteItem, index } = this.props
+        deleteItem(index)
+    }
+}
+
+export default TodoItem
+```
+
+
+
+::: tip 思考
+
+- 命名式开发: 直接操作dom（jQuery、原生），声名式开发: 面向数据编程（React）
+
+- 可以与其它框架并存，React只影响其绑定的原生dom标签下的区域
+
+- 组件化（React的组件首字母大写，属性传值，方法传递）
+
+- 单向数据流，子组件不允许改变父组件的值（只读，当数据被多个子组件共用且允许被子组件改变数据时，会导致维护困难）
+- 视图层框架（需要redux等其它辅助状态管理）
+- 函数式编程（有利于单元测试）
+
+:::
