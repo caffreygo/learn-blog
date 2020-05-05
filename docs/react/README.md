@@ -60,7 +60,11 @@ ReactDOM.render(
 </html>
 ```
 
+::: tip this
 
+​	JSX语法中的this指向当前组件
+
+:::
 
 - JSX中的this执行当前Reack组件,所以onClick = { this.handleClick }可以拿到当前组件的函数
 
