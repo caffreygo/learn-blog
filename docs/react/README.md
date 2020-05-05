@@ -365,7 +365,7 @@ class TodoItem extends Component {
 export default TodoItem
 ```
 
-
+### 总结
 
 ::: tip 思考
 
@@ -380,3 +380,120 @@ export default TodoItem
 - 函数式编程（有利于单元测试）
 
 :::
+
+## 进阶
+
+### PropTypes与DefaultProps
+
+- 使用
+
+  [PropTypes]: https://reactjs.org/docs/typechecking-with-proptypes.html
+
+  实现**类型校验**(开发环境下的warning)
+
+```js
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+
+class TodoItem extends Component {
+    // ...
+}
+
+TodoItem.propTypes = {
+    content: PropTypes.string,
+    deleteItem: PropTypes.func,
+    index: PropTypes.number
+}
+
+export default TodoItem
+```
+
+isRequired实现必传`test: PropTypes.string.isRequired`
+
+```shell
+Warning: Failed prop type: The prop `test` is marked as required in `TodoItem`, but its value is `undefined`.
+```
+
+- 使用defaultProps**提供默认值**(例如在isRequired下)
+
+```js
+TodoItem.defaultProps = {
+    test: "hello world"
+}
+```
+
+### Props、State与render函数
+
+- 当组件当中的Props或者State发生改变的时候，会触发render函数重新执行
+- 当父组件的render函数被运行时，它的子组件的render都将被重新执行
+
+### 什么是虚拟DOM
+
+#### 方案1
+
+1. state 数据
+2. 模板 （render函数中返回的JSX）
+3. 数据 + 模板 = 真实的DOM显示
+4. state 发生改变
+5. 数据 + 模板 = 真实的DOM，替换原始的DOM
+
+::: warning 缺陷
+
+- 第一次生成了一个完整的DOM片段
+- 第二次生成了一个完整的DOM片段
+- 第二次生成的DOM替换第一次的DOM，非常耗性能
+
+:::
+
+#### 方案2
+
+1. state 数据
+2. JSX 模板 
+3. 数据 + 模板 结合，生成真实的DOM，来显示
+4. state 发生改变
+5. 数据 + 模板 结合，生成真实的DOM，并不直接替换原始的DOM
+6. 新的DOM（DocumentFragment文档碎片）和原始的DOM做对比，找差异、
+7. 找出input框发生了变化
+8. 只用新的DOM中的input元素，替换掉老的DOM中的input元素
+
+::: tip 结果 
+
+- 只修改部分DOM元素节约了一部分性能
+- 对比DOM的过程又损耗了一部分性能
+- 性能提升并不明显
+
+:::
+
+#### 方案3
+
+1. state 数据
+
+2. JSX 模板 
+
+3. 数据 + 模板 结合，生成真实的DOM，来显示
+
+   `<div id='abc'><span>hello world</span></div>`
+
+4. 生成虚拟DOM（虚拟DOM是一个数组结构的对象，用它开描述真实DOM）
+
+   `['div',{id:'abc'},['span',{},'hello world']]`
+
+5. state发生变化
+
+6. 生成新的虚拟DOM
+
+   `['div',{id:'abc'},['span',{},'bye bye']]`
+
+7. 比较原始虚拟DOM和新的虚拟DOM的区别，找到区别是span中的内容
+
+8. 直接操作DOM，改变span中的内容
+
+::: tip 优化
+
+- 第4步，生成虚拟DOM损耗了一些性能，但是生成JS对象的虚拟DOM与生成真实DOM的损耗相比是很小的（js创建js对象很简单，创建DOM的时候需要调用WebApplication级别的API的损耗就比较大）
+- 第6步生成虚拟DOM对比方案2第5步生成DOM极大提升了性能
+- 第7步比较JS对象，和真实DOM的对比也极大提升了性能
+
+:::
+
+### 虚拟DOM深入
