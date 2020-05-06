@@ -400,8 +400,8 @@ class TodoItem extends Component {
 }
 
 TodoItem.propTypes = {
-    content: PropTypes.string,
-    deleteItem: PropTypes.func,
+    content: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    deleteItem: PropTypes.func
     index: PropTypes.number
 }
 
@@ -497,3 +497,120 @@ TodoItem.defaultProps = {
 :::
 
 ### 虚拟DOM深入
+
+- react的实现是在生成虚拟DOM后才生成真实DOM
+
+- JSX => createElement => 虚拟DOM（JS对象） => 真实的DOM
+
+  ```jsx
+  render() {
+  	return (
+      	<div>item</div>
+      )
+      // return React.createElement('div', {}, 'item')
+  }
+  ```
+
+1. state 数据
+
+2. JSX 模板 
+
+3. 生成虚拟DOM（虚拟DOM是一个数组结构的对象，用它开描述真实DOM）
+
+   `['div',{id:'abc'},['span',{},'hello world']]`
+
+4. 通过虚拟DOM来生成真实的DOM，来显示
+
+   `<div id='abc'><span>hello world</span></div>`
+
+5. state发生变化
+
+6. 生成新的虚拟DOM
+
+   `['div',{id:'abc'},['span',{},'bye bye']]`
+
+7. 比较原始虚拟DOM和新的虚拟DOM的区别，找到区别是span中的内容
+
+8. 直接操作DOM，改变span中的内容
+
+::: tip 虚拟DOM的优点
+
+- 性能提升
+
+- 跨端应用得以实现。React Native
+
+  DOM只存在于浏览器，虚拟DOM作为JS对象在原生应用和浏览器都可以复用
+
+:::
+
+### 虚拟DOM中的diff算法
+
+比较虚拟DOM区别的算法（第7步）
+
+- setState作为异步函数提供了多个state更新（很短间隔时间内）只执行一次setState，一次虚拟DOM的比对提升性能
+
+  ![](../img/react/diff.png)
+
+- 同级比较，两个虚拟DOM的比对首先是同级的比对，第一层、第二层......如果有一级不同则不再比较，直接替换后面的全部DOM。（虽然可能会造成DOM渲染的浪费，但是大大减少了两个虚拟DOM之间对比算法的性能损耗）
+
+- 每个虚拟DOM节点的比较通过key值做关联（比较性能提升的前提，要保证前后虚拟DOM前后的key值一致，如果使用index作为key值就无法保证前后key值的一致，失去了key值存在的意义）
+
+  ![](../img/react/key.png)
+
+### React中ref的使用
+
+#### DOM获取
+
+（在React中除了e.target可以获取到DOM元素之外，ref也可以）
+
+ref参数等于一个函数(箭头函数传递this)，如下我们构建了一个ref的引用（this.inopt），指向input这个节点
+
+```jsx
+<input
+    id="insertArea"
+    className="input"
+    ref={(input)=>{this.input = input}}
+    value={this.state.inputValue}
+    onChange={this.handleInputChange}
+    />
+// this.input === <input id="insertArea" class="input" value>
+```
+
+#### setState异步问题
+
+- ref与setState共同使用可能出现的问题，setState是异步函数不会立即执行
+
+  ```jsx
+  // jsx
+      <ul ref={(ul) => { this.ul = ul }}>
+          {this.getTodoItem()}
+      </ul>
+  
+  // click event
+        handleBtnClick() {
+            if (this.state.inputValue.trim().length === 0) return
+            this.setState((prevState) => ({
+                list: [...prevState.list, prevState.inputValue],
+                inputValue: ''
+            }))
+            console.log(this.ul.querySelectorAll('li').length)
+        }
+  ```
+
+![](../img/react/ref.png)
+
+- 如果希望在setState后获取到正确的DOM，setState接受第二个参数，是执行完的回调函数
+
+  ```jsx
+  handleBtnClick() {
+      if (this.state.inputValue.trim().length === 0) return
+      this.setState((prevState) => ({
+          list: [...prevState.list, prevState.inputValue],
+          inputValue: ''
+      }), () => {
+          console.log(this.ul.querySelectorAll('li').length)
+      })
+  }
+  ```
+
+  
