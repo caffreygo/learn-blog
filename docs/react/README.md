@@ -614,3 +614,160 @@ ref参数等于一个函数(箭头函数传递this)，如下我们构建了一�
   ```
 
   
+
+### 生命周期函数
+
+::: tip 生命周期函数
+
+- 在某一个时刻组件会自动执行的函数
+- render函数需要定义
+- state和props发生改变时render函数自动执行；父组件的render函数重新执行时，子组件的render函数也会自动执行
+
+:::
+
+![](../img/react/lifeFunc.png)
+
+- componentWillMount：在组件即将被挂载到页面的时刻自动执行
+
+- componentDidMount：组件被挂载到页面之后，自动执行
+
+- shouldComponentUpdate：在组件更新之前会被自动执行 (return Boolean)
+
+  由返回的布尔值确定组件是否需要被更新
+
+- componentWillUpdate：组件被更新之前，他会被自动执行，但是它在shoudComponentUpdate之后被执行，由shoudComponentUpdate的返回值确定是否执行
+
+- componentDidUpdate：在组件更新之后自动执行
+
+- componentWillReceiveProps：当一个组件从父组件接收参数，只要父组件的render函数被执行了，这个函数就会被执行
+
+  如果这个组件第一次存在于父组件中，不会执行；如果这个组件已经存在于父组件中，才会执行
+
+- componentWillUnmount：当组件即将从页面中剔除时执行
+
+### 生命周期函数的使用
+
+- 性能优化--shouldComponentUpdate：父组件render执行时，子组件的render函数也会执行。例如在TodoList中，输入框的改变导致了子组件Item的render函数重新执行，但是其实子组件只需要在btnClick时才需要执行：
+
+  ```jsx
+  shouldComponentUpdate(nextProps, nextState) {
+      // 子组件TodoItem被渲染一次后，除非是content改变
+      // 否则不允许无谓的render(父组件input改变导致的render重新执行)
+      // render函数的执行需要生成虚拟DOM进行比对
+      if (nextProps.content !== this.props.content) {
+          return true
+      } else {
+          return false
+      }
+  }
+  ```
+
+- AJAX--componentDidMount：只在组件的生命周期中执行一次，考虑各种情况，这个最合适
+
+### Charles数据mock
+
+```jsx
+componentDidMount() {
+    Axios.get('api/todolist').then(res => {
+        this.setState(() => ({
+            list: [...res.data]
+        }))
+    }).catch(err => {
+        console.warn(err)
+    })
+}
+```
+
+### React中的css动画
+
+- css3的transition的过渡效果
+
+  ```jsx
+  import React, { Component, Fragment } from 'react'
+  import './style.css'
+  
+  class App extends Component {
+  
+    constructor(props) {
+      super(props)
+      this.state = {
+        show: true
+      }
+      this.handleToggle = this.handleToggle.bind(this)
+    }
+  
+    render() {
+      return (
+        <Fragment>
+          <div className={this.state.show ? 'show' : 'hide'}>hello</div>
+          <button onClick={this.handleToggle}>Toggle</button>
+        </Fragment>
+      )
+    }
+  
+    handleToggle() {
+      this.setState((prevState) => {
+        return {
+          show: prevState.show ? false : true
+        }
+      })
+    }
+  }
+  
+  export default App
+  ```
+
+  ```css
+  .show {
+    transition: all 0.3s ease-in;
+    opacity: 1;
+  }
+  
+  .hide {
+    transition: all 0.3s ease-out;
+    opacity: 0;
+  }
+  ```
+
+- css的动画效果@keyframes
+
+  ```css
+  .show {
+    animation: show-item 2s ease-out;
+  }
+  
+  .hide {
+    animation: hide-item 2s ease-out forwards;
+  }
+  
+  @keyframes hide-item {
+    0% {
+      opacity: 1;
+      color: red;
+    }
+    50% {
+      opacity: 0.5;
+      color: green;
+    }
+    100% {
+      opacity: 0;
+      color: blue;
+    }
+  }
+  @keyframes show-item {
+    0% {
+      opacity: 0;
+      color: red;
+    }
+    50% {
+      opacity: 0.5;
+      color: green;
+    }
+    100% {
+      opacity: 1;
+      color: blue;
+    }
+  }
+  ```
+
+  
