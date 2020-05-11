@@ -770,4 +770,320 @@ componentDidMount() {
   }
   ```
 
+
+### react-transition-group
+
+[CssTransition]: https://reactcommunity.org/react-transition-group/css-transition
+
+- CSSTransition实现class
+- classNames指定类名开头
+- unmountOnExit在exit后不渲染DOM
+- 钩子函数实现js
+- `appear={true}`实现入场动画的第一帧 （fade-appear,fade-appear-active）
+
+```jsx
+import React, { Component, Fragment } from 'react'
+import { CSSTransition } from 'react-transition-group'
+import './style.css'
+
+class App extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            show: true
+        }
+        this.handleToggle = this.handleToggle.bind(this)
+    }
+
+    render() {
+        return (
+            <Fragment>
+                <CSSTransition in={this.state.show} timeout={1000} classNames='fade'>
+                    <div>hello</div>
+                </CSSTransition>
+                <button onClick={this.handleToggle}>Toggle</button>
+            </Fragment>
+        )
+    }
+
+    handleToggle() {
+        this.setState((prevState) => {
+            return {
+                show: prevState.show ? false : true
+            }
+        })
+    }
+}
+
+export default App
+```
+
+```css
+/* 入场动画 */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 1s ease-in;
+}
+
+.fade-enter-done {
+  opacity: 1;
+}
+
+/* 出场动画 */
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 1s ease-in;
+}
+
+.fade-exit-done {
+  opacity: 0;
+}
+```
+
+- 出场之后修改文字颜色
+
+  1. ```
+     .fade-enter-done {
+         opacity: 1;
+         color: red
+     }
+     ```
+
+  2. ```jsx
+     <CSSTransition
+         in={this.state.show}
+         timeout={1000}
+         classNames='fade'
+         unmountOnExit
+         onEntered={(el) => { el.style.color = 'blue' }}
+         >
+         <div>hello</div>
+     </CSSTransition>
+     ```
+
+
+- TransitionGroup可以在外层包裹实现多个动画的实现
+
+  ```jsx
+  <TransitionGroup>
+      {
+          this.state.list.map((item, index) => {
+              return (
+                  <CSSTransition
+                      key={index}
+                      timeout={1000}
+                      classNames='fade'
+                      unmountOnExit
+                      onEntered={(el) => { el.style.color = 'blue' }}
+                      appear={true}
+                      >
+                      <div>item</div>
+                  </CSSTransition>
+              )
+          })
+      }
+      <button onClick={this.handleAddItem}>Toggle</button>
+  </TransitionGroup>
+  ```
+
+## Redux（数据层框架）
+
+
+
+redux（Reducer+Flux）实现了大型应用组件间数据传值的问题
+
+![](../img/react/withRedux.png)
+
+### Redux的工作流程
+
+![](../img/react/reduxFlow.png)
+
+- React Components(借阅者)
+- Action Creators(借书的这句话)
+- Store(管理员)
+- Reducers(记录本)
+
+### 创建redux中的store
+
+- reducer中的**state**存放store里面的数据（笔记本）
+
+  ```js
+  const defaultState = {
+    inputValue: '123',
+    list: ['1', '2', '3']
+  }
   
+  export default (state = defaultState, action) => {
+    return state
+  }
+  ```
+
+- createStore函数第一个参数将reducer数据传给store
+
+  ```js
+  import { createStore } from 'redux'
+  import reducer from './reducer'
+  
+  const store = createStore(reducer);
+  
+  export default store
+  ```
+
+- 页面引入store，通过getState方法获取state数据
+
+  ```js
+  constructor(props) {
+      super(props)
+      this.state = store.getState()
+  }
+  ```
+
+### Action和Reducer
+
+- action是一个对象，包含了type和value，store通过dispatch将action传递给store
+
+  ```js
+  handleInputChange(e) {
+      const action = {
+          type: 'change_input_value',
+          value: e.target.value
+      }
+      store.dispatch(action)
+  }
+  ```
+
+- reducer接收action的type和value更新store(return newState)，注意：reducer不能直接修改state(深拷贝)
+
+  ```js
+  const defaultState = {
+      inputValue: '',
+      list: []
+  }
+  
+  export default (state = defaultState, action) => {
+      if (action.type === 'change_input_value') {
+          const newState = JSON.parse(JSON.stringify(state))
+          newState.inputValue = action.value;
+          return newState
+      }
+      if (action.type === 'delete_todo_item') {
+          const newState = JSON.parse(JSON.stringify(state))
+          newState.list.splice(action.value, 1);
+          return newState
+      }
+      if (action.type === 'add_todo_item') {
+          const newState = JSON.parse(JSON.stringify(state))
+          newState.list.push(newState.inputValue)
+          newState.inputValue = ''
+          return newState
+      }
+      return state
+  }
+  ```
+
+- 组件需要订阅store更新，然后重新获取state`store.getState()`
+
+  ```js
+  constructor(props) {
+      super(props)
+      this.handleInputChange = this.handleInputChange.bind(this)
+      this.handleStoreChange = this.handleStoreChange.bind(this)
+      this.state = store.getState()
+      // 订阅store更新
+      store.subscribe(this.handleStoreChange)
+  }
+  
+  // ......
+  
+  // 重新获取state
+  handleStoreChange() {
+      this.setState(store.getState())
+  }
+  
+  // 点击删除item
+  handleItemDelete(index) {
+      const action = {
+          type: 'delete_todo_item',
+          value: index
+      }
+      store.dispatch(action)
+  }
+
+  // 点击btn添加listItem
+  handleBtnClick() {
+      const action = {
+          type: 'add_todo_item'
+      }
+      store.dispatch(action)
+  }
+  ```
+  
+
+### ActionTypes的拆分
+
+- 常量或者变量的错误方便查错
+- 字符串的拼写错误不好发现
+
+```js
+export const CHANGE_INPUT_VALUE = 'change_input_value'
+export const ADD_TODO_ITEM = 'add_todo_item'
+export const DELETE_TODO_ITEM = 'delete_todo_item'
+```
+
+### actionCreator统一创建
+
+```js
+import { CHANGE_INPUT_VALUE, ADD_TODO_ITEM, DELETE_TODO_ITEM } from './actionTypes'
+
+export const getInputChangeAction = (value) => ({
+    type: CHANGE_INPUT_VALUE,
+    value: value
+})
+
+export const getAddItemAction = () => ({
+    type: ADD_TODO_ITEM
+})
+
+export const getDeleteItemAction = (index) => ({
+    type: DELETE_TODO_ITEM,
+    value: index
+})
+```
+
+组件中创建action，然后派发出去
+
+```js
+handleInputChange(e) {
+    const action = getInputChangeAction(e.target.value)
+    store.dispatch(action)
+}
+```
+
+### Redux三大原则
+
+- store是唯一的
+
+- 只有store能够改变自己的内容
+
+  reducer是拿到store之前的数据，然后将更改后的数据再返回给store
+
+  store拿到数据之后自己进行更新（reducer不能更改store的内容）
+
+- reducer必需是纯函数
+
+  纯函数：给定固定的输入，就一定会有固定的输出，而且不会有任何副作用
+
+  1. state和action确定，return的结果就是固定的
+
+     `newState.date = new Date()`不是纯函数，异步、ajax...
+
+  2. `state.inputValue = action.value`参数修改 （副作用）也不是纯函数
