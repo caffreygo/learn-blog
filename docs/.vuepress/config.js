@@ -18,7 +18,7 @@ module.exports = {
       '/typescript/': ['', 'crawler', 'step2', 'step3', 'step4', 'step5'],
       '/javascript/': ['', 'demo'],
       '/webpack/': ['', 'step-2', 'step-3', 'step-4', 'step-5'],
-      '/react/': ['', 'redux'],
+      '/react/': ['', 'redux', 'note'],
       '/http/': [''],
       '/git/': [''],
       '/basic/': ['']

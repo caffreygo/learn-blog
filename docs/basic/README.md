@@ -17,6 +17,100 @@
 
 ​		在`created`周期函数中的DOM操作也是如此，而在`mounted`中则没有问题。
 
+## Vue 3.0
+
+### 项目升级
+
+```shell
+vue add vue-next
+```
+
+下载新版本vue的依赖，同时将项目代码的语法进行升级
+
+```json
+"vue-router": "^4.0.0-alpha.6",
+"vuex": "^4.0.0-alpha.1"
+```
+
+- template模板内不能再使用this
+
+  ```html
+  <!-- <div class="banner-tittle">{{this.sightName}}</div> -->
+  <div class="banner-tittle">{{sightName}}</div>
+  ```
+
+- ref元素获取
+
+  ```js
+  // this.$refs['A'][0].offsetTop 
+  this.$refs['A'].offsetTop
+  ```
+
+### Composition API
+
+- #### data
+
+  data的双向绑定需要使用`reactive()`,在setup中返回让模板使用
+
+  ```js
+  import { reactive } from 'vue';
+  
+  export default {
+      // ...
+      setup() {
+          const data = reactive({
+              lastCity: '',
+          });
+          return {
+              data
+          };
+      }
+  }
+  ```
+
+- ### vuex computed
+
+  vuex计算属性的获取，`useStore`拿到store，`computed`返回，如果模板需要使用就return
+
+  ```js
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
+  
+  export default {
+      // ...
+      setup() {
+          const store = useStore();
+          const city = computed(() => {
+              return store.state.city;
+          });
+          return {
+              city
+          };
+      }
+  }
+  ```
+
+- ### mothods
+
+  函数方法直接在`setup() { ... }`内定义，没有this关键字
+
+- ### 生命周期函数
+
+  ```js
+  import { onMounted } from 'vue
+  
+  export default {
+      // ...
+      setup() {
+          onMounted(() =>{
+              // getHomeInfo()
+          })
+      }
+  }
+  ```
+
+  
+
 ## jQuery
 
 ### 根据元素css状态获取元素

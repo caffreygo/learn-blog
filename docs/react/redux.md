@@ -482,3 +482,286 @@ componentDidMount() {
 - 有利于自动化测试（getTodoList函数相比生命周期函数更方便测试）
 
 :::
+
+### Redux中间件
+
+- redux中间件是表示在action和store中间的处理
+
+- Redux-thunk对dispatch这个方法做了升级，调用dispatch传递对象保持原样，而如果是传递函数，会先执行这个函数，在需要的时候再调用store(根据参数的不同执行不同的逻辑)
+
+![](../img/react/middleware.png)
+
+### Redux-saga中间件
+
+- **index.js**使用配置
+
+  ```js
+  import { createStore, compose, applyMiddleware } from 'redux';
+  import reducer from './reducer';
+  import createSagaMiddleware from 'redux-saga';
+  import todoSagas from './sagas'
+  
+  const sagaMiddleware = createSagaMiddleware()
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({}) : compose;
+  const enhancer = composeEnhancers(applyMiddleware(sagaMiddleware));
+  
+  const store = createStore(reducer, enhancer);
+  // sagaMiddleware运行sagas文件
+  sagaMiddleware.run(todoSagas)
+  
+  export default store
+  ```
+
+- **sagas.js**一定要导出一个generator函数
+
+  ```js
+  import { takeEvery, put } from 'redux-saga/effects';
+  import { GET_INIT_LIST } from './actionTypes';
+  import axios from 'axios';
+  import { initListAction } from './actionCreator'
+  
+  function* getInitList() {
+    // generator对异步请求要用yield等待获取res
+    // 通过try catch语句捕获错误
+    try {
+      const res = yield axios.get('/api/todolist');
+      const action = initListAction(res.data)
+      // !! yield put()
+      yield put(action)
+    } catch (e) {
+      console.log('todoList 网络请求失败')
+    }
+  }
+  
+  // generator 函数
+  function* mySaga() {
+    // sagas文件通过takeEvery捕获action，执行对应的方法
+    yield takeEvery(GET_INIT_LIST, getInitList)
+  }
+  
+  export default mySaga;
+  ```
+
+- **reducer**获取action更改state
+
+  ```js
+  import { INIT_LIST_ACTION } from './actionTypes'
+  
+  const defaultState = {
+      inputValue: '',
+      list: []
+  }
+  
+  export default (state = defaultState, action) => {
+      if (action.type === INIT_LIST_ACTION) {
+          const newState = JSON.parse(JSON.stringify(state))
+          newState.list = action.data
+          return newState
+      }
+      return state
+  }
+  ```
+
+### React-Redux
+
+- Provider：将对应store提供给其内部的所有组件
+
+  ```js
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import TodoList from './TodoList';
+  import { Provider } from 'react-redux';
+  import store from './store';
+  
+  const App = (
+      <Provider store={store}>
+      <TodoList />
+      </Provider>
+  )
+  
+  ReactDOM.render(
+      App,
+      document.getElementById('root')
+  );
+  ```
+
+- connect：将组件和store作连接（Provider内的组件）
+
+  ```jsx
+  import React, { Component } from 'react';
+  import { connect } from 'react-redux';
+  
+  class TodoList extends Component {
+      render() {
+          return (
+              <div>
+                  <div>
+                      <input
+                          value={this.props.inputValue}
+                          onChange={this.props.changeInputValue}
+                          />
+                      <button>提交</button>
+                  </div>
+                  <ul>
+                      <li>123</li>
+                  </ul>
+              </div>
+          )
+      }
+  }
+  
+  const mapStateToProps = (state) => {
+      return {
+          inputValue: state.inputValue,
+          list: state.list
+      }
+  }
+  
+  // store.dispatch, props
+  const mapDispatchToProps = (dispatch) => {
+      return {
+          changeInputValue(e) {
+              const action = {
+                  type: 'change_input_value',
+                  value: e.target.value
+              }
+              dispatch(action)
+          }
+      }
+  }
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(TodoList)
+  ```
+
+- mapStateToProps：定义state数据映射到props的规则
+
+- mapDispatchToProps：将store.dispatch方法映射到props上
+
+#### demo
+
+- TodoList
+
+```jsx
+import React from 'react';
+import { connect } from 'react-redux';
+import { getAddItemAction, getInputChangeAction, getDeleteItemAction } from './store/actionCreator'
+
+const TodoList = (props) => {
+  const { inputValue, list, handleClick, changeInputValue, handleDelete } = props
+  return (
+    <div>
+      <div>
+        <input value={inputValue} onChange={changeInputValue} />
+        <button onClick={handleClick}>提交</button>
+      </div>
+      <ul>
+        {
+          list.map((item, index) => {
+            // onCclick返回一个箭头函数执行，拿到正确index参数
+            return <li onClick={() => (handleDelete(index))} key={index}>{item}</li>
+          })
+        }
+      </ul>
+    </div>
+  )
+}
+
+const mapStateToProps = (state) => {
+  return {
+    inputValue: state.inputValue,
+    list: state.list
+  }
+}
+
+// store.dispatch, props
+const mapDispatchToProps = (dispatch) => {
+  return {
+    changeInputValue(e) {
+      const action = getInputChangeAction(e.target.value)
+      dispatch(action)
+    },
+    handleDelete(index) {
+      const action = getDeleteItemAction(index)
+      dispatch(action)
+    },
+    handleClick() {
+      const action = getAddItemAction()
+      dispatch(action)
+    }
+  }
+}
+
+// 将UI组件和数据方法结合，返回容器组件
+export default connect(mapStateToProps, mapDispatchToProps)(TodoList)
+```
+
+- store/index.js
+
+```
+import { createStore } from 'redux';
+import reducer from './reducer'
+
+const store = createStore(reducer)
+
+export default store;
+```
+
+- reducer
+
+```js
+import { CHANGE_INPUT_VALUE, ADD_ITEM, DELETE_ITEM } from './actionTypes'
+
+const defaultState = {
+  inputValue: 'hello world',
+  list: []
+}
+
+export default (state = defaultState, action) => {
+  if (action.type === CHANGE_INPUT_VALUE) {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.inputValue = action.value
+    return newState
+  }
+  if (action.type === ADD_ITEM) {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.list.push(newState.inputValue)
+    newState.inputValue = ''
+    return newState
+  }
+  if (action.type === DELETE_ITEM) {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.list.splice(action.index, 1)
+    return newState
+  }
+  return state
+}
+```
+
+- actionTypes
+
+```js
+export const CHANGE_INPUT_VALUE = 'change_input_value'
+export const ADD_ITEM = 'add_item'
+export const DELETE_ITEM = 'delete_item'
+```
+
+- actionCreator
+
+```js
+import { CHANGE_INPUT_VALUE, ADD_ITEM, DELETE_ITEM } from './actionTypes'
+
+export const getInputChangeAction = (value) => ({
+  type: CHANGE_INPUT_VALUE,
+  value
+})
+
+export const getDeleteItemAction = (index) => ({
+  type: DELETE_ITEM,
+  index
+})
+
+export const getAddItemAction = () => ({
+  type: ADD_ITEM
+})
+```
+
