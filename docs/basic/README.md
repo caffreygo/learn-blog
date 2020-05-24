@@ -1,4 +1,4 @@
-# 笔记
+笔记
 
 ## Vue
 
@@ -46,70 +46,301 @@ vue add vue-next
   this.$refs['A'].offsetTop
   ```
 
-### Composition API
+### ref / reactive
 
-- #### data
+模板上使用的数据需要转化成**响应式**并**返回**
 
-  data的双向绑定需要使用`reactive()`,在setup中返回让模板使用
+1. 对象(**深度reactive**)
+
+   通过`reactive`方法实现数据的响应式，在`setup`返回
+
+   ```js
+   import { reactive } from 'vue';
+   
+   export default {
+       // ...
+       setup() {
+           const data = reactive({
+               lastCity: '',
+           });
+           return {
+               data
+           };
+       }
+   }
+   ```
+
+2. 变量`ref()`
+
+   通过ref实现响应式的数据赋值需要通过**value**属性，使用时也需要value属性，但是vue在编译**模板**的时候会自己实现
+
+   ```js
+   const iconList = ref([]);
+   
+   // iconList.value = result
+   ```
+
+### Props
+
+```js
+export default {
+    // setup接收props,context参数，直接使用即可
+    setup(props) {
+	
+    }
+}
+```
+
+- 注意: setup函数传递的props是响应式数据，但是结构之后就不是了
 
   ```js
-  import { reactive } from 'vue';
-  
   export default {
-      // ...
-      setup() {
-          const data = reactive({
-              lastCity: '',
-          });
-          return {
-              data
-          };
+      setup({list}) {
+  		// 不要在setup参数做结构
       }
   }
   ```
 
-- ### vuex computed
+### store/computed
 
-  vuex计算属性的获取，`useStore`拿到store，`computed`返回，如果模板需要使用就return
+1. `usestore()`方法使用store
+2. `computed()`实现计算属性
+3. `store.commit(mutation, data)`
 
-  ```js
-  import { computed } from 'vue';
-  import { useStore } from 'vuex';
-  
-  export default {
-      // ...
-      setup() {
-          const store = useStore();
-          const city = computed(() => {
-              return store.state.city;
-          });
-          return {
-              city
-          };
-      }
+```js
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+
+export default {
+    // ...
+    setup() {
+        const store = useStore();
+        const city = computed(() => {
+            return store.state.city;
+        });
+        return {
+            city
+        };
+    }
+}
+```
+
+### watch
+
+watch第二个参数是`callback(value, prevValue)`
+
+```js
+import { watch } from 'vue'
+
+export default {
+    setup(props) {
+        // 函数式返回props.letter能够实现自动将letter实现reactive/ref
+        watch(() => props.letter, (letter, prevLetter) => {
+            if (letter && scroll) {
+                const element = elems.value[letter]
+                scroll.scrollToElement(element)
+            }
+        })
+    }
+}
+```
+
+```js
+watch(keyword, (keyword, prevKeyword) => {
+    if (timer) {
+        clearTimeout(timer)
+        timer = null
+    }
+    // 这边的keyword是watch传递进来的具体的值，不需要加value属性
+    if (!keyword) {
+        // ref数据赋值  ~.value = ~
+        list.value = []
+        return
+    }
+    timer = setTimeout(() => {
+        const result = []
+        for (let i in props.cities) {
+            props.cities[i].forEach((value) => {
+                if (value.spell.indexOf(keyword)>-1 || value.name.indexOf(keyword)>-1) {
+                    result.push(value)
+                }
+            })
+        }
+        list.value = result
+    }, 100)
+})
+```
+
+
+
+### Methods
+
+函数方法直接在`setup() { ... }`内定义，没有this关键字
+
+### 生命周期
+
+destroyed生命周期现在变成了**onUnmounted**
+
+```js
+import { onMounted } from 'vue
+
+export default {
+    // ...
+    setup() {
+        onMounted(() =>{
+            // getHomeInfo()
+        })
+    }
+}
+```
+
+### 逻辑统一管理
+
+1. 将不同功能的数据逻辑代码放在函数中统一定义和方法操作
+2. 在`setup`函数中使用返回
+
+```vue
+<script>
+import { reactive, ref, onMounted } from 'vue'
+import axios from 'axios'
+
+export default {
+  name: 'City',
+  setup() {
+    const { letter, handleLetterChange } = useLetterLogic()
+    const { data } = useCityLogic()
+    return { data, letter, handleLetterChange }
   }
-  ```
+}
 
-- ### mothods
-
-  函数方法直接在`setup() { ... }`内定义，没有this关键字
-
-- ### 生命周期函数
-
-  ```js
-  import { onMounted } from 'vue
-  
-  export default {
-      // ...
-      setup() {
-          onMounted(() =>{
-              // getHomeInfo()
-          })
-      }
+function useCityLogic() {
+  const data = reactive({
+    cities: {},
+    hotCities: [],
+  })
+  async function getCityInfo() {
+    let res = await axios.get('/api/city.json')
+    res = res.data
+    if (res.ret && res.data) {
+      const result = res.data
+      data.cities = result.cities
+      data.hotCities = result.hotCities
+    }
   }
-  ```
+  onMounted(() => { getCityInfo() })
+  return { data }
+}
 
-  
+function useLetterLogic() {
+  const letter = ref('')
+  function handleLetterChange(selected) {
+    letter.value = selected
+  }
+  return { letter, handleLetterChange }
+}
+
+</script>
+```
+
+### refs元素绑定
+
+#### 单个元素
+
+```html
+<template>
+    <div class="list" ref="wrapper">
+</template>
+```
+
+```js
+import { ref } from 'vue'
+setup(props) {
+    // vue会自动将wrapper和模板中的ref元素绑定,使用：wrapper.value  (即this.$refs['wrapper'])
+    const wrapper = ref(null)
+    return { wrapper }
+}
+```
+
+#### 循环refs
+
+- 模板绑定`:ref="elem => elems[item] = elem"`
+- 数据定义elems：`const elems = ref([])`
+- value使用`startY = elems.value['A'].offsetTop`
+
+```vue
+<template>
+  <ul class="list">
+    <li
+      v-for="item of letters"
+      :key="item"
+      :ref="elem => elems[item] = elem"
+    >
+      {{item}}
+    </li>
+  </ul>
+</template>
+
+<script>
+import { computed, onUpdated, ref } from 'vue'
+export default {
+  name: 'CityAlphabet',
+  props: {
+    cities: Object
+  },
+  setup(props, context) {
+    let touchStatus = false
+    let startY = 0
+    let timer = null
+    const elems = ref([])
+
+    const letters = computed(() => {
+      const letters = []
+      for (let i in props.cities) {
+        letters.push(i)
+      }
+      return letters
+    })
+
+    onUpdated(() => {
+      startY = elems.value['A'].offsetTop
+    })
+
+    function handleLetterClick(e) {
+      context.emit('change', e.target.innerText)
+    }
+
+    return { elems, letters, handleLetterClick }
+  }
+}
+</script>
+```
+
+### emit
+
+- `setup(props, context)`
+- `context.emit('change', data)`
+
+### router
+
+```js
+import { useRouter } from 'vue-router'
+
+export default {
+  setup(props) {
+    const router = useRouter()
+    // router.push('/')
+  }
+}
+```
+
+### async swait
+
+```js
+async function getHomeInfo() {
+    let res = await axios.get('/api/index.json?city=' + city);
+    res = res.data
+}
+```
 
 ## jQuery
 
@@ -152,8 +383,6 @@ $("#reserve-membershipSize option:selected").val();
 ```js
 $("#j-reserve div[data-name='reserve-tip']").show();
 ```
-
-
 
 ## React
 
