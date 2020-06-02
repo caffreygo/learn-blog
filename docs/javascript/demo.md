@@ -413,15 +413,40 @@ div1.addEventListener('drag', throttle(function(e){
 
 ### Event Loop
 
-::: tip Event Loop
+#### 同步任务和异步任务
 
-​	`JavaScript`的事件分两种，宏任务(`macro-task`)和微任务(`micro-task`)
+- 所有同步任务都在主线程上执行，形成一个执行栈（execution context stack）。
+- 主线程之外，还存在一个"任务队列"（task queue）。只要异步任务有了运行结果，就在"任务队列"之中放置一个事件。
+- 一旦"执行栈"中的所有同步任务执行完毕，系统就会读取"任务队列"，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，进入执行栈，开始执行。
+- 主线程不断重复上面的第三步。
+  主线程从任务队列中读取事件,这个过程是不断循环的,所以整个的**运行机制**称为event loop
 
-- **宏任务**：包括整体代码`script，setTimeout，setInterval`
-- **微任务**：`Promise.then(非new Promise)`，`process.nextTick(node中)`
+#### 宏任务和微任务
+
+- 宏任务(`macro-task`): 可以理解是每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行,每一个宏任务会从头到尾将这个任务执行完毕，不会执行其它）包括整体代码script，setTimeout，setInterval
+-  微任务(`micro-task`): 可以理解是在当前 task 执行结束后立即执行的任务 包括Promise.then(非new Promise)，process.nextTick
+
 - 事件的执行顺序，是先执行宏任务，然后执行微任务，这个是基础，任务可以有同步任务和异步任务，同步的进入主线程，异步的进入`Event Table`并注册函数，异步事件完成后，会将回调函数放入`Event Queue`中(宏任务和微任务是不同的`Event Queue`)，同步任务执行完成后，会从`Event Queue`中读取事件放入主线程执行，回调函数中可能还会包含不同的任务，因此会循环执行上述操作。
 
-:::
+  ```js
+  setTimeout(function() {
+      // 整体代码宏任务外的宏任务
+      console.log('1');
+  })
+  
+  new Promise(function(resolve) {
+      console.log('2');
+  }).then(function() {
+      // 微任务
+      console.log('3');
+  })
+  
+  console.log('4');
+  
+  //打印顺序 2 4 3 1
+  ```
+
+  首先整体代码是一个宏任务,遇到setTimeout,会创建另一个宏任务,接着执行当前的宏任务,Promise **新建**后就会**立即执行**。所以会首先打印2，then方法是一个微任务，遇到then，添加到微任务队列，代码接着执行会打印4。此时宏任务执行完毕，接着就会检查当前微任务队列是否有微任务，如果有，立即执行当前的微任务（也就是then 打印3），当前微任务执行完毕之后，开始执行下一轮的宏任务setTimeout，会打印1
 
 ### Promise
 
