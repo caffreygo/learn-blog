@@ -384,6 +384,37 @@ $("#reserve-membershipSize option:selected").val();
 $("#j-reserve div[data-name='reserve-tip']").show();
 ```
 
+## form原生校验
+
+### 简单校验
+
+form标签下的表单元素，设置required实现**必填**校验
+
+```html
+<form id="subscribe-form">
+    <button type="submit">订阅</button>
+    <input type="email" id="subscribe-email" required="" placeholder="请输入您的邮箱">
+</form>
+```
+
+邮件必填校验
+
+```html
+<input id="reserve-email" type="email" required="">
+```
+
+### submit事件
+
+```js
+$(document).ready(function(){
+    $("#subscribe-form").submit(function(e){
+        // 没有action属性，阻止默认提交事件
+        e.preventDefault();
+        var email = $("#subscribe-email").val();
+    })
+})
+```
+
 ## React
 
 ### JSX
