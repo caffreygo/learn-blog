@@ -449,7 +449,7 @@ div1.addEventListener('drag', throttle(function(e){
 
   首先整体代码是一个宏任务,遇到setTimeout,会创建另一个宏任务,接着执行当前的宏任务,Promise **新建**后就会**立即执行**。所以会首先打印2，then方法是一个微任务，遇到then，添加到微任务队列，代码接着执行会打印4。此时宏任务执行完毕，接着就会检查当前微任务队列是否有微任务，如果有，立即执行当前的微任务（也就是then 打印3），当前微任务执行完毕之后，开始执行**下一轮的宏任务**setTimeout，会打印1。
 
-  ![](../img/javascript/micro-task.webp)
+  ![](../img/javascript/micro-task.jpg)
 
 ### Promise
 
