@@ -194,6 +194,14 @@ grep "babel" package.json
 - 服务器收到、处理并返回 http 请求
 - 浏览器得到返回内容
 
+### 浏览器渲染页面的过程
+
+- 根据 HTML 结构生成 DOM Tree
+- 根据 CSS 生成 CSSOM
+- 将 DOM 和 CSSOM 整合形成 RenderTree
+- 根据 RenderTree 开始渲染和展示
+- 遇到`<script>`时，会执行并阻塞渲染
+
 ::: tip 
 
 ​	从“在浏览器输入域名”到“页面静态资源完全加载”的整个流程
@@ -237,14 +245,6 @@ grep "babel" package.json
 `CSSOM` 树和 `DOM` 树构建完成后会开始生成 `Render` 树，这一步就是确定页面元素的布局、样式等等诸多方面的东西
 
 在生成 `Render` 树的过程中，浏览器就开始调用`GPU` 绘制，合成图层，将内容显示在屏幕上了。
-
-### 浏览器渲染页面的过程
-
-- 根据 HTML 结构生成 DOM Tree
-- 根据 CSS 生成 CSSOM
-- 将 DOM 和 CSSOM 整合形成 RenderTree
-- 根据 RenderTree 开始渲染和展示
-- 遇到`<script>`时，会执行并阻塞渲染
 
 ### window.onload 和 DOMContentLoaded
 
@@ -386,7 +386,7 @@ div1.addEventListener('drag', throttle(function(e){
 - 一个博客网站，我发布一篇博客，其中签入`<script>`脚本
 - 脚本内容：获取cookie，发送到我的服务器（服务器配合跨域）
 
-::: tip **XSS预防**
+::: tip XSS预防
 
 - 替换特殊字符，如`<`变为`&lt;` `>`变为`&gt;`
 - `<script>`变为`&lt;script&gt;`,直接显示，而不会作为脚本执行
@@ -404,9 +404,44 @@ div1.addEventListener('drag', throttle(function(e){
 - 但是邮件正文隐藏着`<img src="xxx.com/pay?id=200"/>`
 - 你一查看邮件，就帮我购买了id是200的商品
 
-::: tip **XSRF预防**
+::: tip XSRF预防
 
 - 使用post接口
 - 增加验证，例如密码、短信验证码、指纹等
+
+:::
+
+### Event Loop
+
+::: tip Event Loop
+
+​	`JavaScript`的事件分两种，宏任务(`macro-task`)和微任务(`micro-task`)
+
+- **宏任务**：包括整体代码`script，setTimeout，setInterval`
+- **微任务**：`Promise.then(非new Promise)`，`process.nextTick(node中)`
+- 事件的执行顺序，是先执行宏任务，然后执行微任务，这个是基础，任务可以有同步任务和异步任务，同步的进入主线程，异步的进入`Event Table`并注册函数，异步事件完成后，会将回调函数放入`Event Queue`中(宏任务和微任务是不同的`Event Queue`)，同步任务执行完成后，会从`Event Queue`中读取事件放入主线程执行，回调函数中可能还会包含不同的任务，因此会循环执行上述操作。
+
+:::
+
+### Promise
+
+::: tip Promise
+
+​	`Promise`是一个异步编程的解决方案，简单来讲，`Promise`类似一个盒子，里面保存着在未来某个时间点才会结束的事件。
+
+- `pending`：进行中
+- `fulfilled` ：已经成功
+- `rejected` ：已经失败 状态改变，只能从 `pending` 变成 `fulfilled` 或者 `rejected`，状态不可逆。
+
+:::
+
+### async
+
+- 实现原理：`async` 函数的实现原理，就是将 `Generator` 函数和自动执行器，包装在一个函数里。
+- `Generator` 函数是协程在 ES6 的实现，最大特点就是可以交出函数的执行权（即暂停执行）。
+
+::: tip 协程
+
+​				协程是一种用户态的轻量级线程, 协程的调度完全由用户控制。协程拥有自己的寄存器上下文和栈。协程调度切换时，将寄存器上下文和栈保存到其他地		方，在切回来的时候，恢复先前保存的寄存器上下文和栈，直接操作栈则基本没有内核切换的开销，可以不加锁的访问全局变量，所以上下文的切换非常快。
 
 :::
