@@ -309,5 +309,261 @@ export const NavSearch = styled.input.attrs({
   `
   ```
 
+
+## redux && react-redux
+
+- 定义store/index.js
+
+  ```js
+  import { createStore } from 'redux';
+  import reducer from './reducer'
+  
+  const store = createStore(reducer);
+  
+  export default store;
+  ```
+
+- store/reducer.js
+
+  ```js
+  const defaultState = {
+    focused: false
+  }
+  
+  export default (state = defaultState, action) => {
+    if (action.type === 'search_focus') {
+      return {
+        focused: true
+      }
+    }
+    if (action.type === 'search_blur') {
+      return {
+        focused: false
+      }
+    }
+    return state
+  }
+  ```
+
+- App.js引入store和Provider组件
+
+  ```js
+  import React, { Fragment } from 'react';
+  import Header from './common/header';
+  import store from './store';
+  import { Provider } from 'react-redux';
+  import { GlobalStyle } from './style.js';
+  import { IconFont } from './statics/iconfont/iconfont.js'
+  
+  function App() {
+    return (
+      <Fragment>
+        <GlobalStyle />
+        <IconFont />
+        <Provider store={store}>
+          <Header />
+        </Provider>
+      </Fragment>
+  
+    );
+  }
+  
+  export default App;
+  ```
+
+- 对应组件引入connect
+
+  ```react
+  import React from 'react';
+  import { connect } from 'react-redux';
+  
+  const Header = (props) => {
+    return (
+  	......
+    )
+  }
+  
+  const mapStateToProps = (state) => {
+    return {
+      focused: state.focused
+    }
+  }
+  
+  const mapDispatchToProps = (dispatch) => {
+    return {
+    }
+  }
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(Header);
+  ```
+
+## redux-devtools-extension
+
+https://github.com/zalmoxisus/redux-devtools-extension
+
+```js
+import { createStore, compose } from 'redux';
+import reducer from './reducer'
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const store = createStore(
+  reducer,
+  composeEnhancers()
+);
+
+export default store;
+```
+
+## reducer拆分
+
+reducer如果存放过多的数据可能会造成代码的不可维护，reducer的拆分和整合
+
+### 拆分
+
+- common/header/store/reducer.js
+
+```js
+const defaultState = {
+  focused: false
+}
+
+export default (state = defaultState, action) => {
+  if (action.type === 'search_focus') {
+    return {
+      focused: true
+    }
+  }
+  if (action.type === 'search_blur') {
+    return {
+      focused: false
+    }
+  }
+  return state
+}
+```
+
+- common/header/store/index.js导出
+
+```js
+import reducer from './reducer'
+
+export { reducer }
+```
+
+### 整合
+
+- store/reducer.js     `combineReducers`方法整合reducer
+- as是es6实现的别名
+
+```js
+import { combineReducers } from 'redux';
+import { reducer as headerReducer } from '../common/header/store';
+
+const reducer = combineReducers({
+  header: headerReducer
+})
+
+export default reducer
+```
+
+- 组件内state路径修改
+
+```js
+const mapStateToProps = (state) => {
+  return {
+    // 整合后的focused在state的header下
+    focused: state.header.focused
+  }
+}
+```
+
+## actionCreators
+
+```
+|-- header
+|   |-- store
+|   |   |-- actionCreators.js
+|   |   |-- constants.js
+|   |   |-- index.js
+|   |   |-- reducer.js
+|   |-- index.js
+|   |-- style.js
+```
+
+- actionCreators创建action
+
+  ```js
+  import * as constants from './constants'
+  
+  export const searchFocus = () => ({
+    type: constants.SEARCH_FOCUS
+  })
+  
+  export const searchBlur = () => ({
+    type: constants.SEARCH_BLUR
+  })
+  ```
+
+- constants统一定义action types
+
+  ```js
+  export const SEARCH_FOCUS = 'header/SEARCH_FOCUS';
+  export const SEARCH_BLUR = 'header/SEARCH_BLUR';
+  ```
+
+- store/index统一导出
+
+  ```js
+  import reducer from './reducer';
+  import * as actionCreators from './actionCreators';
+  import * as constants from './constants';
+  
+  export { reducer, actionCreators, constants }
+  ```
+
+- reducer
+
+  ```js
+  import * as constants from './constants'
+  
+  const defaultState = {
+    focused: false
+  }
+  
+  export default (state = defaultState, action) => {
+    if (action.type === constants.SEARCH_FOCUS) {
+      return {
+        focused: true
+      }
+    }
+    if (action.type === constants.SEARCH_BLUR) {
+      return {
+        focused: false
+      }
+    }
+    return state
+  }
+  ```
+
+- header/index.js使用actionCreators创建action
+
+  ```js
+  import { actionCreators } from './store';
+  
+  ......
+  
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      handleInpusFocus() {
+        dispatch(actionCreators.searchFocus())
+      },
+      handleInpusBlur() {
+        dispatch(actionCreators.searchBlur())
+      }
+    }
+  }
+  ```
+
   
 
