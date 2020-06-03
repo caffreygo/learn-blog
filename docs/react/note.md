@@ -565,5 +565,86 @@ const mapStateToProps = (state) => {
   }
   ```
 
-  
 
+
+
+## Immutable.js
+
+::: tip
+
+- state不能直接修改，reducer应返回一个新的state
+- 原始的方法存在state被误修改的风险
+- immutable.js帮助我们生成一个immutable对象（不可改变）
+- 实现state不可改变（fromJS、get、set）
+
+:::
+
+1. 将reducer中的state转化为通过`fromJS`方法转化为immutable对象
+
+   ```js
+   import { fromJS } from 'immutable';
+   
+   const defaultState = fromJS({
+     focused: false
+   })
+   ```
+
+2. 此时state.header对象已经是一个immutable，属性的获取通过`get`方法获得
+
+   ```js
+   const mapStateToProps = (state) => {
+     return {
+       focused: state.header.get('focused')
+     }
+   }
+   ```
+
+3. reducer再返回新的state之后，是一个普通的对象，通过get方法获取会报错。
+
+   immutable对象`set`方法: 会结合之前immutable对象的值和设置的值返回一个**全新**的对象！
+
+   ```js
+   export default (state = defaultState, action) => {
+     if (action.type === constants.SEARCH_FOCUS) {
+       return state.set('focused', true)
+     }
+     if (action.type === constants.SEARCH_BLUR) {
+       return state.set('focused', false)
+     }
+     return state
+   }
+   ```
+
+## redux-immutable
+
+::: tip
+
+- 获取focus需要调用state.header.get('focused')，state和header两个对象类型不统一
+- 应该将state也转化成immutable对象（redux-immutable）
+- redux-immutable也提供了一个`combineReducers`方法生成的是immutable对象
+
+:::
+
+1. store/reducer.js
+
+   ```js
+   import { combineReducers } from 'redux-immutable';
+   import { reducer as headerReducer } from '../common/header/store';
+   
+   const reducer = combineReducers({
+     header: headerReducer
+   })
+   
+   export default reducer
+   ```
+
+2. ```js
+   const mapStateToProps = (state) => {
+     return {
+       // focused: state.get('header').get('focused')
+       focused: state.getIn(['header', 'focused'])
+     }
+   }
+   ```
+
+   
