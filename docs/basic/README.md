@@ -21,7 +21,7 @@
 
 ### 项目升级
 
-```shell
+```sh
 vue add vue-next
 ```
 
@@ -431,7 +431,7 @@ Babel 会把 JSX 转译成一个名为 `React.createElement()` 函数调用。
 
 以下两种示例代码完全等效：
 
-```react
+```js
 const element = (
   <h1 className="greeting">
     Hello, world!
@@ -446,7 +446,7 @@ const element1 = React.createElement(
 
 `React.createElement()` 会预先执行一些检查，以帮助你编写无错代码，但实际上它创建了一个这样的对象：
 
-```react
+```js
 // 注意：这是简化过的结构
 const element = {
   type: 'h1',
@@ -463,7 +463,7 @@ const element = {
 
 `ReactDOM.render`
 
-```react
+```js
 const element = <h1>Hello, world</h1>;
 ReactDOM.render(element, document.getElementById('root'));
 ```
@@ -472,7 +472,7 @@ ReactDOM.render(element, document.getElementById('root'));
 
 #### 函数组件、class组件
 
-```react
+```js
 function Welcome(props) {
   return <h1>Hello, {props.name}</h1>;
 }
@@ -486,7 +486,7 @@ class Welcome1 extends React.Component {
 
 #### 渲染组件
 
-```react
+```js
 function Welcome(props) {
   return <h1>Hello, {props.name}</h1>;
 }
@@ -506,7 +506,7 @@ ReactDOM.render(
 
 官网实现更新时间的时间显示器：
 
-```react
+```js
 // ReactDom.render(JSX, rootElement)
 
 class Clock extends React.Component {
@@ -550,7 +550,7 @@ ReactDOM.render(
 
 - 修改state:
 
-```react
+```js
 // Wrong
 this.state.comment = 'Hello';
 

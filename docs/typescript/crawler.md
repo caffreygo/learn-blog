@@ -1,4 +1,4 @@
-# TypeScript编写爬虫工具
+# TypeScript 编写爬虫工具
 
 ## 初始化
 
@@ -14,13 +14,13 @@ npm install -D ts-node
 npm install typescript -D
 ```
 
-- 新建src下的crawler.ts
+- 新建 src 下的 crawler.ts
 
 ```js
-console.log('test')
+console.log('test');
 ```
 
-- 更改package.json中的执行语句
+- 更改 package.json 中的执行语句
 
 ```js
   "scripts": {
@@ -56,18 +56,18 @@ const crawler = new Crawler();
 
 ## SuperAgent
 
-superagent可以获取到远程网址上的html
+superagent 可以获取到远程网址上的 html
 
-```shell
+```sh
 npm install superagent --save
 ```
 
-- --save：dependencies生产环境用到的模块
-- --–save-dev： devDependencies开发环境模块（-D）
+- --save：dependencies 生产环境用到的模块
+- --–save-dev： devDependencies 开发环境模块（-D）
 
 ### 类型定义文件@types
 
-TypeScript引用JavaScript会报错，且无法提供只能提醒
+TypeScript 引用 JavaScript 会报错，且无法提供只能提醒
 
 ```typescript
 import Superagent from 'superagent';
@@ -75,7 +75,7 @@ import Superagent from 'superagent';
 
 需要提供 **.d.ts** 的翻译文件,将 **js** 文件里面的类型文件进行补全
 
-**ts  =>  .d.ts 翻译文件  @types/  =>  js**
+**ts => .d.ts 翻译文件 @types/ => js**
 
 ```powershell
 无法找到模块“superagent”的声明文件。“e:/typescript/crawler/node_modules/superagent/lib/node/index.js”隐式拥有 "any" 类型。
@@ -84,13 +84,11 @@ import Superagent from 'superagent';
 
 解决：在开发环境下引入翻译文件
 
-```shell
+```sh
 npm install @types/superagent -D
 ```
 
-
-
-### Htmt获取的实现
+### Htmt 获取的实现
 
 ```typescript
 import Superagent from 'superagent';
@@ -113,11 +111,11 @@ class Crawler {
 const crawler = new Crawler();
 ```
 
-## cheerio数据获取
+## cheerio 数据获取
 
-### cheerio库引入
+### cheerio 库引入
 
-cheerio可以读取html字符串，让我们能够以jQuery的方式操作获取数据
+cheerio 可以读取 html 字符串，让我们能够以 jQuery 的方式操作获取数据
 
 ```shell
 npm install cheerio --save
@@ -126,18 +124,19 @@ npm install @types/cheerio -D
 
 ### 代码实现
 
-cheerio中的map((index,element)=>{})方法的参数和JS的map((element,index)=>{})方法参数相反
+cheerio 中的 map((index,element)=>{})方法的参数和 JS 的 map((element,index)=>{})方法参数相反
 
 ```javascript
 // https://cheerio.js.org/ 文档实例
-$('li').map(function(i, el) {
-  // this === el
-  return $(this).text();
-}).get().join(' ');
+$('li')
+  .map(function(i, el) {
+    // this === el
+    return $(this).text();
+  })
+  .get()
+  .join(' ');
 //=> "apple orange pear"
 ```
-
-
 
 ```typescript
 import superagent from 'superagent';
@@ -169,13 +168,13 @@ class Crowller {
       );
       courseInfo.push({
         title: title,
-        count: count
+        count: count,
       });
     });
 
     const result = {
       time: new Date().getTime(),
-      data: courseInfo
+      data: courseInfo,
     };
 
     console.log(result);
@@ -192,7 +191,6 @@ class Crowller {
 }
 
 const crowller = new Crowller();
-
 ```
 
 ### 结果
@@ -297,7 +295,7 @@ export default class CaffreyAnalyzer implements Analyzer {
     });
     return {
       time: new Date().getTime(),
-      data: courseInfos
+      data: courseInfos,
     };
   }
 
@@ -344,7 +342,7 @@ interface Content {
 export default class CaffreyAnalyzer implements Analyzer {
   // static静态属性，将方法直接挂载在类上面，而不是类的实例上面
   private static instance: CaffreyAnalyzer;
-    
+
   static getInstance() {
     // 只生成一次
     if (!CaffreyAnalyzer.instance) {
@@ -370,7 +368,7 @@ export default class CaffreyAnalyzer implements Analyzer {
     });
     return {
       time: new Date().getTime(),
-      data: courseInfos
+      data: courseInfos,
     };
   }
 
@@ -388,7 +386,7 @@ export default class CaffreyAnalyzer implements Analyzer {
     const fileContent = this.generateJsonContent(courseInfo, filePath);
     return JSON.stringify(fileContent);
   }
-    
+
   // private私有限制符,只允许内部调用  禁止new 实例
   private constructor() {}
 }
@@ -405,7 +403,7 @@ new Crowller(url, analyzer);
 
 ### 初始配置
 
-将ts文件编译为js文件，然后运行该文件
+将 ts 文件编译为 js 文件，然后运行该文件
 
 ```json
 "scripts": {
@@ -419,7 +417,7 @@ new Crowller(url, analyzer);
 "outDir": "./build"
 ```
 
-typescript文件是不能直接运行的
+typescript 文件是不能直接运行的
 
 ```powershell
 node ./build/crawler.js
@@ -427,9 +425,9 @@ node ./build/crawler.js
 node src/crawler.ts
 ```
 
-### 自动编译ts文件
+### 自动编译 ts 文件
 
-通过npm run build后，如果后续ts文件有修改，会自动编译更新js文件
+通过 npm run build 后，如果后续 ts 文件有修改，会自动编译更新 js 文件
 
 ```json
 "scripts": {
@@ -437,13 +435,13 @@ node src/crawler.ts
 }
 ```
 
-### 自动执行js文件
+### 自动执行 js 文件
 
 [nodemon]: https://github.com/remy/nodemon
 
-监控整个项目文件变化后执行动作，安装nodemon(npm install nodemon -D)
+监控整个项目文件变化后执行动作，安装 nodemon(npm install nodemon -D)
 
-- nodemon默认不会监测TypeScript的文件变化（可配置修改）
+- nodemon 默认不会监测 TypeScript 的文件变化（可配置修改）
 
 ```json
 "scripts": {
@@ -452,7 +450,7 @@ node src/crawler.ts
 }
 ```
 
-tips: 第一次运行的npm run start的时候会先执行一次，导致生成了data文件夹下面的course.json; 而当前的文件变化又导致了nodemon的监测重新执行，如此反复循环运行craw.js，需要在package.json增加json配置
+tips: 第一次运行的 npm run start 的时候会先执行一次，导致生成了 data 文件夹下面的 course.json; 而当前的文件变化又导致了 nodemon 的监测重新执行，如此反复循环运行 craw.js，需要在 package.json 增加 json 配置
 
 ```json
 "nodemonConfig": {
@@ -474,7 +472,7 @@ tips: 第一次运行的npm run start的时候会先执行一次，导致生成�
 }
 ```
 
-npm:dev:*相当于  npm run dev: 下的所有命令
+npm:dev:\*相当于 npm run dev: 下的所有命令
 
 ```json
 "scripts": {
@@ -483,4 +481,3 @@ npm:dev:*相当于  npm run dev: 下的所有命令
     "dev": "concurrently npm:dev:*"
 }
 ```
-

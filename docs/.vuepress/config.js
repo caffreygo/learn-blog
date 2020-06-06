@@ -1,5 +1,5 @@
 module.exports = {
-  base: '/learn-blog/',
+  base: '/',
   title: 'CaffreyGo',
   description: 'Something just like thiss',
   head: [['link', { rel: 'icon', href: '/gift.png' }]],

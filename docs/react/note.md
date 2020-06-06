@@ -6,18 +6,18 @@
 
 - 实现样式独享
 
-- css在某个组件内引入之后，其它组件没有引入但是也会生效（样式全局化）
+- css 在某个组件内引入之后，其它组件没有引入但是也会生效（样式全局化）
 - 实现样式只在引入的组件内生效
 
-::: 
+:::
 
 ### 全局样式
 
-- createGlobalStyle实现全局样式导入
+- createGlobalStyle 实现全局样式导入
 - 组件内引入该样式组件，放在需要渲染组件的最上方
 
 ```js
-import { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
     html, body, div, span, applet, object, iframe,
@@ -63,7 +63,7 @@ export const GlobalStyle = createGlobalStyle`
       border-collapse: collapse;
       border-spacing: 0;
     }
-`
+`;
 ```
 
 ```react
@@ -87,15 +87,15 @@ export default App;
 
 ### 样式组件
 
-1. 创建一个div组件带有样式
+1. 创建一个 div 组件带有样式
 
    ```js
-   import styled from 'styled-components'
-   
+   import styled from 'styled-components';
+
    export const HeaderWrapper = styled.div`
      height: 56px;
      background: red;
-   `
+   `;
    ```
 
 2. 组件引入使用该组件
@@ -103,7 +103,7 @@ export default App;
    ```react
    import React, { Component } from 'react';
    import { HeaderWrapper } from './style'
-   
+
    class Header extends Component {
      render() {
        return (
@@ -113,21 +113,21 @@ export default App;
        )
      }
    }
-   
+
    export default Header
    ```
 
 ### 包含图片组件
 
 - 图片需要先引入然后再使用（相对路径先编译后当前路径是根路径会出错）
-- hred这种属性可以直接在组件上写` <Logo href="/" />`，也可以在style的**attr**方法内添加
+- hred 这种属性可以直接在组件上写`<Logo href="/" />`，也可以在 style 的**attr**方法内添加
 
 ```js
-import styled from 'styled-components'
-import LogoPic from '../../statics/logo.png'
+import styled from 'styled-components';
+import LogoPic from '../../statics/logo.png';
 
 export const Logo = styled.a.attrs({
-  href: '/'
+  href: '/',
 })`
   position: absolute;
   top: 0;
@@ -137,16 +137,16 @@ export const Logo = styled.a.attrs({
   width: 100px;
   background: url(${LogoPic});
   background-size: contain;
-`
+`;
 ```
 
-### Input组件
+### Input 组件
 
-`&::placeholder`更改placeholder文字颜色
+`&::placeholder`更改 placeholder 文字颜色
 
 ```js
 export const NavSearch = styled.input.attrs({
-  placeholder: '搜索'
+  placeholder: '搜索',
 })`
   width: 160px;
   height: 38px;
@@ -162,16 +162,16 @@ export const NavSearch = styled.input.attrs({
   &::placeholder {
     color: #999;
   }
-`
+`;
 ```
 
-## iconfont的使用
+## iconfont 的使用
 
-- 在iconfont新建仓库，添加对应图标，下载至本地
+- 在 iconfont 新建仓库，添加对应图标，下载至本地
 
-- 在src/static下新建iconfont文件夹
+- 在 src/static 下新建 iconfont 文件夹
 
-  ```shell
+  ```sh
   |-- iconfont
   |   |-- iconfont.css
   |   |-- iconfont.eot
@@ -181,13 +181,13 @@ export const NavSearch = styled.input.attrs({
   |   |-- iconfont.woff2
   ```
 
-- 修改iconfont.css中的引用路径为相对路径
+- 修改 iconfont.css 中的引用路径为相对路径
 
-- 修改iconfont.css为iconfont.js文件，使用`createGlobalStyle`导出全局iconfont组件
+- 修改 iconfont.css 为 iconfont.js 文件，使用`createGlobalStyle`导出全局 iconfont 组件
 
   ```js
-  import { createGlobalStyle } from 'styled-components'
-  
+  import { createGlobalStyle } from 'styled-components';
+
   export const IconFont = createGlobalStyle`
   @font-face {
     font-family: 'iconfont';
@@ -221,17 +221,17 @@ export const NavSearch = styled.input.attrs({
   .iconPensyumaobi:before {
     content: '\e708';
   }
-  `
+  `;
   ```
 
-- App.js使用IconFont组件
+- App.js 使用 IconFont 组件
 
   ```js
   import React, { Fragment } from 'react';
-  import Header from './common/header'
+  import Header from './common/header';
   import { GlobalStyle } from './style.js';
-  import { IconFont } from './statics/iconfont/iconfont.js'
-  
+  import { IconFont } from './statics/iconfont/iconfont.js';
+
   function App() {
     return (
       <Fragment>
@@ -239,16 +239,15 @@ export const NavSearch = styled.input.attrs({
         <IconFont />
         <Header />
       </Fragment>
-  
     );
   }
-  
+
   export default App;
   ```
 
 ## 输入框动画
 
-- 定义事件onFocus、onBlur
+- 定义事件 onFocus、onBlur
 
   ```js
   handleInpusFocus() {
@@ -256,7 +255,7 @@ export const NavSearch = styled.input.attrs({
           focused: true
       })
   }
-  
+
   handleInpusBlur() {
       this.setState({
           focused: false
@@ -264,7 +263,7 @@ export const NavSearch = styled.input.attrs({
   }
   ```
 
-- 引入CSSTransition，设置`classNames`属性
+- 引入 CSSTransition，设置`classNames`属性
 
   ```html
   <CSSTransition timeout={200} in={this.state.focused} classNames="slide">
@@ -273,7 +272,7 @@ export const NavSearch = styled.input.attrs({
   </CSSTransition>
   ```
 
-- 添加动画样式slide-enter、slide-enter-active、slide-exit、slide-exit-active
+- 添加动画样式 slide-enter、slide-enter-active、slide-exit、slide-exit-active
 
   ```js
   export const SearchWrapper = styled.div`
@@ -281,13 +280,13 @@ export const NavSearch = styled.input.attrs({
     position: relative;
     .slide-enter {
       width: 160px;
-      transition: all .3s ease-out;
+      transition: all 0.3s ease-out;
     }
     .slide-enter-active {
       width: 240px;
     }
     .slide-exit {
-      transition: all .3s ease-out;
+      transition: all 0.3s ease-out;
     }
     .slide-exit-active {
       width: 160px;
@@ -306,20 +305,19 @@ export const NavSearch = styled.input.attrs({
         color: #fff;
       }
     }
-  `
+  `;
   ```
-
 
 ## redux && react-redux
 
-- 定义store/index.js
+- 定义 store/index.js
 
   ```js
   import { createStore } from 'redux';
-  import reducer from './reducer'
-  
+  import reducer from './reducer';
+
   const store = createStore(reducer);
-  
+
   export default store;
   ```
 
@@ -327,25 +325,25 @@ export const NavSearch = styled.input.attrs({
 
   ```js
   const defaultState = {
-    focused: false
-  }
-  
+    focused: false,
+  };
+
   export default (state = defaultState, action) => {
     if (action.type === 'search_focus') {
       return {
-        focused: true
-      }
+        focused: true,
+      };
     }
     if (action.type === 'search_blur') {
       return {
-        focused: false
-      }
+        focused: false,
+      };
     }
-    return state
-  }
+    return state;
+  };
   ```
 
-- App.js引入store和Provider组件
+- App.js 引入 store 和 Provider 组件
 
   ```js
   import React, { Fragment } from 'react';
@@ -353,8 +351,8 @@ export const NavSearch = styled.input.attrs({
   import store from './store';
   import { Provider } from 'react-redux';
   import { GlobalStyle } from './style.js';
-  import { IconFont } from './statics/iconfont/iconfont.js'
-  
+  import { IconFont } from './statics/iconfont/iconfont.js';
+
   function App() {
     return (
       <Fragment>
@@ -364,36 +362,35 @@ export const NavSearch = styled.input.attrs({
           <Header />
         </Provider>
       </Fragment>
-  
     );
   }
-  
+
   export default App;
   ```
 
-- 对应组件引入connect
+- 对应组件引入 connect
 
   ```react
   import React from 'react';
   import { connect } from 'react-redux';
-  
+
   const Header = (props) => {
     return (
   	......
     )
   }
-  
+
   const mapStateToProps = (state) => {
     return {
       focused: state.focused
     }
   }
-  
+
   const mapDispatchToProps = (dispatch) => {
     return {
     }
   }
-  
+
   export default connect(mapStateToProps, mapDispatchToProps)(Header);
   ```
 
@@ -403,21 +400,18 @@ https://github.com/zalmoxisus/redux-devtools-extension
 
 ```js
 import { createStore, compose } from 'redux';
-import reducer from './reducer'
+import reducer from './reducer';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-const store = createStore(
-  reducer,
-  composeEnhancers()
-);
+const store = createStore(reducer, composeEnhancers());
 
 export default store;
 ```
 
-## reducer拆分
+## reducer 拆分
 
-reducer如果存放过多的数据可能会造成代码的不可维护，reducer的拆分和整合
+reducer 如果存放过多的数据可能会造成代码的不可维护，reducer 的拆分和整合
 
 ### 拆分
 
@@ -425,57 +419,57 @@ reducer如果存放过多的数据可能会造成代码的不可维护，reducer
 
 ```js
 const defaultState = {
-  focused: false
-}
+  focused: false,
+};
 
 export default (state = defaultState, action) => {
   if (action.type === 'search_focus') {
     return {
-      focused: true
-    }
+      focused: true,
+    };
   }
   if (action.type === 'search_blur') {
     return {
-      focused: false
-    }
+      focused: false,
+    };
   }
-  return state
-}
+  return state;
+};
 ```
 
-- common/header/store/index.js导出
+- common/header/store/index.js 导出
 
 ```js
-import reducer from './reducer'
+import reducer from './reducer';
 
-export { reducer }
+export { reducer };
 ```
 
 ### 整合
 
-- store/reducer.js     `combineReducers`方法整合reducer
-- as是es6实现的别名
+- store/reducer.js `combineReducers`方法整合 reducer
+- as 是 es6 实现的别名
 
 ```js
 import { combineReducers } from 'redux';
 import { reducer as headerReducer } from '../common/header/store';
 
 const reducer = combineReducers({
-  header: headerReducer
-})
+  header: headerReducer,
+});
 
-export default reducer
+export default reducer;
 ```
 
-- 组件内state路径修改
+- 组件内 state 路径修改
 
 ```js
 const mapStateToProps = (state) => {
   return {
     // 整合后的focused在state的header下
-    focused: state.header.focused
-  }
-}
+    focused: state.header.focused,
+  };
+};
 ```
 
 ## actionCreators
@@ -491,68 +485,68 @@ const mapStateToProps = (state) => {
 |   |-- style.js
 ```
 
-- actionCreators创建action
+- actionCreators 创建 action
 
   ```js
-  import * as constants from './constants'
-  
+  import * as constants from './constants';
+
   export const searchFocus = () => ({
-    type: constants.SEARCH_FOCUS
-  })
-  
+    type: constants.SEARCH_FOCUS,
+  });
+
   export const searchBlur = () => ({
-    type: constants.SEARCH_BLUR
-  })
+    type: constants.SEARCH_BLUR,
+  });
   ```
 
-- constants统一定义action types
+- constants 统一定义 action types
 
   ```js
   export const SEARCH_FOCUS = 'header/SEARCH_FOCUS';
   export const SEARCH_BLUR = 'header/SEARCH_BLUR';
   ```
 
-- store/index统一导出
+- store/index 统一导出
 
   ```js
   import reducer from './reducer';
   import * as actionCreators from './actionCreators';
   import * as constants from './constants';
-  
-  export { reducer, actionCreators, constants }
+
+  export { reducer, actionCreators, constants };
   ```
 
 - reducer
 
   ```js
-  import * as constants from './constants'
-  
+  import * as constants from './constants';
+
   const defaultState = {
-    focused: false
-  }
-  
+    focused: false,
+  };
+
   export default (state = defaultState, action) => {
     if (action.type === constants.SEARCH_FOCUS) {
       return {
-        focused: true
-      }
+        focused: true,
+      };
     }
     if (action.type === constants.SEARCH_BLUR) {
       return {
-        focused: false
-      }
+        focused: false,
+      };
     }
-    return state
-  }
+    return state;
+  };
   ```
 
-- header/index.js使用actionCreators创建action
+- header/index.js 使用 actionCreators 创建 action
 
   ```js
   import { actionCreators } from './store';
-  
+
   ......
-  
+
   const mapDispatchToProps = (dispatch) => {
     return {
       handleInpusFocus() {
@@ -565,63 +559,60 @@ const mapStateToProps = (state) => {
   }
   ```
 
-
-
-
 ## Immutable.js
 
 ::: tip
 
-- state不能直接修改，reducer应返回一个新的state
-- 原始的方法存在state被误修改的风险
-- immutable.js帮助我们生成一个immutable对象（不可改变）
-- 实现state不可改变（fromJS、get、set）
+- state 不能直接修改，reducer 应返回一个新的 state
+- 原始的方法存在 state 被误修改的风险
+- immutable.js 帮助我们生成一个 immutable 对象（不可改变）
+- 实现 state 不可改变（fromJS、get、set）
 
 :::
 
-1. 将reducer中的state转化为通过`fromJS`方法转化为immutable对象
+1. 将 reducer 中的 state 转化为通过`fromJS`方法转化为 immutable 对象
 
    ```js
    import { fromJS } from 'immutable';
-   
+
    const defaultState = fromJS({
-     focused: false
-   })
+     focused: false,
+   });
    ```
 
-2. 此时state.header对象已经是一个immutable，属性的获取通过`get`方法获得
+2. 此时 state.header 对象已经是一个 immutable，属性的获取通过`get`方法获得
 
    ```js
    const mapStateToProps = (state) => {
      return {
-       focused: state.header.get('focused')
-     }
-   }
+       focused: state.header.get('focused'),
+     };
+   };
    ```
 
-3. reducer再返回新的state之后，是一个普通的对象，通过get方法获取会报错。
+3. reducer 再返回新的 state 之后，是一个普通的对象，通过 get 方法获取会报错。
 
-   immutable对象`set`方法: 会结合之前immutable对象的值和设置的值返回一个**全新**的对象！
+   immutable 对象`set`方法: 会结合之前 immutable 对象的值和设置的值返回一个**全新**的对象！
 
    ```js
    export default (state = defaultState, action) => {
      if (action.type === constants.SEARCH_FOCUS) {
-       return state.set('focused', true)
+       return state.set('focused', true);
      }
      if (action.type === constants.SEARCH_BLUR) {
-       return state.set('focused', false)
+       return state.set('focused', false);
      }
-     return state
-   }
+     return state;
+   };
    ```
 
 ## redux-immutable
 
 ::: tip
 
-- 获取focus需要调用state.header.get('focused')，state和header两个对象类型不统一
-- 应该将state也转化成immutable对象（redux-immutable）
-- redux-immutable也提供了一个`combineReducers`方法生成的是immutable对象
+- 获取 focus 需要调用 state.header.get('focused')，state 和 header 两个对象类型不统一
+- 应该将 state 也转化成 immutable 对象（redux-immutable）
+- redux-immutable 也提供了一个`combineReducers`方法生成的是 immutable 对象
 
 :::
 
@@ -630,21 +621,19 @@ const mapStateToProps = (state) => {
    ```js
    import { combineReducers } from 'redux-immutable';
    import { reducer as headerReducer } from '../common/header/store';
-   
+
    const reducer = combineReducers({
-     header: headerReducer
-   })
-   
-   export default reducer
+     header: headerReducer,
+   });
+
+   export default reducer;
    ```
 
 2. ```js
    const mapStateToProps = (state) => {
      return {
        // focused: state.get('header').get('focused')
-       focused: state.getIn(['header', 'focused'])
-     }
-   }
+       focused: state.getIn(['header', 'focused']),
+     };
+   };
    ```
-
-   
