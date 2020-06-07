@@ -599,6 +599,20 @@ const mapStateToProps = (state) => {
    };
    ```
 
+::: tip
+
+```js
+state.set('list', action.data).set('totalPage', action.totalPage);
+
+// merge比多次的set操作性能更高
+state.merge({
+    list: action.data,
+    totalPage: action.totalPage
+})
+```
+
+:::
+
 ## redux-immutable
 
 ::: tip
@@ -713,3 +727,79 @@ export default (state = defaultState, action) => {
   }
 };
 ```
+
+### 请求优化
+
+list数据在请求之后便不需要再重复请求了，`handleInpusFocus`内传入list，请求时判断
+
+```js
+<NavSearch
+    onFocus={() => handleInpusFocus(list)}
+    onBlur={handleInpusBlur}
+    className={focused ? 'focused' : ''}
+></NavSearch>
+```
+
+```js
+handleInpusFocus(list) {
+    (list.size === 0) && dispatch(actionCreators.getList())
+    dispatch(actionCreators.searchFocus())
+}
+```
+
+## css实现旋转动画
+
+- 使用`ref`获取到原始dom标签，在`handlePageChange`中传入
+
+```html
+<SearchInfoSwitch
+    onClick={() => handlePageChange(page, totalPage, this.spinIcon)}
+  	>
+    <i ref={(icon) => { this.spinIcon = icon }} className="iconfont spin">&#xe77f;</i>
+    换一批
+</SearchInfoSwitch>
+```
+
+- `handlePageChange`获取到style的transform属性，将非数字替换为空
+
+  旋转角度自增360，更新`transform: rotate(xxxdeg)`
+
+```js
+handlePageChange(page, totalPage, spin) {
+    let originAngle = spin.style.transform.replace(/[^0-9]/ig, '');
+    if (originAngle) {
+        originAngle = parseInt(originAngle, 10)
+    } else {
+        originAngle = 0
+    }
+    spin.style.transform = 'rotate(' + (originAngle + 360) + 'deg)';
+    if (page < totalPage) {
+        dispatch(actionCreators.changePage(page + 1));
+    } else {
+        dispatch(actionCreators.changePage(1));
+    }
+}
+```
+
+- block标签才能transform旋转
+
+  transform-origin设置旋转中心，这边是center
+
+  transition设置动画
+
+```js
+export const SearchInfoSwitch = styled.span`
+    float: right;
+    cursor: pointer;
+    font-size: 13px;
+    .spin {
+        display: block;
+        float: left;
+        font-size: 12px;
+        margin-right: 2px;
+        transition: all .2s ease-in;
+        transform-origin: center center;
+    }
+`
+```
+
