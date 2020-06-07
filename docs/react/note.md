@@ -66,7 +66,7 @@ export const GlobalStyle = createGlobalStyle`
 `;
 ```
 
-```react
+```js
 import React, { Fragment } from 'react';
 import { GlobalStyle } from './style.js';
 
@@ -100,7 +100,7 @@ export default App;
 
 2. 组件引入使用该组件
 
-   ```react
+   ```js
    import React, { Component } from 'react';
    import { HeaderWrapper } from './style'
 
@@ -370,7 +370,7 @@ export const NavSearch = styled.input.attrs({
 
 - 对应组件引入 connect
 
-  ```react
+  ```js
   import React from 'react';
   import { connect } from 'react-redux';
 
@@ -474,7 +474,7 @@ const mapStateToProps = (state) => {
 
 ## actionCreators
 
-```
+```sh
 |-- header
 |   |-- store
 |   |   |-- actionCreators.js
