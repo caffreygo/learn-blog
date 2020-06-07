@@ -637,3 +637,90 @@ const mapStateToProps = (state) => {
      };
    };
    ```
+
+## redux-thunk & axios
+
+- 异步数据的获取都拆分到actionCreators中，要求actionCreators返回值从对象变成函数，这需要`redux-thunk`这个中间件，修改store/index配置如下:
+
+  ```js
+  import { createStore, compose, applyMiddleware } from 'redux';
+  import thunk from 'redux-thunk';
+  import reducer from './reducer'
+  
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  
+  const store = createStore(
+    reducer,
+    composeEnhancers(
+      applyMiddleware(thunk)
+    )
+  );
+  
+  export default store;
+  ```
+
+- list作为state的内部数组也是immutable类型的数组，如果直接派发改变会将该数组变成普通数组，在`changeList`函数中生成的action的list需要`fromJs`方法转换一下
+
+  ```js
+  import * as constants from './constants';
+  import { fromJS } from "immutable";
+  import axios from 'axios';
+  
+  const changeList = (data) => ({
+    type: constants.CHANGE_LIST,
+    data: fromJS(data)
+  })
+  
+  export const getList = () => {
+    return (dispatch) => {
+      axios.get('api/headerList.json').then(res => {
+        const { success, data } = res.data
+        if (success) {
+          dispatch(changeList(data))
+        }
+      }).catch(() => {
+        console.log('err')
+      })
+    }
+  }
+  ```
+
+- 数组改变之后需要通过数组的`map`方法循环展示数据
+
+  ```html
+  <SearchInfoList>
+      {
+          this.props.list.map((item) => {
+              return <SearchInfoItem key={item}>{item}</SearchInfoItem>
+          })
+      }
+  </SearchInfoList>
+  ```
+
+### 调整
+
+reducer.js：switch语法一般需要跟break，这边case之后有return，就不需要了
+
+```js
+import * as constants from './constants';
+import { fromJS } from 'immutable';
+
+const defaultState = fromJS({
+  focused: false,
+  list: []
+})
+
+export default (state = defaultState, action) => {
+  switch (action.type) {
+    case constants.SEARCH_FOCUS:
+      return state.set('focused', true);
+    case constants.SEARCH_BLUR:
+      return state.set('focused', false);
+    case constants.CHANGE_LIST:
+      return state.set('list', action.data);
+    default:
+      return state
+  }
+}
+```
+
