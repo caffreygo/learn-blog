@@ -4,11 +4,11 @@
 
 redux（Reducer+Flux）实现了大型应用组件间数据传值的问题（数据层框架）
 
-![](D:/learn-blog/docs/img/react/withRedux.png)
+![](../img/react/withRedux.png)
 
 ### Redux的工作流程
 
-![](D:/learn-blog/docs/img/react/reduxFlow.png)
+![](../img/react/reduxFlow.png)
 
 - React Components(借阅者)
 - Action Creators(借书的这句话)

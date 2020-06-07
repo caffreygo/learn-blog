@@ -74,11 +74,8 @@ function App() {
   return (
     <Fragment>
       <GlobalStyle />
-      <div className="red">
-        hello world
-      </div>
+      <div className="red">hello world</div>
     </Fragment>
-
   );
 }
 
@@ -102,19 +99,15 @@ export default App;
 
    ```js
    import React, { Component } from 'react';
-   import { HeaderWrapper } from './style'
+   import { HeaderWrapper } from './style';
 
    class Header extends Component {
      render() {
-       return (
-         <HeaderWrapper>
-           header
-         </HeaderWrapper>
-       )
+       return <HeaderWrapper>header</HeaderWrapper>;
      }
    }
 
-   export default Header
+   export default Header;
    ```
 
 ### 包含图片组件
@@ -640,66 +633,63 @@ const mapStateToProps = (state) => {
 
 ## redux-thunk & axios
 
-- 异步数据的获取都拆分到actionCreators中，要求actionCreators返回值从对象变成函数，这需要`redux-thunk`这个中间件，修改store/index配置如下:
+- 异步数据的获取都拆分到 actionCreators 中，要求 actionCreators 返回值从对象变成函数，这需要`redux-thunk`这个中间件，修改 store/index 配置如下:
 
   ```js
   import { createStore, compose, applyMiddleware } from 'redux';
   import thunk from 'redux-thunk';
-  import reducer from './reducer'
-  
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-  
-  const store = createStore(
-    reducer,
-    composeEnhancers(
-      applyMiddleware(thunk)
-    )
-  );
-  
+  import reducer from './reducer';
+
+  const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+  const store = createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
+
   export default store;
   ```
 
-- list作为state的内部数组也是immutable类型的数组，如果直接派发改变会将该数组变成普通数组，在`changeList`函数中生成的action的list需要`fromJs`方法转换一下
+- list 作为 state 的内部数组也是 immutable 类型的数组，如果直接派发改变会将该数组变成普通数组，在`changeList`函数中生成的 action 的 list 需要`fromJs`方法转换一下
 
   ```js
   import * as constants from './constants';
-  import { fromJS } from "immutable";
+  import { fromJS } from 'immutable';
   import axios from 'axios';
-  
+
   const changeList = (data) => ({
     type: constants.CHANGE_LIST,
-    data: fromJS(data)
-  })
-  
+    data: fromJS(data),
+  });
+
   export const getList = () => {
     return (dispatch) => {
-      axios.get('api/headerList.json').then(res => {
-        const { success, data } = res.data
-        if (success) {
-          dispatch(changeList(data))
-        }
-      }).catch(() => {
-        console.log('err')
-      })
-    }
-  }
+      axios
+        .get('api/headerList.json')
+        .then((res) => {
+          const { success, data } = res.data;
+          if (success) {
+            dispatch(changeList(data));
+          }
+        })
+        .catch(() => {
+          console.log('err');
+        });
+    };
+  };
   ```
 
 - 数组改变之后需要通过数组的`map`方法循环展示数据
 
   ```html
   <SearchInfoList>
-      {
-          this.props.list.map((item) => {
-              return <SearchInfoItem key={item}>{item}</SearchInfoItem>
-          })
-      }
+    { this.props.list.map((item) => { return
+    <SearchInfoItem key="{item}">{item}</SearchInfoItem>
+    }) }
   </SearchInfoList>
   ```
 
 ### 调整
 
-reducer.js：switch语法一般需要跟break，这边case之后有return，就不需要了
+reducer.js：switch 语法一般需要跟 break，这边 case 之后有 return，就不需要了
 
 ```js
 import * as constants from './constants';
@@ -707,8 +697,8 @@ import { fromJS } from 'immutable';
 
 const defaultState = fromJS({
   focused: false,
-  list: []
-})
+  list: [],
+});
 
 export default (state = defaultState, action) => {
   switch (action.type) {
@@ -719,8 +709,7 @@ export default (state = defaultState, action) => {
     case constants.CHANGE_LIST:
       return state.set('list', action.data);
     default:
-      return state
+      return state;
   }
-}
+};
 ```
-

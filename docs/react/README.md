@@ -59,7 +59,7 @@ ReactDOM.render(<Toggle />, document.getElementById('root'));
 
 ::: tip this
 
-​ JSX 语法中的 this 指向当前组件
+ JSX 语法中的 this 指向当前组件
 
 :::
 
@@ -188,7 +188,7 @@ ReactDOM.render(
 
   ::: tip 关键字
 
-  ​ class 使用 className, for 使用 htmlFor
+   class 使用 className, for 使用 htmlFor
 
   :::
 
@@ -222,9 +222,9 @@ ReactDOM.render(
 
 ::: tip immutable
 
-​ react 建议 state 不允许我们做任何的改变（直接改变会影响性能）
+ react 建议 state 不允许我们做任何的改变（直接改变会影响性能）
 
-​ 可以考虑拷贝一个副本, 然后操作赋值 [...this.state.list] ）
+ 可以考虑拷贝一个副本, 然后操作赋值 [...this.state.list] ）
 
 :::
 
@@ -242,13 +242,13 @@ ReactDOM.render(
 
 ::: tip 组件
 
-​ 在 constructor 里面做 this 统一绑定，会比在 jsx 中绑定的性能好
+ 在 constructor 里面做 this 统一绑定，会比在 jsx 中绑定的性能好
 
-​ 父组件通过属性向子组件传值，子组件通过 props 接收
+ 父组件通过属性向子组件传值，子组件通过 props 接收
 
-​ 子组件通过属性获取父组件方法，调用向外传递事件（父组件在传递方法时, 要记得绑定父组件的 this）
+ 子组件通过属性获取父组件方法，调用向外传递事件（父组件在传递方法时, 要记得绑定父组件的 this）
 
-​ setState 可以传递一个函数实现异步，并且带来性能提升，函数参数 prevState(修改之前的 state)
+ setState 可以传递一个函数实现异步，并且带来性能提升，函数参数 prevState(修改之前的 state)
 
 :::
 
