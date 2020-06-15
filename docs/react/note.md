@@ -803,3 +803,53 @@ export const SearchInfoSwitch = styled.span`
 `
 ```
 
+## 路由
+
+```sh
+npm install --save react-router-dom
+```
+
+```js
+import React, { Fragment } from 'react';
+import Header from './common/header';
+import store from './store';
+import { BrowserRouter, Route } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { GlobalStyle } from './style.js';
+import { IconFont } from './statics/iconfont/iconfont.js'
+
+function App() {
+  return (
+    <Fragment>
+      <GlobalStyle />
+      <IconFont />
+      <Provider store={store}>
+        <Header />
+        <BrowserRouter>
+          <Route path="/" exact render={() => <div>home</div>}></Route>
+          <Route path="/detail" exact render={() => <div>detail</div>}></Route>
+        </BrowserRouter>
+      </Provider>
+    </Fragment>
+
+  );
+}
+
+export default App;
+```
+
+::: tip react-router-dom
+
+- path属性匹配路由，添加**exact**属性后`/detail`页面将不会加载home组件
+- **Route**组件的render返回渲染内容（路由规则）
+- 即根据路由的不同渲染不同的组件
+
+:::
+
+```html
+<BrowserRouter>
+    <Route path="/" exact component={Home}></Route>
+    <Route path="/detail" component={Detail}></Route>
+</BrowserRouter>
+```
+
