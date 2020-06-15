@@ -112,7 +112,7 @@ export default App;
 
 ### 包含图片组件
 
-- 图片需要先引入然后再使用（相对路径先编译后当前路径是根路径会出错）
+- 图片需要**先引入**然后再使用（相对路径先编译后当前路径是根路径会出错）
 - hred 这种属性可以直接在组件上写`<Logo href="/" />`，也可以在 style 的**attr**方法内添加
 
 ```js
@@ -132,6 +132,38 @@ export const Logo = styled.a.attrs({
   background-size: contain;
 `;
 ```
+
+------
+
+--------------------------------
+
+通过`${(props)=> ~}`函数返回值使用**组件属性**
+
+```html
+<RecommendItem
+       imgUrl={item.get("imgUrl")}
+       key={item.get("id")}
+></RecommendItem>
+```
+
+```js
+export const RecommendItem = styled.div`
+    width: 280px;
+    height: 50px;
+    margin-bottom: 5px;
+    background-image: url(${(props) => props.imgUrl});
+    background-size: contain;
+`;
+```
+
+```js
+var item = {
+    id: 1,
+    imgUrl: require("../../../statics/1.png")
+}
+```
+
+
 
 ### Input 组件
 
