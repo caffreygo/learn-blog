@@ -885,3 +885,190 @@ export default App;
 </BrowserRouter>
 ```
 
+## 数据异步获取
+
+::: tip mapDispatch
+
+- 父组件通过`connect`方法连接store，在父组件`dispatch`的action，**所有**的子组件都能接收到
+- `formJS`方法可以将普通对象转化为immutableJS对象，然后`set`更新state
+- `merge`方法同上可以执行多次的`set`操作
+- 通过**redux-thunk**可以实现将异步请求放到action中管理，而不是在组件内
+
+:::
+
+### 组件内的获取
+
+1. connect方法连接store
+2. componentDidMount时创建action派发给reducer
+3. reducer根据action.type设置immutableJS数据返回
+
+```js
+// pages/home/index.js
+import React, { Component } from 'react';
+import { connect } from "react-redux";
+import axios from "axios";
+
+class Home extends Component {
+    render() {
+        return (
+			// JSX
+        )
+    }
+
+    componentDidMount() {
+        this.props.changeHomeData()
+    }
+}
+
+const mapDispatch = (dispatch)=> ({
+    changeHomeData() {
+        axios.get("/api/home.json").then(res=>{
+            const {success,data} = res.data;
+            if(success) {
+                const {topicList,articleList,recommendList} = data
+                const action = {
+                    type: "change_home_data",
+                    topicList,
+                    articleList,
+                    recommendList
+                }
+                dispatch(action);
+            }
+        })
+    }
+})
+
+export default connect(null,mapDispatch)(Home);
+```
+
+```js
+// reducer.js
+import { fromJS } from "immutable";
+
+const defaultState = fromJS({
+  topicList: [],
+  articleList: [],
+  recommendList: [],
+});
+
+export default (state = defaultState, action) => {
+  switch (action.type) {
+    case 'change_home_data':
+      return state.merge({
+        topicList: fromJS(action.topicList),
+        articleList: fromJS(action.articleList),
+        recommendList: fromJS(action.recommendList),
+      })
+    default:
+      return state;
+  }
+};
+```
+
+### 请求代码优化管理
+
+::: tip redux
+
+- 首先创建action，派发给reducer
+- reducer获取action，最后更新state
+- actionCreators管理action的创建
+- constants管理actionTypes
+- redux-thunk能够实现action的创建返回一个函数（getHomeInfo返回函数，函数内创建action然后派发）
+
+:::
+
+#### 组件index
+
+获取actionCreators方法创建action，并且派发给reducer
+
+```js
+import React, { Component } from 'react';
+import { connect } from "react-redux";
+import { actionCreators } from "./store";
+
+class Home extends Component {
+    render() {
+        return (
+            // JSX
+        )
+    }
+
+    componentDidMount() {
+        this.props.changeHomeData()
+    }
+}
+
+const mapDispatch = (dispatch)=> ({
+    changeHomeData() {
+        const action = actionCreators.getHomeInfo();
+        dispatch(action)
+    }
+})
+
+export default connect(null,mapDispatch)(Home);
+```
+
+#### actionCreators
+
+```js
+import axios from "axios";
+import * as constants from "./constants";
+
+const changeHomeData = (result)=> ({
+    type: constants.CHANGE_HOME_DATA,
+    topicList: result.topicList,
+    articleList: result.articleList,
+    recommendList: result.recommendList
+})
+// !!!!!!!!!  redux-thunk
+export const getHomeInfo = ()=> {
+    return (dispatch)=>
+    axios.get("/api/home.json").then(res=>{
+        const {success,data} = res.data;
+        success && dispatch(changeHomeData(data));
+    })
+}
+```
+
+#### constants
+
+```js
+export const CHANGE_HOME_DATA = "home/CHANGE_HOME_DATA";
+```
+
+#### index
+
+```js
+import reducer from './reducer';
+import * as constants from "./constants";
+import * as actionCreators from "./actionCreators";
+
+export { reducer,actionCreators,constants }
+```
+
+#### reducer
+
+```js
+import { fromJS } from "immutable";
+import * as constants from "./constants";
+
+const defaultState = fromJS({
+  topicList: [],
+  articleList: [],
+  recommendList: [],
+});
+
+export default (state = defaultState, action) => {
+  switch (action.type) {
+    case constants.CHANGE_HOME_DATA:
+      return state.merge({
+        topicList: fromJS(action.topicList),
+        articleList: fromJS(action.articleList),
+        recommendList: fromJS(action.recommendList),
+      })
+    default:
+      return state;
+  }
+};
+```
+
