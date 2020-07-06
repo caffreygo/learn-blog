@@ -4,6 +4,8 @@
 
 ### Dom元素获取
 
+
+
 ::: tip 绑定: 通过ref="selector"绑定元素
 
 1. 如果元素是一个原生的**HTML元素**，通过this.$refs['selector'].click() 触发。
