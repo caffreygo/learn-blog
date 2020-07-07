@@ -1072,3 +1072,191 @@ export default (state = defaultState, action) => {
 };
 ```
 
+## 加载更多
+
+1. 点击**更多文字**派发action异步获取下一页数据 （page表示当前页页码，获取时增1）
+2. 获取成功后派发addHomeList这个action,reducer接收后concat文章数据
+
+```js
+import React, { PureComponent } from "react";
+import { ListItem, ListInfo, LoadMore } from "../style";
+import { connect } from "react-redux";
+import { actionCreators } from "../store";
+import { Link } from "react-router-dom";
+
+class List extends PureComponent {
+  render() {
+    const { list, getMoreList, page } = this.props;
+    return (
+      <div>
+        {list.map((item, index) => {
+          return (
+            <Link key={index} to="/detail">
+              <ListItem>
+                <img className="pic" alt="" src={item.get("imgUrl")} />
+                <ListInfo>
+                  <h3 className="title">{item.get("title")}</h3>
+                  <p className="desc">{item.get("desc")}</p>
+                </ListInfo>
+              </ListItem>
+            </Link>
+          );
+        })}
+        <LoadMore onClick={() => getMoreList(page)}>更多文字</LoadMore>
+      </div>
+    );
+  }
+}
+
+const mapState = (state) => ({
+  list: state.getIn(["home", "articleList"]),
+  page: state.getIn(["home", "articlePage"]),
+});
+
+const mapDispatch = (dispatch) => ({
+  getMoreList(page) {
+    dispatch(actionCreators.getMoreList(page));
+  },
+});
+
+export default connect(mapState, mapDispatch)(List);
+```
+
+### actionCreators
+
+```js
+const addArticleList = (state, action) => {
+  return state.merge({
+    articleList: state.get("articleList").concat(action.list),
+    articlePage: action.nextPage,
+  });
+};
+
+export const getMoreList = (page) => {
+  return (dispatch) => {
+    axios.get(`/api/homeList.json?page=${page}`).then((res) => {
+      const data = res.data.data;
+      dispatch(addHomeList(data, page + 1));
+    });
+  };
+};
+```
+
+### reducer
+
+```js
+const addArticleList = (state, action) => {
+  return state.merge({
+    articleList: state.get("articleList").concat(action.list),
+    articlePage: action.nextPage,
+  });
+};
+```
+
+## 回到顶部
+
+1. 监听window的scroll事件，到达阈值显示回到顶部按钮 
+2. 点击回到顶部执行window.scrollTl(0,0)
+3. componentWillUnmount移除监听
+
+```js
+import React, { PureComponent } from "react";
+import { connect } from "react-redux";
+import List from "./components/List";
+import Recommend from "./components/Recommend";
+import Writer from "./components/Writer";
+import Topic from "./components/Topic";
+import { HomeWrapper, HomeLeft, HomeRight, BackTop } from "./style";
+import { actionCreators } from "./store";
+
+class Home extends PureComponent {
+  handleScrollTop() {
+    window.scrollTo(0, 0);
+  }
+  render() {
+    const { showScroll } = this.props;
+    return (
+      <HomeWrapper>
+        <HomeLeft>
+          <img
+            className="banner-img"
+            alt=""
+            src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1592200833675&di=6fc258493302450c75369d484e287e9b&imgtype=0&src=http%3A%2F%2Fattach.bbs.miui.com%2Fforum%2F201306%2F23%2F110328s72xxse7lfis9fnd.jpg"
+          />
+          <Topic />
+          <List />
+        </HomeLeft>
+        <HomeRight>
+          <Recommend />
+          <Writer />
+        </HomeRight>
+        {showScroll ? (
+          <BackTop onClick={this.handleScrollTop}>回到顶部</BackTop>
+        ) : null}
+      </HomeWrapper>
+    );
+  }
+
+  componentDidMount() {
+    this.props.changeHomeData();
+    // 滚动事件监听
+    this.bindEvent();
+  }
+
+  componentWillUnmount() {
+    // 移除事件
+    window.removeEventListener("scroll", this.props.changeScrollTopShow);
+  }
+
+  bindEvent() {
+    window.addEventListener("scroll", this.props.changeScrollTopShow);
+  }
+}
+
+const mapState = (state) => ({
+  showScroll: state.getIn(["home", "showScroll"]),
+});
+
+const mapDispatch = (dispatch) => ({
+  changeHomeData() {
+    dispatch(actionCreators.getHomeInfo());
+  },
+  changeScrollTopShow(e) {
+    // 派发toggleTopShow
+    if (document.documentElement.scrollTop > 400) {
+      dispatch(actionCreators.toggleTopShow(true));
+    } else {
+      dispatch(actionCreators.toggleTopShow(false));
+    }
+  },
+});
+
+export default connect(mapState, mapDispatch)(Home);
+```
+
+## 路由跳转
+
+react的单页面应用由**react-router-dom**实现路由的跳转，不会重新加载html，只改变部分区域的显示
+
+**Link**组件实现链接
+
+```html
+<Link to="/detail">跳转到详情页</Link>
+```
+
+## PureComponent
+
+组件需要使用`shouldComponentUpdate`观察不需要重新渲染的redux数据，减少某些组件的不必要重新渲染
+
+在使用了`immutable.js`下，我们只需要引入**PureComponent**代替原来的Component的class即可自动实现该功能
+
+```js
+import React, { PureComponent } from "react";
+
+class List extends PureComponent {
+  render() {
+    // ....
+  }
+}
+```
+
