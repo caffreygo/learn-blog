@@ -18,7 +18,14 @@ module.exports = {
       { text: 'React', link: '/react/' },
       { text: 'JavaScript', link: '/javascript/' },
       { text: 'Git', link: '/git/' },
-      { text: 'Note', link: '/basic/' },
+      {
+        text: '笔记相关',
+        ariaLabel: 'note',
+        items: [
+          { text: '日常笔记', link: '/basic/' },
+          { text: '算法', link: '/algorithm/' }
+        ]
+      },
       { text: 'Github', link: 'https://github.com/caffreygo' }
     ],
     sidebar: {
@@ -27,6 +34,7 @@ module.exports = {
       '/webpack/': ['', 'step-2', 'step-3', 'step-4', 'step-5'],
       '/react/': ['', 'redux', 'note'],
       '/http/': [''],
+      '/algorithm/': [''],
       '/javascript/': ['', 'demo'],
       '/git/': [''],
       '/basic/': ['']
