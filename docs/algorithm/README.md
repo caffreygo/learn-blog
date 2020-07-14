@@ -183,3 +183,485 @@ console.log(queue.size());
 //2
 //输出元素个数
 ```
+
+## 链表
+
+::: 链表 
+
+​		在计算机科学中, 一个 **链表** 是数据元素的线性集合, 元素的线性顺序不是由它们在内存中的物理位置给出的。 相反, 每个元素指向下一个元素。它是由一组节点组成的数据结构,这些节点一起,表示序列。
+
+​		在最简单的形式下，每个节点由**数据**和到序列中下一个节点的**引用**(换句话说，链接)组成。这种结构允许在迭代期间有效地从序列中的任何位置插入或删除元素。
+
+​		更复杂的变体添加额外的链接，允许有效地插入或删除任意元素引用。链表的一个缺点是访问时间是线性的(而且难以管道化)。
+
+​		更快的访问，如随机访问，是不可行的。与链表相比，数组具有更好的缓存位置。
+
+::: 
+
+![](../img/algorithm/linkedList.svg)
+
+::: 与栈和队列的区别
+
+- 在内存中，栈和队列（数组）的存在就是一个整体，如果想要对她内部某一个元素进行移除或是添加一个新元素就要动她内部所有的元素，所谓牵一发而动全身；
+- 而链表则不一样，每一个元素都是由元素本身数据和指向下一个元素的指针构成，所以添加或是移除某一个元素不需要对链表整体进行操作，只需要改变相关元素的指针指向就可以了。
+
+::: 
+
+![](../img/algorithm/linkedList.png)
+
+### 链表的创建
+
+首先我们要创建一个链表类：
+
+```js
+function LinkedList(){
+    //各种属性和方法的声明
+}
+```
+
+然后我们需要一种数据结构来保存链表里面的数据：
+
+```js
+var Node=function(element){
+    this.element=element;
+    this.next=null;
+}
+//Node类表示要添加的元素，他有两个属性，一个是element，表示添加到链表中的具体的值；另一个是next,表示要指向链表中下一个元素的指针。
+```
+
+接下来，我们需要给链表声明一些方法：
+
+- append(element)：向链表尾部添加一个新的元素；
+- insert(position,element)：向链表特定位置插入元素；
+- remove(element)：从链表移除一项；
+- indexOf(element)：返回链表中某元素的索引，如果没有返回-1；
+- removeAt(position)：从特定位置移除一项；
+- isEmpty()：判断链表是否为空，如果为空返回true,否则返回false;
+- size()：返回链表包含的元素个数；
+- toString()：重写继承自Object类的toString()方法，因为我们使用了Node类；
+
+### 链表的完整代码：
+
+```js
+function LinkedList() {
+    //Node类声明
+    let Node = function(element){
+        this.element = element;
+        this.next = null;
+    };
+    //初始化链表长度
+    let length = 0;
+    //初始化第一个元素
+    let head = null;
+    this.append = function(element){
+        //初始化添加的Node实例
+        let node = new Node(element),
+            current;
+        if (head === null){
+            //第一个Node实例进入链表，之后在这个LinkedList实例中head就不再是null了
+            head = node;
+        } else {
+            current = head;
+            //循环链表知道找到最后一项，循环结束current指向链表最后一项元素
+            while(current.next){
+                current = current.next;
+            }
+            //找到最后一项元素后，将他的next属性指向新元素node,j建立链接
+            current.next = node;
+        }
+        //更新链表长度
+        length++;
+    };
+    this.insert = function(position, element){
+        //检查是否越界，超过链表长度或是小于0肯定不符合逻辑的
+        if (position >= 0 && position <= length){
+            let node = new Node(element),
+                current = head,
+                previous,
+                index = 0;
+            if (position === 0){
+                //在第一个位置添加
+                node.next = current;
+                head = node;
+            } else {
+                //循环链表，找到正确位置，循环完毕，previous，current分别是被添加元素的前一个和后一个元素
+                while (index++ < position){
+                    previous = current;
+                    current = current.next;
+                }
+                node.next = current;
+                previous.next = node;
+            }
+            //更新链表长度
+            length++;
+            return true;
+        } else {
+            return false;
+        }
+    };
+    this.removeAt = function(position){
+        //检查是否越界，超过链表长度或是小于0肯定不符合逻辑的
+        if (position > -1 && position < length){
+            let current = head,
+                previous,
+                index = 0;
+            //移除第一个元素
+            if (position === 0){
+                //移除第一项，相当于head=null;
+                head = current.next;
+            } else {
+                //循环链表，找到正确位置，循环完毕，previous，current分别是被添加元素的前一个和后一个元素
+                while (index++ < position){
+                    previous = current;
+                    current = current.next;
+                }
+                //链接previous和current的下一个元素，也就是把current移除了
+                previous.next = current.next;
+            }
+            length--;
+            return current.element;
+        } else {
+            return null;
+        }
+    };
+    this.indexOf = function(element){
+        let current = head,
+            index = 0;
+        //循环链表找到元素位置
+        while (current) {
+            if (element === current.element) {
+                return index;
+            }
+            index++;
+            current = current.next;
+        }
+        return -1;
+    };
+    this.remove = function(element){
+        //调用已经声明过的indexOf和removeAt方法
+        let index = this.indexOf(element);
+        return this.removeAt(index);
+    };
+    this.isEmpty = function() {
+        return length === 0;
+    };
+    this.size = function() {
+        return length;
+    };
+    this.getHead = function(){
+        return head;
+    };
+    this.toString = function(){
+        let current = head,
+            string = '';
+        while (current) {
+            string += current.element + (current.next ? ', ' : '');
+            current = current.next;
+        }
+        return string;
+    };
+    this.print = function(){
+        console.log(this.toString());
+    };
+}
+//一个实例化后的链表，里面是添加的数个Node类的实例复制代码
+```
+
+ES6版本:
+
+```js
+let LinkedList2 = (function () {
+    class Node {
+        constructor(element){
+            this.element = element;
+            this.next = null;
+        }
+    }
+    //这里我们使用WeakMap对象来记录长度状态
+    const length = new WeakMap();
+    const head = new WeakMap();
+    class LinkedList2 {
+        constructor () {
+            length.set(this, 0);
+            head.set(this, null);
+        }
+        append(element) {
+            let node = new Node(element),
+                current;
+            if (this.getHead() === null) {
+                head.set(this, node);
+            } else {
+                current = this.getHead();
+                while (current.next) {
+                    current = current.next;
+                }
+                current.next = node;
+            }
+            let l = this.size();
+            l++;
+            length.set(this, l);
+        }
+        insert(position, element) {
+            if (position >= 0 && position <= this.size()) {
+
+                let node = new Node(element),
+                    current = this.getHead(),
+                    previous,
+                    index = 0;
+                if (position === 0) {
+                    node.next = current;
+                    head.set(this, node);
+                } else {
+                    while (index++ < position) {
+                        previous = current;
+                        current = current.next;
+                    }
+                    node.next = current;
+                    previous.next = node;
+                }
+                let l = this.size();
+                l++;
+                length.set(this, l);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        removeAt(position) {
+            if (position > -1 && position < this.size()) {
+                let current = this.getHead(),
+                    previous,
+                    index = 0;
+                if (position === 0) {
+                    head.set(this, current.next);
+                } else {
+                    while (index++ < position) {
+                        previous = current;
+                        current = current.next;
+                    }
+                    previous.next = current.next;
+                }
+                let l = this.size();
+                l--;
+                length.set(this, l);
+                return current.element;
+            } else {
+                return null;
+            }
+        }
+        remove(element) {
+            let index = this.indexOf(element);
+            return this.removeAt(index);
+        }
+        indexOf(element) {
+            let current = this.getHead(),
+                index = 0;
+            while (current) {
+                if (element === current.element) {
+                    return index;
+                }
+                index++;
+                current = current.next;
+            }
+            return -1;
+        }
+        isEmpty() {
+            return this.size() === 0;
+        }
+        size() {
+            return length.get(this);
+        }
+        getHead() {
+            return head.get(this);
+        }
+        toString() {
+            let current = this.getHead(),
+                string = '';
+            while (current) {
+                string += current.element + (current.next ? ', ' : '');
+                current = current.next;
+            }
+            return string;
+
+        }
+        print() {
+            console.log(this.toString());
+        }
+    }
+    return LinkedList2;
+})();
+```
+
+### 双向链表
+
+![](../img/algorithm/doubleLinkedList.png)
+
+```js
+function DoublyLinkedList() {
+    let Node = function(element){
+        this.element = element;
+        this.next = null;
+        this.prev = null; //NEW
+    }; 
+    let length = 0;
+    let head = null;
+    let tail = null; //NEW
+    this.append = function(element){
+        let node = new Node(element),
+            current;
+        if (head === null){
+            head = node;
+            tail = node; //NEW
+        } else {
+            //NEW
+            tail.next = node;
+            node.prev = tail;
+            tail = node;
+        }
+        length++;
+    };
+    this.insert = function(position, element){
+        if (position >= 0 && position <= length){
+            let node = new Node(element),
+                current = head,
+                previous,
+                index = 0;
+            if (position === 0){
+                if (!head){       //NEW
+                    head = node;
+                    tail = node;
+                } else {
+                    node.next = current;
+                    current.prev = node; //NEW
+                    head = node;
+                }
+            } else  if (position === length) { ////NEW
+                current = tail;   
+                current.next = node;
+                node.prev = current;
+                tail = node;
+            } else {
+                while (index++ < position){
+                    previous = current;
+                    current = current.next;
+                }
+                node.next = current;
+                previous.next = node;
+                current.prev = node; //NEW
+                node.prev = previous; //NEW
+            }
+            length++;
+            return true;
+        } else {
+            return false;
+        }
+    };
+    this.removeAt = function(position){
+        if (position > -1 && position < length){
+            let current = head,
+                previous,
+                index = 0;
+            if (position === 0){ //NEW
+                if (length === 1){ //
+                    tail = null;
+                } else {
+                    head.prev = null;
+                }
+            } else if (position === length-1){  //NEW
+                current = tail;
+                tail = current.prev;
+                tail.next = null;
+            } else {
+                while (index++ < position){
+                    previous = current;
+                    current = current.next;
+                }
+                previous.next = current.next;
+                current.next.prev = previous; //NEW
+            }
+            length--;
+            return current.element;
+        } else {
+            return null;
+        }
+    };
+    this.remove = function(element){
+        let index = this.indexOf(element);
+        return this.removeAt(index);
+    };
+    this.indexOf = function(element){
+        let current = head,
+            index = -1;
+        if (element == current.element){
+            return 0;
+        }
+        index++;
+        while(current.next){
+            if (element == current.element){
+                return index;
+            }
+            current = current.next;
+            index++;
+        }
+        //check last item
+        if (element == current.element){
+            return index;
+        }
+        return -1;
+    };
+    this.isEmpty = function() {
+        return length === 0;
+    };
+    this. size = function() {
+        return length;
+    };
+    this.toString = function(){
+        let current = head,
+            s = current ? current.element : '';
+        while(current && current.next){
+            current = current.next;
+            s += ', ' + current.element;
+        }
+        return s;
+    };
+    this.inverseToString = function() {
+        let current = tail,
+            s = current ? current.element : '';
+        while(current && current.prev){
+            current = current.prev;
+            s += ', ' + current.element;
+        }
+        return s;
+    };
+    this.print = function(){
+        console.log(this.toString());
+    };
+    this.printInverse = function(){
+        console.log(this.inverseToString());
+    };
+    this.getHead = function(){
+        return head;
+    };
+    this.getTail = function(){
+        return tail;
+    }
+}
+```
+
+  双向链表和单项比起来就是Node类多了一个prev属性，也就是每一个node不仅仅有一个指向它后面元素的指针也有一个指向它前面的指针。
+
+### 循环链表
+
+​		整个链表实例变成了一个圈，在单项链表中**最后一个元素**的next属性为null,现在让它指向第一个元素也就是head，那么他就成了**单向循环链表**。在双向链表中最后一个元素的next属性为null,现在让它指向第一个元素也就是head，那么他就成了**双向循环链表**。
+
+### 复杂度
+
+#### 时间复杂度
+
+| Access | Search | Insertion | Deletion |
+| ------ | ------ | --------- | -------- |
+| O(n)   | O(n)   | O(1)      | O(1)     |
+
+#### 空间复杂度
+
+O(n)
