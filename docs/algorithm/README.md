@@ -184,6 +184,38 @@ console.log(queue.size());
 //输出元素个数
 ```
 
+### 实战
+
+栈满足先进后出，队列满足先进先出
+
+#### 用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型
+
+<img src="../img/algorithm/111.jpg" style="zoom:20%;" />
+
+```js
+// 1. 用出入栈进行模拟
+// 2. 进队列全部添加到入栈中
+// 3. 出队列检查出栈是否为空，不为空则将栈顶元素出栈；为空则先将入栈中的所有元素压入出栈
+let in_stack = [],out_stack = [];
+
+function push(value) {
+    in_stack.push(value);
+}
+
+function pop() {
+    if(!out_stack.length){
+        while(in_stack.length > 0){
+            // in_stack.pop()获取'入栈'栈顶元素，out_stack.push将元素推入到'出栈'栈底，反序后可实现出队列效果
+            out_stack.push(in_stack.pop())
+        }
+    }else{
+        return out_stack.pop();
+    }
+}
+```
+
+
+
 ## 链表
 
 ::: tip 链表 
