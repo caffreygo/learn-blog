@@ -114,7 +114,13 @@ console.log(stack.size());
 
 ::: 
 
-![](../img/algorithm/queue.jpg)
+![](../img/algorithm/queue11.png)
+
+::: tip 双向队列 Deque
+
+​		如果一个队列的头和尾都支持元素入队，出队，那么这种队列就称为双向队列，英文是**Deque**
+
+::: 
 
 #### 队列的创建
 
