@@ -194,7 +194,7 @@ console.log(queue.size());
 
 栈满足先进后出，队列满足先进先出
 
-#### 用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型
+### 用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型
 
 <img src="../img/algorithm/111.jpg" style="zoom:20%;" />
 
@@ -220,7 +220,7 @@ function pop() {
 }
 ```
 
-#### 定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1）
+### 定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1）
 
 <img src="../img/algorithm/112.jpg" style="zoom:25%;" />
 
@@ -263,7 +263,46 @@ function min() {
 }
 ```
 
+### 滑动窗口的最大值
 
+给定一个数组 `nums` 和滑动窗口的大小 `k`，请找出所有滑动窗口里的最大值。
+
+[滑动窗口的最大值]: https://zhuanlan.zhihu.com/p/34456480	"滑动窗口的最大值"
+
+```js
+1. 维护一个单调的双向队列
+2. 新增元素与队尾元素比较，比队尾小直接添加，比队尾大，弹出队尾，直到找到该元素合适的位置
+3. 每次将双向队列中队首元素添加到结果中
+var maxSlidingWindow = function(nums, k) {
+    if (k === 0) return [];
+    const length = nums.length;
+    if (length === 0) return [];
+    const deque = [];
+    for (let i = 0; i < k; ++i) {
+        cleanDeque(deque, nums, i, k);
+        deque.push(i);
+    }
+    const res = [];
+    res.push(nums[deque[0]]);
+    for (let i = k; i < length; ++i) {
+        cleanDeque(deque, nums, i, k);
+        deque.push(i);
+        res.push(nums[deque[0]]);
+    }
+    return res;
+};
+
+function cleanDeque(queue, arr, cur, k) {
+    // 如果双向队列中，包含不是滑动窗口内的数，直接出队
+    if (queue.length && cur >= k + queue[0]) {
+        queue.shift();
+    }
+
+    while (queue.length && arr[idx] > nums[queue[queue.length - 1]]) {
+        queue.pop();
+    }
+}
+```
 
 ## 链表
 
