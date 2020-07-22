@@ -271,7 +271,7 @@ function min() {
 
 给定一个数组 `nums` 和滑动窗口的大小 `k`，请找出所有滑动窗口里的最大值。
 
-[滑动窗口的最大值]: https://zhuanlan.zhihu.com/p/34456480	"滑动窗口的最大值"
+https://zhuanlan.zhihu.com/p/34456480
 
 ```js
 1. 维护一个单调的双向队列
@@ -307,6 +307,55 @@ function cleanDeque(queue, arr, cur, k) {
     }
 }
 ```
+
+### 有效的括号
+
+::: tip 
+
+给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。
+
+有效字符串需满足：
+
+左括号必须用相同类型的右括号闭合。 左括号必须以正确的顺序闭合。
+
+::: 
+
+<img src="../img/algorithm/113.jpg" style="zoom:28%;" />
+
+```js
+左括号入栈，右括号与栈顶比较是否匹配，匹配弹出栈顶，不匹配return false
+查看栈是否为空
+var isValid = function(s) {
+    if(!s.length) return true;
+    let stack = [];
+    for(let i = 0;i < s.length;i++){
+        if(s[i] === '(' || s[i] === '{' || s[i] === '['){
+            stack.unshift(s[i]);
+        }else{
+            if(s[i] === ')'){
+                if(stack[0] === '(') stack.shift();
+                else{
+                    return false;
+                }
+            }else if(s[i] === ']'){
+                if(stack[0] === '[') stack.shift();
+                else{
+                    return false;
+                }
+            }else if(s[i] === '}'){
+                if(stack[0] === '{') stack.shift();
+                else{
+                    return false;
+                }
+            }
+        }
+    }
+    // 最后需要全匹配
+    return stack.length === 0;
+};
+```
+
+
 
 ## 链表
 
