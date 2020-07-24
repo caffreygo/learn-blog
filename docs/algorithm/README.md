@@ -415,6 +415,40 @@ var decodeString = function(s) {
 };
 ```
 
+### 根据身高重建队列
+
+::: tip 根据身高重建队列
+
+假设有打乱顺序的一群人站成一个队列。 每个人由一个整数对(h, k)表示，其中h是这个人的身高，k是排在这个人前面且身高大于或等于h的人数。 编写一个算法来重建这个队列。
+
+::: 
+
+```sh
+输入:
+[[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]]
+
+输出:
+[[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]]
+```
+
+```js
+1. 按升高降序，身高相同的按人数升序排列
+2. 将队列的每个元素按序插入到索引位置
+const reconstructQueue = (people)=>{
+    people.sort((a,b)=>{
+        // 首先按照身高h降序排列，同时如果身高相同那么按照k增序
+        return a[0]===b[0]?a[1]-b[1]:b[0]-a[0];
+    });
+    // console.info(people);
+    let res=[];
+    for(let i=0;i<people.length;i++){
+        res.splice(people[i][1],0,people[i]);
+    }
+    // console.info(res);
+    return res;
+};
+```
+
 
 
 ## 链表
