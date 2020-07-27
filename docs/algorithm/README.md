@@ -273,6 +273,9 @@ function min() {
 
 https://zhuanlan.zhihu.com/p/34456480
 
+- <img src="../img/algorithm/114.jpg" style="zoom:25%;" />
+- <img src="../img/algorithm/115.jpg" style="zoom:20%;" />
+
 ```js
 1. 维护一个单调的双向队列
 2. 新增元素与队尾元素比较，比队尾小直接添加，比队尾大，弹出队尾，直到找到该元素合适的位置
@@ -447,6 +450,109 @@ const reconstructQueue = (people)=>{
     // console.info(res);
     return res;
 };
+```
+
+### 中缀表达式转后缀
+
+https://blog.csdn.net/sgbfblog/article/details/8001651
+
+- 数字直接添加到result
+- 栈空，运算符直接入栈
+- 遇到左括号直接入栈，遇到右括号栈顶元素添加到result中然后弹栈，依次循环直到遇到左括号，然后将左括号弹栈
+- 遇到运算符，判断运算符与栈顶元素的优先级，将所有优先级大于等于该运算符的栈顶弹栈，然后入栈该运算符
+- 将栈中剩余的字符添加到result中
+
+```js
+
+function toPoland(str){
+    let stack = [],result = '';
+    for(let i = 0;i < str.length;i++){
+        if(!Object.is(Number(str[i]),NaN)){
+            result += str[i];
+        }else if(stack.length === 0 && Object.is(Number(str[i]),NaN)){
+            result += ' ';
+            stack.push(str[i]);
+        }else if(str[i] === '('){
+            stack.push(str[i])
+        }else if(str[i] === ')'){
+            result += ' ';
+            while(stack[stack.length-1] !== '('){
+                result += stack.pop();
+            }
+            stack.pop();
+        }else if(str[i] === '*' || str[i] === '/'){
+            while(stack[stack.length-1] === '*' || stack[stack.length-1] === '/'){
+                result += ' ' + stack.pop();
+            }
+            result += ' ';
+            stack.push(str[i]);
+        }else if(str[i] === '+' || str[i] === '-'){
+            while(stack[stack.length-1] === '*' || stack[stack.length-1] === '/' || stack[stack.length-1] === '+' || stack[stack.length-1] === '-'){
+                result += ' ' + stack.pop();
+            }
+            result += ' ';
+            stack.push(str[i]);
+        }
+    }
+    while(stack.length){
+        result += ' ' + stack.pop();
+    }
+    return result;
+}
+```
+
+### 计算后缀表达式
+
+后缀表达式也叫逆波兰表达式，其求值过程可以用到栈来辅助存储。假定待求值的后缀表达式为：6  5  2  3  + 8 * + 3  +  *，则其求值过程如下：
+
+1）遍历表达式，遇到的数字首先放入栈中，此时栈如下所示：
+
+2）接着读到“+”，则弹出3和2，执行3+2，计算结果等于5，并将5压入到栈中。
+
+3）读到8，将其直接放入栈中。
+
+4）读到“*”，弹出8和5，执行8*5，并将结果40压入栈中。而后过程类似，读到“+”，将40和5弹出，将40+5的结果45压入栈...以此类推。最后求的值288。
+
+::: tip 
+
+1. 数字入栈 
+2. 运算符，栈顶作为右操作数，次栈顶作为左操作数 
+3. 将运算结果入栈 
+4. 栈最后一个值即为结果
+
+::: 
+
+```js
+function CalcRPN(str) {
+    let stack = [];
+    let num = '';
+    for(let i = 0;i < str.length;i++){
+        if(str[i] === ' '){
+            if(num !== '') stack.push(Number(num));
+            num = '';
+        }else if(!Object.is(Number(str[i]),NaN)){
+            num += str[i];
+        }else if(str[i] === '+'){
+            let right = stack.pop();
+            let left = stack.pop();
+
+            stack.push(left + right);
+        }else if(str[i] === '-'){
+            let right = stack.pop();
+            let left = stack.pop();
+            stack.push(left - right);
+        }else if(str[i] === '*'){
+            let right = stack.pop();
+            let left = stack.pop();
+            stack.push(left * right);
+        }else if(str[i] === '/'){
+            let right = stack.pop();
+            let left = stack.pop();
+            stack.push(left / right);
+        }
+    }
+    return stack.pop();
+}
 ```
 
 
