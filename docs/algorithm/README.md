@@ -198,7 +198,13 @@ console.log(queue.size());
 
 栈满足先进后出，队列满足先进先出
 
-### 用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型
+### 两个栈实现队列
+
+::: tip 
+
+用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型
+
+::: 
 
 <img src="../img/algorithm/111.jpg" style="zoom:20%;" />
 
@@ -224,7 +230,13 @@ function pop() {
 }
 ```
 
-### 定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1）
+### 栈最小函数
+
+::: tip 
+
+定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1）
+
+::: 
 
 <img src="../img/algorithm/112.jpg" style="zoom:25%;" />
 
@@ -553,6 +565,73 @@ function CalcRPN(str) {
     }
     return stack.pop();
 }
+```
+
+### 整数序列弹出判断
+
+::: tip 
+
+输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否可能为该栈的弹出顺序。假设压入栈的所有数字均不相等。
+
+- 模拟出栈的过程
+- 变量push栈，每次将一个元素压入辅助栈
+- 判断辅助栈是否为空的同时，pop栈的栈顶是否与辅助栈栈顶元素相同，如果都满足则两者出栈
+- 最后判断辅助栈是否为空 
+
+例如序列1,2,3,4,5是某栈的压入顺序，序列4,5,3,2,1是该压栈序列对应的一个弹出序列，但4,3,5,1,2就不可能是该压栈序列的弹出序列。 // （注意：这两个序列的长度是相等的）
+
+::: 
+
+```js
+function IsPopOrder(pushV, popV) {
+    let stack = [],k = 0;
+    for(let i = 0;i < pushV.length;i++){
+        stack.unshift(pushV[i]);
+        while(stack[0] && popV[k] && stack[0] === popV[k]){
+            stack.shift();
+            k++;
+        }
+    }
+    return stack.length === 0;
+}
+```
+
+### 数组中的第K个最大元素
+
+```js
+var findKthLargest = function(nums, k) {
+    let queue = [];
+    for(let i = 0;i < nums.length;i++){
+        if(queue.length < k) {
+           let pos = 0;
+           while(pos < k) {
+               if(queue[pos] === undefined) {
+                    queue[pos] = nums[i];
+                    break;
+               } else {
+                   if(nums[i] > queue[pos]) {
+                       queue.splice(pos,0,nums[i]);
+                       break;
+                   }
+               }
+               pos++;
+           }
+        } else {
+            if(nums[i] > queue[k-1]) {
+                let pos = 0;
+                while(pos < k) {
+                    if(nums[i] > queue[pos]) {
+                       queue.splice(pos,0,nums[i]);
+                       queue.pop();
+                       break;
+                    }
+                    pos++;
+                }                
+            }
+        }
+    }
+    return queue[k-1];
+};
 ```
 
 
