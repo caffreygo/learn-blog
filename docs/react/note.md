@@ -17,7 +17,7 @@
 - 组件内引入该样式组件，放在需要渲染组件的最上方
 
 ```js
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
     html, body, div, span, applet, object, iframe,
@@ -67,8 +67,8 @@ export const GlobalStyle = createGlobalStyle`
 ```
 
 ```js
-import React, { Fragment } from 'react';
-import { GlobalStyle } from './style.js';
+import React, { Fragment } from "react";
+import { GlobalStyle } from "./style.js";
 
 function App() {
   return (
@@ -87,7 +87,7 @@ export default App;
 1. 创建一个 div 组件带有样式
 
    ```js
-   import styled from 'styled-components';
+   import styled from "styled-components";
 
    export const HeaderWrapper = styled.div`
      height: 56px;
@@ -98,8 +98,8 @@ export default App;
 2. 组件引入使用该组件
 
    ```js
-   import React, { Component } from 'react';
-   import { HeaderWrapper } from './style';
+   import React, { Component } from "react";
+   import { HeaderWrapper } from "./style";
 
    class Header extends Component {
      render() {
@@ -116,11 +116,11 @@ export default App;
 - hred 这种属性可以直接在组件上写`<Logo href="/" />`，也可以在 style 的**attr**方法内添加
 
 ```js
-import styled from 'styled-components';
-import LogoPic from '../../statics/logo.png';
+import styled from "styled-components";
+import LogoPic from "../../statics/logo.png";
 
 export const Logo = styled.a.attrs({
-  href: '/',
+  href: "/",
 })`
   position: absolute;
   top: 0;
@@ -133,9 +133,9 @@ export const Logo = styled.a.attrs({
 `;
 ```
 
-------
+---
 
---------------------------------
+---
 
 通过`${(props)=> ~}`函数返回值使用**组件属性**
 
@@ -148,22 +148,20 @@ export const Logo = styled.a.attrs({
 
 ```js
 export const RecommendItem = styled.div`
-    width: 280px;
-    height: 50px;
-    margin-bottom: 5px;
-    background-image: url(${(props) => props.imgUrl});
-    background-size: contain;
+  width: 280px;
+  height: 50px;
+  margin-bottom: 5px;
+  background-image: url(${(props) => props.imgUrl});
+  background-size: contain;
 `;
 ```
 
 ```js
 var item = {
-    id: 1,
-    imgUrl: require("../../../statics/1.png")
-}
+  id: 1,
+  imgUrl: require("../../../statics/1.png"),
+};
 ```
-
-
 
 ### Input 组件
 
@@ -171,7 +169,7 @@ var item = {
 
 ```js
 export const NavSearch = styled.input.attrs({
-  placeholder: '搜索',
+  placeholder: "搜索",
 })`
   width: 160px;
   height: 38px;
@@ -211,7 +209,7 @@ export const NavSearch = styled.input.attrs({
 - 修改 iconfont.css 为 iconfont.js 文件，使用`createGlobalStyle`导出全局 iconfont 组件
 
   ```js
-  import { createGlobalStyle } from 'styled-components';
+  import { createGlobalStyle } from "styled-components";
 
   export const IconFont = createGlobalStyle`
   @font-face {
@@ -252,10 +250,10 @@ export const NavSearch = styled.input.attrs({
 - App.js 使用 IconFont 组件
 
   ```js
-  import React, { Fragment } from 'react';
-  import Header from './common/header';
-  import { GlobalStyle } from './style.js';
-  import { IconFont } from './statics/iconfont/iconfont.js';
+  import React, { Fragment } from "react";
+  import Header from "./common/header";
+  import { GlobalStyle } from "./style.js";
+  import { IconFont } from "./statics/iconfont/iconfont.js";
 
   function App() {
     return (
@@ -338,8 +336,8 @@ export const NavSearch = styled.input.attrs({
 - 定义 store/index.js
 
   ```js
-  import { createStore } from 'redux';
-  import reducer from './reducer';
+  import { createStore } from "redux";
+  import reducer from "./reducer";
 
   const store = createStore(reducer);
 
@@ -354,12 +352,12 @@ export const NavSearch = styled.input.attrs({
   };
 
   export default (state = defaultState, action) => {
-    if (action.type === 'search_focus') {
+    if (action.type === "search_focus") {
       return {
         focused: true,
       };
     }
-    if (action.type === 'search_blur') {
+    if (action.type === "search_blur") {
       return {
         focused: false,
       };
@@ -371,12 +369,12 @@ export const NavSearch = styled.input.attrs({
 - App.js 引入 store 和 Provider 组件
 
   ```js
-  import React, { Fragment } from 'react';
-  import Header from './common/header';
-  import store from './store';
-  import { Provider } from 'react-redux';
-  import { GlobalStyle } from './style.js';
-  import { IconFont } from './statics/iconfont/iconfont.js';
+  import React, { Fragment } from "react";
+  import Header from "./common/header";
+  import store from "./store";
+  import { Provider } from "react-redux";
+  import { GlobalStyle } from "./style.js";
+  import { IconFont } from "./statics/iconfont/iconfont.js";
 
   function App() {
     return (
@@ -424,8 +422,8 @@ export const NavSearch = styled.input.attrs({
 https://github.com/zalmoxisus/redux-devtools-extension
 
 ```js
-import { createStore, compose } from 'redux';
-import reducer from './reducer';
+import { createStore, compose } from "redux";
+import reducer from "./reducer";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -448,12 +446,12 @@ const defaultState = {
 };
 
 export default (state = defaultState, action) => {
-  if (action.type === 'search_focus') {
+  if (action.type === "search_focus") {
     return {
       focused: true,
     };
   }
-  if (action.type === 'search_blur') {
+  if (action.type === "search_blur") {
     return {
       focused: false,
     };
@@ -465,7 +463,7 @@ export default (state = defaultState, action) => {
 - common/header/store/index.js 导出
 
 ```js
-import reducer from './reducer';
+import reducer from "./reducer";
 
 export { reducer };
 ```
@@ -476,8 +474,8 @@ export { reducer };
 - as 是 es6 实现的别名
 
 ```js
-import { combineReducers } from 'redux';
-import { reducer as headerReducer } from '../common/header/store';
+import { combineReducers } from "redux";
+import { reducer as headerReducer } from "../common/header/store";
 
 const reducer = combineReducers({
   header: headerReducer,
@@ -513,7 +511,7 @@ const mapStateToProps = (state) => {
 - actionCreators 创建 action
 
   ```js
-  import * as constants from './constants';
+  import * as constants from "./constants";
 
   export const searchFocus = () => ({
     type: constants.SEARCH_FOCUS,
@@ -527,16 +525,16 @@ const mapStateToProps = (state) => {
 - constants 统一定义 action types
 
   ```js
-  export const SEARCH_FOCUS = 'header/SEARCH_FOCUS';
-  export const SEARCH_BLUR = 'header/SEARCH_BLUR';
+  export const SEARCH_FOCUS = "header/SEARCH_FOCUS";
+  export const SEARCH_BLUR = "header/SEARCH_BLUR";
   ```
 
 - store/index 统一导出
 
   ```js
-  import reducer from './reducer';
-  import * as actionCreators from './actionCreators';
-  import * as constants from './constants';
+  import reducer from "./reducer";
+  import * as actionCreators from "./actionCreators";
+  import * as constants from "./constants";
 
   export { reducer, actionCreators, constants };
   ```
@@ -544,7 +542,7 @@ const mapStateToProps = (state) => {
 - reducer
 
   ```js
-  import * as constants from './constants';
+  import * as constants from "./constants";
 
   const defaultState = {
     focused: false,
@@ -586,19 +584,19 @@ const mapStateToProps = (state) => {
 
 ## Immutable.js
 
-::: tip 
+::: tip
 
 - state 不能直接修改，reducer 应返回一个新的 state
 - 原始的方法存在 state 被误修改的风险
 - immutable.js 帮助我们生成一个 immutable 对象（不可改变）
 - 实现 state 不可改变（fromJS、get、set）
 
-::: 
+:::
 
 1. 将 reducer 中的 state 转化为通过`fromJS`方法转化为 immutable 对象
 
    ```js
-   import { fromJS } from 'immutable';
+   import { fromJS } from "immutable";
 
    const defaultState = fromJS({
      focused: false,
@@ -610,7 +608,7 @@ const mapStateToProps = (state) => {
    ```js
    const mapStateToProps = (state) => {
      return {
-       focused: state.header.get('focused'),
+       focused: state.header.get("focused"),
      };
    };
    ```
@@ -622,10 +620,10 @@ const mapStateToProps = (state) => {
    ```js
    export default (state = defaultState, action) => {
      if (action.type === constants.SEARCH_FOCUS) {
-       return state.set('focused', true);
+       return state.set("focused", true);
      }
      if (action.type === constants.SEARCH_BLUR) {
-       return state.set('focused', false);
+       return state.set("focused", false);
      }
      return state;
    };
@@ -634,13 +632,13 @@ const mapStateToProps = (state) => {
 ::: tip
 
 ```js
-state.set('list', action.data).set('totalPage', action.totalPage);
+state.set("list", action.data).set("totalPage", action.totalPage);
 
 // merge比多次的set操作性能更高
 state.merge({
-    list: action.data,
-    totalPage: action.totalPage
-})
+  list: action.data,
+  totalPage: action.totalPage,
+});
 ```
 
 :::
@@ -658,8 +656,8 @@ state.merge({
 1. store/reducer.js
 
    ```js
-   import { combineReducers } from 'redux-immutable';
-   import { reducer as headerReducer } from '../common/header/store';
+   import { combineReducers } from "redux-immutable";
+   import { reducer as headerReducer } from "../common/header/store";
 
    const reducer = combineReducers({
      header: headerReducer,
@@ -672,7 +670,7 @@ state.merge({
    const mapStateToProps = (state) => {
      return {
        // focused: state.get('header').get('focused')
-       focused: state.getIn(['header', 'focused']),
+       focused: state.getIn(["header", "focused"]),
      };
    };
    ```
@@ -682,9 +680,9 @@ state.merge({
 - 异步数据的获取都拆分到 actionCreators 中，要求 actionCreators 返回值从对象变成函数，这需要`redux-thunk`这个中间件，修改 store/index 配置如下:
 
   ```js
-  import { createStore, compose, applyMiddleware } from 'redux';
-  import thunk from 'redux-thunk';
-  import reducer from './reducer';
+  import { createStore, compose, applyMiddleware } from "redux";
+  import thunk from "redux-thunk";
+  import reducer from "./reducer";
 
   const composeEnhancers =
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -697,9 +695,9 @@ state.merge({
 - list 作为 state 的内部数组也是 immutable 类型的数组，如果直接派发改变会将该数组变成普通数组，在`changeList`函数中生成的 action 的 list 需要`fromJs`方法转换一下
 
   ```js
-  import * as constants from './constants';
-  import { fromJS } from 'immutable';
-  import axios from 'axios';
+  import * as constants from "./constants";
+  import { fromJS } from "immutable";
+  import axios from "axios";
 
   const changeList = (data) => ({
     type: constants.CHANGE_LIST,
@@ -709,7 +707,7 @@ state.merge({
   export const getList = () => {
     return (dispatch) => {
       axios
-        .get('api/headerList.json')
+        .get("api/headerList.json")
         .then((res) => {
           const { success, data } = res.data;
           if (success) {
@@ -717,7 +715,7 @@ state.merge({
           }
         })
         .catch(() => {
-          console.log('err');
+          console.log("err");
         });
     };
   };
@@ -738,8 +736,8 @@ state.merge({
 reducer.js：switch 语法一般需要跟 break，这边 case 之后有 return，就不需要了
 
 ```js
-import * as constants from './constants';
-import { fromJS } from 'immutable';
+import * as constants from "./constants";
+import { fromJS } from "immutable";
 
 const defaultState = fromJS({
   focused: false,
@@ -749,11 +747,11 @@ const defaultState = fromJS({
 export default (state = defaultState, action) => {
   switch (action.type) {
     case constants.SEARCH_FOCUS:
-      return state.set('focused', true);
+      return state.set("focused", true);
     case constants.SEARCH_BLUR:
-      return state.set('focused', false);
+      return state.set("focused", false);
     case constants.CHANGE_LIST:
-      return state.set('list', action.data);
+      return state.set("list", action.data);
     default:
       return state;
   }
@@ -762,13 +760,13 @@ export default (state = defaultState, action) => {
 
 ### 请求优化
 
-list数据在请求之后便不需要再重复请求了，`handleInpusFocus`内传入list，请求时判断
+list 数据在请求之后便不需要再重复请求了，`handleInpusFocus`内传入 list，请求时判断
 
 ```js
 <NavSearch
-    onFocus={() => handleInpusFocus(list)}
-    onBlur={handleInpusBlur}
-    className={focused ? 'focused' : ''}
+  onFocus={() => handleInpusFocus(list)}
+  onBlur={handleInpusBlur}
+  className={focused ? "focused" : ""}
 ></NavSearch>
 ```
 
@@ -779,9 +777,9 @@ handleInpusFocus(list) {
 }
 ```
 
-## css实现旋转动画
+## css 实现旋转动画
 
-- 使用`ref`获取到原始dom标签，在`handlePageChange`中传入
+- 使用`ref`获取到原始 dom 标签，在`handlePageChange`中传入
 
 ```html
 <SearchInfoSwitch
@@ -792,9 +790,9 @@ handleInpusFocus(list) {
 </SearchInfoSwitch>
 ```
 
-- `handlePageChange`获取到style的transform属性，将非数字替换为空
+- `handlePageChange`获取到 style 的 transform 属性，将非数字替换为空
 
-  旋转角度自增360，更新`transform: rotate(xxxdeg)`
+  旋转角度自增 360，更新`transform: rotate(xxxdeg)`
 
 ```js
 handlePageChange(page, totalPage, spin) {
@@ -813,26 +811,26 @@ handlePageChange(page, totalPage, spin) {
 }
 ```
 
-- block标签才能transform旋转
+- block 标签才能 transform 旋转
 
-  transform-origin设置旋转中心，这边是center
+  transform-origin 设置旋转中心，这边是 center
 
-  transition设置动画
+  transition 设置动画
 
 ```js
 export const SearchInfoSwitch = styled.span`
-    float: right;
-    cursor: pointer;
-    font-size: 13px;
-    .spin {
-        display: block;
-        float: left;
-        font-size: 12px;
-        margin-right: 2px;
-        transition: all .2s ease-in;
-        transform-origin: center center;
-    }
-`
+  float: right;
+  cursor: pointer;
+  font-size: 13px;
+  .spin {
+    display: block;
+    float: left;
+    font-size: 12px;
+    margin-right: 2px;
+    transition: all 0.2s ease-in;
+    transform-origin: center center;
+  }
+`;
 ```
 
 ## 路由
@@ -842,13 +840,13 @@ npm install --save react-router-dom
 ```
 
 ```js
-import React, { Fragment } from 'react';
-import Header from './common/header';
-import store from './store';
-import { BrowserRouter, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { GlobalStyle } from './style.js';
-import { IconFont } from './statics/iconfont/iconfont.js'
+import React, { Fragment } from "react";
+import Header from "./common/header";
+import store from "./store";
+import { BrowserRouter, Route } from "react-router-dom";
+import { Provider } from "react-redux";
+import { GlobalStyle } from "./style.js";
+import { IconFont } from "./statics/iconfont/iconfont.js";
 
 function App() {
   return (
@@ -863,7 +861,6 @@ function App() {
         </BrowserRouter>
       </Provider>
     </Fragment>
-
   );
 }
 
@@ -872,16 +869,16 @@ export default App;
 
 ::: tip react-router-dom
 
-- path属性匹配路由，添加**exact**属性后`/detail`页面将不会加载home组件
-- **Route**组件的render返回渲染内容（路由规则）
+- path 属性匹配路由，添加**exact**属性后`/detail`页面将不会加载 home 组件
+- **Route**组件的 render 返回渲染内容（路由规则）
 - 即根据路由的不同渲染不同的组件
 
 :::
 
 ```html
 <BrowserRouter>
-    <Route path="/" exact component={Home}></Route>
-    <Route path="/detail" component={Detail}></Route>
+  <Route path="/" exact component="{Home}"></Route>
+  <Route path="/detail" component="{Detail}"></Route>
 </BrowserRouter>
 ```
 
@@ -889,18 +886,18 @@ export default App;
 
 ::: tip mapDispatch
 
-- 父组件通过`connect`方法连接store，在父组件`dispatch`的action，**所有**的子组件都能接收到
-- `formJS`方法可以将普通对象转化为immutableJS对象，然后`set`更新state
+- 父组件通过`connect`方法连接 store，在父组件`dispatch`的 action，**所有**的子组件都能接收到
+- `formJS`方法可以将普通对象转化为 immutableJS 对象，然后`set`更新 state
 - `merge`方法同上可以执行多次的`set`操作
-- 通过**redux-thunk**可以实现将异步请求放到action中管理，而不是在组件内
+- 通过**redux-thunk**可以实现将异步请求放到 action 中管理，而不是在组件内
 
 :::
 
 ### 组件内的获取
 
-1. connect方法连接store
-2. componentDidMount时创建action派发给reducer
-3. reducer根据action.type设置immutableJS数据返回
+1. connect 方法连接 store
+2. componentDidMount 时创建 action 派发给 reducer
+3. reducer 根据 action.type 设置 immutableJS 数据返回
 
 ```js
 // pages/home/index.js
@@ -953,12 +950,12 @@ const defaultState = fromJS({
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case 'change_home_data':
+    case "change_home_data":
       return state.merge({
         topicList: fromJS(action.topicList),
         articleList: fromJS(action.articleList),
         recommendList: fromJS(action.recommendList),
-      })
+      });
     default:
       return state;
   }
@@ -969,17 +966,17 @@ export default (state = defaultState, action) => {
 
 ::: tip redux
 
-- 首先创建action，派发给reducer
-- reducer获取action，最后更新state
-- actionCreators管理action的创建
-- constants管理actionTypes
-- redux-thunk能够实现action的创建返回一个函数（getHomeInfo返回函数，函数内创建action然后派发）
+- 首先创建 action，派发给 reducer
+- reducer 获取 action，最后更新 state
+- actionCreators 管理 action 的创建
+- constants 管理 actionTypes
+- redux-thunk 能够实现 action 的创建返回一个函数（getHomeInfo 返回函数，函数内创建 action 然后派发）
 
 :::
 
-#### 组件index
+#### 组件 index
 
-获取actionCreators方法创建action，并且派发给reducer
+获取 actionCreators 方法创建 action，并且派发给 reducer
 
 ```js
 import React, { Component } from 'react';
@@ -1014,20 +1011,20 @@ export default connect(null,mapDispatch)(Home);
 import axios from "axios";
 import * as constants from "./constants";
 
-const changeHomeData = (result)=> ({
-    type: constants.CHANGE_HOME_DATA,
-    topicList: result.topicList,
-    articleList: result.articleList,
-    recommendList: result.recommendList
-})
+const changeHomeData = (result) => ({
+  type: constants.CHANGE_HOME_DATA,
+  topicList: result.topicList,
+  articleList: result.articleList,
+  recommendList: result.recommendList,
+});
 // !!!!!!!!!  redux-thunk
-export const getHomeInfo = ()=> {
-    return (dispatch)=>
-    axios.get("/api/home.json").then(res=>{
-        const {success,data} = res.data;
-        success && dispatch(changeHomeData(data));
-    })
-}
+export const getHomeInfo = () => {
+  return (dispatch) =>
+    axios.get("/api/home.json").then((res) => {
+      const { success, data } = res.data;
+      success && dispatch(changeHomeData(data));
+    });
+};
 ```
 
 #### constants
@@ -1039,11 +1036,11 @@ export const CHANGE_HOME_DATA = "home/CHANGE_HOME_DATA";
 #### index
 
 ```js
-import reducer from './reducer';
+import reducer from "./reducer";
 import * as constants from "./constants";
 import * as actionCreators from "./actionCreators";
 
-export { reducer,actionCreators,constants }
+export { reducer, actionCreators, constants };
 ```
 
 #### reducer
@@ -1065,7 +1062,7 @@ export default (state = defaultState, action) => {
         topicList: fromJS(action.topicList),
         articleList: fromJS(action.articleList),
         recommendList: fromJS(action.recommendList),
-      })
+      });
     default:
       return state;
   }
@@ -1074,15 +1071,15 @@ export default (state = defaultState, action) => {
 
 ## 页面路由参数获取
 
-### params参数
+### params 参数
 
 - `App.js`组件路由设置
 
 ```html
-<Route path="/detail/:id" component={Detail}></Route>
+<Route path="/detail/:id" component="{Detail}"></Route>
 ```
 
-- home页面List组件添加**参数跳转**
+- home 页面 List 组件添加**参数跳转**
 
 ```html
 <Link key={index} to={"/detail/" + item.get("id")}>
@@ -1090,7 +1087,7 @@ export default (state = defaultState, action) => {
 </Link>
 ```
 
-- detail页面参数获取  `this.props.match.params.id`
+- detail 页面参数获取 `this.props.match.params.id`
 
 ```js
 componentDidMount() {
@@ -1098,15 +1095,15 @@ componentDidMount() {
 }
 ```
 
-### query参数
+### query 参数
 
 - `App.js`组件路由**无需设置**特殊参数
 
 ```html
-<Route path="/detail" component={Detail}></Route>
+<Route path="/detail" component="{Detail}"></Route>
 ```
 
-- home页面List组件添加**参数跳转**
+- home 页面 List 组件添加**参数跳转**
 
 ```html
 <Link key={index} to={"/detail?id=" + item.get("id")}>
@@ -1122,7 +1119,7 @@ componentDidMount() {
 
 ## 异步组件加载
 
-实现页面在访问某个路由页面的时候再加载**对应的js**文件，减少首屏加载时间
+实现页面在访问某个路由页面的时候再加载**对应的 js**文件，减少首屏加载时间
 
 ```shell
 |-- pages
@@ -1151,13 +1148,101 @@ export default () => <LoadableComponent />;
 
 - #### withRouter
 
-**detail页面**需要获取对应的文章id，但是经过**loadable**处理返回后的组件已经无法再直接拿到参数，需要借助react-router-dom的**withRouter**包装返回
+**detail 页面**需要获取对应的文章 id，但是经过**loadable**处理返回后的组件已经无法再直接拿到参数，需要借助 react-router-dom 的**withRouter**包装返回
 
 `export default connect(mapState, mapDispatch)(withRouter(Detail));`
+
+## 加载更多
+
+1. 点击**更多文字**派发 action 异步获取下一页数据 （page 表示当前页页码，获取时增 1）
+2. 获取成功后派发 addHomeList 这个 action,reducer 接收后 concat 文章数据
+
+```js
+import React, { PureComponent } from "react";
+import { ListItem, ListInfo, LoadMore } from "../style";
+import { connect } from "react-redux";
+import { actionCreators } from "../store";
+import { Link } from "react-router-dom";
+
+class List extends PureComponent {
+  render() {
+    const { list, getMoreList, page } = this.props;
+    return (
+      <div>
+        {list.map((item, index) => {
+          return (
+            <Link key={index} to="/detail">
+              <ListItem>
+                <img className="pic" alt="" src={item.get("imgUrl")} />
+                <ListInfo>
+                  <h3 className="title">{item.get("title")}</h3>
+                  <p className="desc">{item.get("desc")}</p>
+                </ListInfo>
+              </ListItem>
+            </Link>
+          );
+        })}
+        <LoadMore onClick={() => getMoreList(page)}>更多文字</LoadMore>
+      </div>
+    );
+  }
+}
+
+const mapState = (state) => ({
+  list: state.getIn(["home", "articleList"]),
+  page: state.getIn(["home", "articlePage"]),
+});
+
+const mapDispatch = (dispatch) => ({
+  getMoreList(page) {
+    dispatch(actionCreators.getMoreList(page));
+  },
+});
+
+export default connect(mapState, mapDispatch)(List);
+```
+
+### actionCreators
+
+```js
+const addArticleList = (state, action) => {
+  return state.merge({
+    articleList: state.get("articleList").concat(action.list),
+    articlePage: action.nextPage,
+  });
+};
+
+export const getMoreList = (page) => {
+  return (dispatch) => {
+    axios.get(`/api/homeList.json?page=${page}`).then((res) => {
+      const data = res.data.data;
+      dispatch(addHomeList(data, page + 1));
+    });
+  };
+};
+```
+
+### reducer
+
+```js
+const addArticleList = (state, action) => {
+  return state.merge({
+    articleList: state.get("articleList").concat(action.list),
+    articlePage: action.nextPage,
+  });
+};
+```
+
+## 回到顶部
+
+1. 监听 window 的 scroll 事件，到达阈值显示回到顶部按钮
+2. 点击回到顶部执行 window.scrollTl(0,0)
+3. componentWillUnmount 移除监听
 
 ```js
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
+<<<<<<< HEAD
 import { withRouter } from "react-router-dom";
 
 class Detail extends PureComponent {
@@ -1165,20 +1250,115 @@ class Detail extends PureComponent {
     const { title, content } = this.props;
     return (
       JSX......
+=======
+import List from "./components/List";
+import Recommend from "./components/Recommend";
+import Writer from "./components/Writer";
+import Topic from "./components/Topic";
+import { HomeWrapper, HomeLeft, HomeRight, BackTop } from "./style";
+import { actionCreators } from "./store";
+
+class Home extends PureComponent {
+  handleScrollTop() {
+    window.scrollTo(0, 0);
+  }
+  render() {
+    const { showScroll } = this.props;
+    return (
+      <HomeWrapper>
+        <HomeLeft>
+          <img
+            className="banner-img"
+            alt=""
+            src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1592200833675&di=6fc258493302450c75369d484e287e9b&imgtype=0&src=http%3A%2F%2Fattach.bbs.miui.com%2Fforum%2F201306%2F23%2F110328s72xxse7lfis9fnd.jpg"
+          />
+          <Topic />
+          <List />
+        </HomeLeft>
+        <HomeRight>
+          <Recommend />
+          <Writer />
+        </HomeRight>
+        {showScroll ? (
+          <BackTop onClick={this.handleScrollTop}>回到顶部</BackTop>
+        ) : null}
+      </HomeWrapper>
+>>>>>>> c126359de7417042a3f2a740f3802ed80315daa0
     );
   }
 
   componentDidMount() {
+<<<<<<< HEAD
     this.props.getDetail(this.props.match.params.id);
+=======
+    this.props.changeHomeData();
+    // 滚动事件监听
+    this.bindEvent();
+  }
+
+  componentWillUnmount() {
+    // 移除事件
+    window.removeEventListener("scroll", this.props.changeScrollTopShow);
+  }
+
+  bindEvent() {
+    window.addEventListener("scroll", this.props.changeScrollTopShow);
+>>>>>>> c126359de7417042a3f2a740f3802ed80315daa0
   }
 }
 
 const mapState = (state) => ({
+<<<<<<< HEAD
 });
 
 const mapDispatch = (dispatch) => ({
 });
 
 export default connect(mapState, mapDispatch)(withRouter(Detail));
+=======
+  showScroll: state.getIn(["home", "showScroll"]),
+});
+
+const mapDispatch = (dispatch) => ({
+  changeHomeData() {
+    dispatch(actionCreators.getHomeInfo());
+  },
+  changeScrollTopShow(e) {
+    // 派发toggleTopShow
+    if (document.documentElement.scrollTop > 400) {
+      dispatch(actionCreators.toggleTopShow(true));
+    } else {
+      dispatch(actionCreators.toggleTopShow(false));
+    }
+  },
+});
+
+export default connect(mapState, mapDispatch)(Home);
 ```
 
+## 路由跳转
+
+react 的单页面应用由**react-router-dom**实现路由的跳转，不会重新加载 html，只改变部分区域的显示
+
+**Link**组件实现链接
+
+```html
+<Link to="/detail">跳转到详情页</Link>
+```
+
+## PureComponent
+
+组件需要使用`shouldComponentUpdate`观察不需要重新渲染的 redux 数据，减少某些组件的不必要重新渲染
+
+在使用了`immutable.js`下，我们只需要引入**PureComponent**代替原来的 Component 的 class 即可自动实现该功能
+
+```js
+import React, { PureComponent } from "react";
+
+class List extends PureComponent {
+  render() {
+    // ....
+  }
+}
+>>>>>>> c126359de7417042a3f2a740f3802ed80315daa0
+```

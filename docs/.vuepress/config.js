@@ -5,7 +5,14 @@ module.exports = {
   head: [['link', { rel: 'icon', href: '/gift.png' }]],
   themeConfig: {
     nav: [
-      { text: 'TypeScript', link: '/typescript/' },
+      {
+        text: 'TypeScript',
+        ariaLabel: 'TypeScript',
+        items: [
+          { text: '语法学习', link: '/typescript/grammar/' },
+          { text: '爬虫实现', link: '/typescript/crawler/' },
+        ]
+      },
       {
         text: '书籍相关',
         ariaLabel: 'JavaScript书籍',
@@ -18,15 +25,24 @@ module.exports = {
       { text: 'React', link: '/react/' },
       { text: 'JavaScript', link: '/javascript/' },
       { text: 'Git', link: '/git/' },
-      { text: 'Note', link: '/basic/' },
+      {
+        text: '笔记相关',
+        ariaLabel: 'note',
+        items: [
+          { text: '日常笔记', link: '/basic/' },
+          { text: '算法', link: '/algorithm/' }
+        ]
+      },
       { text: 'Github', link: 'https://github.com/caffreygo' }
     ],
     sidebar: {
-      '/typescript/': ['', 'crawler', 'step2', 'step3', 'step4', 'step5'],
+      '/typescript/grammar/': ['', 'advanced', 'final'],
+      '/typescript/crawler/': ['', 'express', 'final'],
       '/book/': ['designPattern'],
       '/webpack/': ['', 'step-2', 'step-3', 'step-4', 'step-5'],
       '/react/': ['', 'redux', 'note'],
       '/http/': [''],
+      '/algorithm/': [''],
       '/javascript/': ['', 'demo'],
       '/git/': [''],
       '/basic/': ['']
