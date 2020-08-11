@@ -586,14 +586,14 @@ const mapStateToProps = (state) => {
 
 ## Immutable.js
 
-::: tip
+::: tip 
 
 - state 不能直接修改，reducer 应返回一个新的 state
 - 原始的方法存在 state 被误修改的风险
 - immutable.js 帮助我们生成一个 immutable 对象（不可改变）
 - 实现 state 不可改变（fromJS、get、set）
 
-:::
+::: 
 
 1. 将 reducer 中的 state 转化为通过`fromJS`方法转化为 immutable 对象
 
@@ -1070,5 +1070,115 @@ export default (state = defaultState, action) => {
       return state;
   }
 };
+```
+
+## 页面路由参数获取
+
+### params参数
+
+- `App.js`组件路由设置
+
+```html
+<Route path="/detail/:id" component={Detail}></Route>
+```
+
+- home页面List组件添加**参数跳转**
+
+```html
+<Link key={index} to={"/detail/" + item.get("id")}>
+	...
+</Link>
+```
+
+- detail页面参数获取  `this.props.match.params.id`
+
+```js
+componentDidMount() {
+    this.props.getDetail(this.props.match.params.id);
+}
+```
+
+### query参数
+
+- `App.js`组件路由**无需设置**特殊参数
+
+```html
+<Route path="/detail" component={Detail}></Route>
+```
+
+- home页面List组件添加**参数跳转**
+
+```html
+<Link key={index} to={"/detail?id=" + item.get("id")}>
+	...
+</Link>
+```
+
+- 参数获取`this.props.location.search`，需要自己**再处理**这个参数
+
+```
+?id=2
+```
+
+## 异步组件加载
+
+实现页面在访问某个路由页面的时候再加载**对应的js**文件，减少首屏加载时间
+
+```shell
+|-- pages
+|   |-- detail
+|   |   |-- store
+|   |   |-- index.js
+|   |   |-- loadable.js
+|   |   |-- style.js
+```
+
+- #### loadable.js
+
+```js
+import Loadable from "react-loadable";
+import React from "react";
+
+const LoadableComponent = Loadable({
+  loader: () => import("./index"),
+  loading() {
+    return <div>正在加载...</div>;
+  },
+});
+
+export default () => <LoadableComponent />;
+```
+
+- #### withRouter
+
+**detail页面**需要获取对应的文章id，但是经过**loadable**处理返回后的组件已经无法再直接拿到参数，需要借助react-router-dom的**withRouter**包装返回
+
+`export default connect(mapState, mapDispatch)(withRouter(Detail));`
+
+```js
+import React, { PureComponent } from "react";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+
+class Detail extends PureComponent {
+  render() {
+    const { title, content } = this.props;
+    return (
+      JSX......
+    );
+  }
+
+  componentDidMount() {
+    this.props.getDetail(this.props.match.params.id);
+  }
+}
+
+const mapState = (state) => ({
+});
+
+const mapDispatch = (dispatch) => ({
+});
+
+export default connect(mapState, mapDispatch)(withRouter(Detail));
 ```
 
