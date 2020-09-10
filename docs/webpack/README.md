@@ -238,7 +238,111 @@ $ npx webpack index.js
 
 正如上面你所看到的那样，网页正确显示了我们期待的结果，这也是 Webpack 能为我们解决问题的一小部分能力，下面将正式开始介绍 Webpack 。
 
+## loader的编写
 
+::: tip Loader
+
+​	loader实际上是一个函数，实现对源码source的处理
+
+::: 
+
+```shell
+npm init
+npm install webpack webpack-cli loader-utils -D
+```
+
+```sh
+|-- loaders
+|   |-- replaceLoader.js
+|   |-- replaceLoaderAsync.js
+|-- src
+|   |-- index.js
+|-- package.json
+|-- webpack.config.js
+```
+
+- webpack.config.js （resolveLoader：loader引用时查找位置配置）
+
+  ```js
+  const path = require("path");
+  
+  module.exports = {
+    mode: "development",
+    entry: {
+      main: "./src/index.js",
+    },
+    // path.resolve(__dirname, "loaders/replaceLoaderAsync.js")
+    resolveLoader: {
+      modules: ["node_modules", "./loaders"],
+    },
+    output: {
+      path: path.resolve(__dirname, "dist"),
+      filename: "[name].js",
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js/,
+          // loader执行顺序从右到左
+          use: [
+            {
+              loader: "replaceLoader",
+            },
+            {
+              loader: "replaceLoaderAsync",
+              options: {
+                name: "Sumi",
+              },
+            },
+          ],
+        },
+      ],
+    },
+  };
+  
+  ```
+
+- replaceLoader.js
+
+  ```js
+  module.exports = function (source) {
+    return source.replace("Sumi", "Enjoy");
+  };
+  ```
+  
+- replaceLoaderAsync.js
+
+  ```js
+  // loader-utils更方便获取到this   （options.name === this.query.name）
+  const loaderUtils = require("loader-utils");
+  
+  module.exports = function (source) {
+    const options = loaderUtils.getOptions(this);
+    // this.async返回异步callback
+    const callback = this.async();
+  
+    setTimeout(() => {
+      const result = source.replace("Jerry", options.name);
+      // callback返回更多数据
+      callback(null, result);
+    }, 2000);
+  };
+  ```
+
+- index.js：   `console.log("hello Jerry");`
+
+- package.json
+
+  ```json
+  {
+    "scripts": {
+      "build": "webpack"
+    }
+    ......
+  }
+  ```
+
+  
 
 ## 模块打包工具？
 

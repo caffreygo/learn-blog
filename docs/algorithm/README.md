@@ -582,6 +582,8 @@ function CalcRPN(str) {
 
 ::: 
 
+<img src="../img/algorithm/116.jpg" style="zoom:15%;" />
+
 ```js
 function IsPopOrder(pushV, popV) {
     let stack = [],k = 0;
