@@ -419,9 +419,9 @@ module.exports = {
 },
 ```
 
-::: tip Plugin
+::: tip 
 
-​				此时`npm run debug`和`npm run build`达到的效果是一样的，显示用node执行webpack.js可以允许外		面传一些参数进去，例如`--inspect`、`--inspect-brk`分别表示**要开启调试**和**在webpack第一行打一个		断点**
+​		此时`npm run debug`和`npm run build`达到的效果是一样的，显示用node执行webpack.js可以允许外面传一些参数进去，例如`--inspect`、`--inspect-brk`分别表示**要开启调试**和**在webpack第一行打一个断点**
 
 ::: 
 
@@ -488,11 +488,13 @@ import ~ from "src"
 
 ### 全局安装
 
-:::注意
+::: tip 注意
 
 如果你只是想做一个 Webpack 的 Demo 案例，那么全局安装方法可能会比较适合你。如果你是在实际生产开发中使用，那么推荐你使用本地安装方法。
 
 `webpack4.0+`的版本，必须安装`webpack-cli`，`-g`命令代表全局安装的意思
+
+::: 
 
 ```sh
 $ npm install webpack webpack-cli -g
