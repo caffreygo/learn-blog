@@ -242,7 +242,7 @@ $ npx webpack index.js
 
 ::: tip Loader
 
-​	loader实际上是一个函数，实现对源码source的处理
+​	loader实际上是一个函数，实现对模块代码的出
 
 ::: 
 
@@ -343,6 +343,126 @@ npm install webpack webpack-cli loader-utils -D
   ```
 
   
+
+## plugin的编写
+
+::: tip Plugin
+
+​	plugin是一个类，在打包的hook时间点触发
+
+​	基于发布订阅模式设计，是事件驱动的插件机制
+
+::: 
+
+### CopyrightWebpackPlugin
+
+```js
+class CopyrightWebpackPlugin {
+  constructor(options) {
+    console.log(options);
+  }
+  // compiler: webpack的实例对象, 存放了配置和打包的所有内容(https://webpack.js.org/api/compiler-hooks/)
+  apply(compiler) {
+    // 同步hook由tap触发，函数没有callback参数
+    compiler.hooks.compile.tap("CopyrightWebpackPlugin", (compilation) => {
+      console.log("compile tab");
+    });
+
+    // compilation： 只存放这次打包的内容
+    compiler.hooks.emit.tapAsync(
+      "CopyrightWebpackPlugin",
+      (compilation, cb) => {
+        compilation.assets["copyright.txt"] = {
+          source: function () {
+            return "copyright by caffrey";
+          },
+          size: function () {
+            return 20;
+          },
+        };
+        cb();
+      }
+    );
+  }
+}
+
+module.exports = CopyrightWebpackPlugin;
+```
+
+```js
+const path = require("path");
+const CopyrightWebpackPlugin = require("./plugins/copyright-webpack-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: {
+    main: "./src/index.js",
+  },
+  plugins: [
+    new CopyrightWebpackPlugin({
+      name: "Sumi",
+    }),
+  ],
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+};
+```
+
+### node调试
+
+```json
+"scripts": {
+    "build": "webpack",
+    "debug": "node --inspect --inspect-brk node_modules/webpack/bin/webpack.js"
+},
+```
+
+::: tip Plugin
+
+​				此时`npm run debug`和`npm run build`达到的效果是一样的，显示用node执行webpack.js可以允许外		面传一些参数进去，例如`--inspect`、`--inspect-brk`分别表示**要开启调试**和**在webpack第一行打一个		断点**
+
+::: 
+
+```shell
+PS E:\webpack\plugin> npm run debug
+
+> plugin@1.0.0 debug E:\webpack\plugin
+> node --inspect --inspect-brk node_modules/webpack/bin/webpack.js
+
+Debugger listening on ws://127.0.0.1:9229/cb8dee01-7e07-4eb5-823a-603ef027795c
+For help, see: https://nodejs.org/en/docs/inspector
+```
+
+`npm run debug`后打开chrome**浏览器控制台**的node绿色按钮就可以看到调试过程
+
+```js
+class CopyrightWebpackPlugin {
+  apply(compiler) {
+    compiler.hooks.emit.tapAsync(
+      "CopyrightWebpackPlugin",
+      (compilation, cb) => {
+        // 断点调试
+        debugger;
+        compilation.assets["copyright.txt"] = {
+          source: function () {
+            return "copyright by caffrey";
+          },
+          size: function () {
+            return 20;
+          },
+        };
+        cb();
+      }
+    );
+  }
+}
+
+module.exports = CopyrightWebpackPlugin;
+```
+
+![](../img/webpack/debug.png)
 
 ## 模块打包工具？
 
