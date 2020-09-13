@@ -464,6 +464,302 @@ module.exports = CopyrightWebpackPlugin;
 
 ![](../img/webpack/debug.png)
 
+## bundler源码的编写
+
+### 单个模块分析
+
+#### @babel/parser 分析源代码, 生成AST
+
+```js
+const ast = parser.parse(content, {
+	sourceType: "module",
+})
+```
+
+ast.program.body分析出抽象语法树
+
+```shell
+[
+  Node {
+    type: 'ImportDeclaration',
+    start: 0,
+    end: 35,
+    loc: SourceLocation { start: [Position], end: [Position] },
+    specifiers: [ [Node] ],
+    source: Node {
+      type: 'StringLiteral',
+      start: 20,
+      end: 34,
+      loc: [SourceLocation],
+      extra: [Object],
+      value: './message.js'
+    }
+  },
+  Node {
+    type: 'ExpressionStatement',
+    start: 39,
+    end: 60,
+    loc: SourceLocation { start: [Position], end: [Position] },
+    expression: Node {
+      type: 'CallExpression',
+      start: 39,
+      end: 59,
+      loc: [SourceLocation],
+      callee: [Node],
+      arguments: [Array]
+    }
+  }
+]
+```
+
+#### @babel/traverse 分析抽象语法树的节点
+
+dependencies为依赖的**路径数组**
+
+```js
+const dependencies = [];
+traverse(ast, {
+    ImportDeclaration({ node }) {
+        console.log(node);
+        dependencies.push(node.source.value);
+    },
+});
+```
+
+```shell
+Node {
+  type: 'ImportDeclaration',
+  start: 0,
+  end: 35,
+  loc: SourceLocation {
+    start: Position { line: 1, column: 0 },
+    end: Position { line: 1, column: 35 }  
+  },
+  specifiers: [
+    Node {
+      type: 'ImportDefaultSpecifier',      
+      start: 7,
+      end: 14,
+      loc: [SourceLocation],
+      local: [Node]
+    }
+  ],
+  source: Node {
+    type: 'StringLiteral',
+    start: 20,
+    end: 34,
+    loc: SourceLocation { start: [Position], end: [Position] },
+    extra: { rawValue: './message.js', raw: '"./message.js"' },
+    value: './message.js'
+  }
+}
+```
+
+#### 路径转化
+
+相对路径转化为绝对路径(或者是**相对于根路径的相对路径**)
+
+```js
+const dirname = path.dirname(filename);
+const newFile = "./" + path.join(dirname, node.source.value);
+```
+
+`path.join(dirname, node.source.value)`获取到绝对路径，加上`./`变成相对于bundler的相对路径
+
+#### @babel/core ast转可执行代码
+
+ 核心模块其中**transformFromAst**将ast转化为浏览器可以执行的代码，**presets**将ES6转化为ES5
+
+```js
+const { code } = babel.transformFromAst(ast, null, {
+    presets: ["@babel/preset-env"],
+});
+```
+
+```js
+"use strict";
+
+var _message = _interopRequireDefault(require("./message.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+console.log(_message["default"]);
+```
+
+### 全部模块分析
+
+```js
+const makeDependenciesGraph = (entry) => {
+    const entryModule = moduleAnalyser(entry);
+    const graphArray = [entryModule];
+    for (let i = 0; i < graphArray.length; i++) {
+        const item = graphArray[i];
+        const { dependencies } = item;
+        if (dependencies) {
+            for (let j in dependencies) {
+                graphArray.push(moduleAnalyser(dependencies[j]));
+            }
+        }
+    }
+    const graph = {};
+    graphArray.forEach((item) => {
+        graph[item.filename] = {
+            dependencies: item.dependencies,
+            code: item.code,
+        };
+    });
+    return graph
+};
+```
+
+```shell
+{
+  './src/index.js': {
+    dependencies: { './message.js': './src\\message.js' },
+    code: '"use strict";\n' +
+      '\n' +
+      'var _message = _interopRequireDefault(require("./message.js"));\n' +
+      '\n' +
+      'function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }\n' +
+      '\n' +
+      'console.log(_message["default"]);'
+  },
+  './src\\message.js': {
+    dependencies: { './word.js': './src\\word.js' },
+    code: '"use strict";\n' +
+      '\n' +
+      'Object.defineProperty(exports, "__esModule", {\n' +
+      '  value: true\n' +
+      '});\n' +
+      'exports["default"] = void 0;\n' +
+      '\n' +
+      'var _word = require("./word.js");\n' +
+      '\n' +
+      'var message = "say ".concat(_word.word);\n' +
+      'var _default = message;\n' +
+      'exports["default"] = _default;'
+  },
+  './src\\word.js': {
+    dependencies: {},
+    code: '"use strict";\n' +
+      '\n' +
+      'Object.defineProperty(exports, "__esModule", {\n' +
+      '  value: true\n' +
+      '});\n' +
+      'exports.word = void 0;\n' +
+      'var word = "hello";\n' +
+      'exports.word = word;'
+  }
+}
+```
+
+### 生成代码
+
+::: tip 
+
+`JSON.stringify(makeDependenciesGraph(entry))`生成的依赖图谱里需要构造**require**方法和**exports**对象
+
+:::
+
+```js
+const generateCode = (entry) => {
+  const graph = JSON.stringify(makeDependenciesGraph(entry));
+  return `
+		(function(graph){
+			function require(module) { 
+				function localRequire(relativePath) {
+					return require(graph[module].dependencies[relativePath]);
+				}
+				var exports = {};
+				(function(require, exports, code){
+					eval(code)
+				})(localRequire, exports, graph[module].code);
+				return exports;
+			};
+			require('${entry}')
+		})(${graph});
+	`;
+};
+```
+
+### 完整代码
+
+```js
+const fs = require("fs");
+const path = require("path");
+const parser = require("@babel/parser");
+const traverse = require("@babel/traverse").default;
+const babel = require("@babel/core");
+
+const moduleAnalyser = (filename) => {
+  const content = fs.readFileSync(filename, "utf-8");
+  const ast = parser.parse(content, {
+    sourceType: "module",
+  });
+  const dependencies = {};
+  traverse(ast, {
+    ImportDeclaration({ node }) {
+      const dirname = path.dirname(filename);
+      const newFile = "./" + path.join(dirname, node.source.value);
+      dependencies[node.source.value] = newFile;
+    },
+  });
+  const { code } = babel.transformFromAst(ast, null, {
+    presets: ["@babel/preset-env"],
+  });
+  return {
+    filename,
+    dependencies,
+    code,
+  };
+};
+
+const makeDependenciesGraph = (entry) => {
+  const entryModule = moduleAnalyser(entry);
+  const graphArray = [entryModule];
+  for (let i = 0; i < graphArray.length; i++) {
+    const item = graphArray[i];
+    const { dependencies } = item;
+    if (dependencies) {
+      for (let j in dependencies) {
+        graphArray.push(moduleAnalyser(dependencies[j]));
+      }
+    }
+  }
+  const graph = {};
+  graphArray.forEach((item) => {
+    graph[item.filename] = {
+      dependencies: item.dependencies,
+      code: item.code,
+    };
+  });
+  return graph;
+};
+
+const generateCode = (entry) => {
+  const graph = JSON.stringify(makeDependenciesGraph(entry));
+  return `
+		(function(graph){
+			function require(module) { 
+				function localRequire(relativePath) {
+					return require(graph[module].dependencies[relativePath]);
+				}
+				var exports = {};
+				(function(require, exports, code){
+					eval(code)
+				})(localRequire, exports, graph[module].code);
+				return exports;
+			};
+			require('${entry}')
+		})(${graph});
+	`;
+};
+
+const code = generateCode("./src/index.js");
+```
+
+
+
 ## 模块打包工具？
 
 webpack最早是一个js的模块打包工具，但是现在，webpack实际上已经是一个<font color=orange>模块打包工具</font>
