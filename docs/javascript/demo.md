@@ -74,8 +74,10 @@ var currying = function(fn) {
 var curry = function(fn) {
     var args = []
     return function() {
+        // 没有传参数，执行函数得到结果  cost()
         if(arguments.length === 0) {
             return fn.apply(this, args)
+        // args.push所以的新参数，返回当前函数
         }else {
             Array.prototype.push.apply(args, arguments)
             return arguments.callee
@@ -95,10 +97,25 @@ var cost = (function(){
 var cost = currying(cost);
 cost(100);
 cost(200);
-cost(20);
-cost(10);
+cost(20,10);
 console.log(cost()); // 输出330
 ```
+
+### Apply的妙用
+
+```js
+// 数组的连接
+var arr1 = [1,2,4]
+var arr2 = [3,5]
+arr1.concat(arr2)    // concat返回新数组： [1,2,4,3,5]
+Array.prototype.push.apply(arr1, arr2)        // 5 push方法返回arr1的长度   arr1：[1,2,4,3,5]
+
+// 求数组的最值
+var max = Math.max.apply(null, numbers); /* 基本等同于 Math.max(numbers[0], ...) 或 Math.max(5, 6, ..) */
+var min = Math.min.apply(null, numbers);
+```
+
+
 
 ## ES6 module
 
