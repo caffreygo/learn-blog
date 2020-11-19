@@ -101,6 +101,47 @@ cost(20,10);
 console.log(cost()); // 输出330
 ```
 
+```js
+// 高级柯里化实现  https://zh.javascript.info/currying-partials
+function curry(func) {
+    return function curried(...args) {
+		// func.length 函数的参数长度(3)，args.length 
+        if (args.length >= func.length) {
+            // 返回执行结果
+            return func.apply(this, args);
+        // 再次包装
+        } else {
+            return function(...args2) {
+                return curried.apply(this, args.concat(args2));
+            }
+        }
+    };
+}
+
+function sum(a, b, c) {
+    return a + b + c;
+}
+
+let curriedSum = curry(sum);
+
+alert( curriedSum(1, 2, 3) );   // 6，仍然可以被正常调用
+alert( curriedSum(1)(2,3) );    // 6，对第一个参数的柯里化
+alert( curriedSum(1)(2)(3) );   // 6，全柯里化
+```
+
+当我们运行它时，这里有两个 `if` 执行分支：
+
+1. 现在调用：如果传入的 `args` 长度与原始函数所定义的（`func.length`）相同或者更长，那么只需要将调用传递给它即可。
+2. 获取一个偏函数：否则，`func` 还没有被调用。取而代之的是，返回另一个包装器 `pass`，它将重新应用 `curried`，将之前传入的参数与新的参数一起传入。然后，在一个新的调用中，再次，我们将获得一个新的偏函数（如果参数不足的话），或者最终的结果。
+
+例如，让我们看看 `sum(a, b, c)` 这个例子。它有三个参数，所以 `sum.length = 3`。
+
+对于调用 `curried(1)(2)(3)`：
+
+1. 第一个调用 `curried(1)` 将 `1` 保存在词法环境中，然后返回一个包装器 `pass`。
+2. 包装器 `pass` 被调用，参数为 `(2)`：它会获取之前的参数 `(1)`，将它与得到的 `(2)` 连在一起，并一起调用 `curried(1, 2)`。由于参数数量仍小于 3，`curry` 函数依然会返回 `pass`。
+3. 包装器 `pass` 再次被调用，参数为 `(3)`，在接下来的调用中，`pass(3)` 会获取之前的参数 (`1`, `2`) 并将 `3` 与之合并，执行调用 `curried(1, 2, 3)` — 最终有 `3` 个参数，它们被传入最原始的函数中。
+
 ### Apply的妙用
 
 ```js
