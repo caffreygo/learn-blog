@@ -53,6 +53,53 @@ p1.getName();
 
 ![this解析](../img/javascript/this.png)
 
+### 函数柯里化
+
+**柯里化**：又称部分求值，一个柯里化参数首先会接受一些参数，接受这些参数之后，该函数并不会立即求值，而是继续返回另外一个函数，刚才传入的参数在函数形成的**闭包**中被保存起来，待到合适的时机一起求值。
+
+```js
+// 通用的柯里化
+var currying = function(fn) {
+  var args = [];
+  return function() {
+    if(arguments.length==0) {
+      return fn.apply(this,args);
+    } else {
+      Array.prototype.push.apply(args,arguments);
+      return arguments.callee;
+    }
+  }
+}
+
+var curry = function(fn) {
+    var args = []
+    return function() {
+        if(arguments.length === 0) {
+            return fn.apply(this, args)
+        }else {
+            Array.prototype.push.apply(args, arguments)
+            return arguments.callee
+        }
+    }
+}
+
+var cost = (function(){
+  var money = 0;
+  return function() {
+    for(var i = 0,len = arguments.length;i<len;i++) {
+      money +=arguments[i];
+    }
+    return money;
+  }
+})()
+var cost = currying(cost);
+cost(100);
+cost(200);
+cost(20);
+cost(10);
+console.log(cost()); // 输出330
+```
+
 ## ES6 module
 
 ```js
