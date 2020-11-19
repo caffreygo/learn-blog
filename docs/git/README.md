@@ -10,6 +10,12 @@ git config --global user.email "userEmail"
 git config --list    查看所有配置
 ```
 
+## 多个账号
+
+![](../img/git/acount.png)
+
+git clone git@github.com:caffreygo/abc.git    ===>   git clone jinrui:caffreygo/abc.git 
+
 ## 理论
 
 ### 三棵树
