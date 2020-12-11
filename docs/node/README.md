@@ -281,3 +281,359 @@ seajs.use(['myModule.js'], function(my){
 });
 ```
 
+## Node的异步I/O
+
+::: tip
+
+完成整个异步I/O环节有
+
+- 事件循环：每执行一次事件循环称为Tick
+- 观察者：事件循环中有一个或多个观察者来判断是否还有需要处理的事件
+- 请求对象：存在于Js发起调用到内核执行完I/O操作的过渡过程中，保存异步I/O的所有状态
+
+:::
+
+![](../img/node/asyncIO.png)
+
+​		上图为整个异步I/O的流程，事件循环、观察者、请求对象、I/O线程池这四者共同构成了Node异步I/O模型的基本要素。
+
+## 异步编程
+
+### 函数式编程
+
+::: tip JavaScript的回调函数和深层嵌套
+
+​		在JavaScript中，函数（function）作为一等公民，使用上非常自由，无论调用它，或者作为参数，或者作为返回值均可。
+
+​		JavaScript的实现吸收了函数式编程的精华，将**函数**作为**一等公民**便是典型案例。
+
+:::
+
+#### 高阶函数
+
+​		可以把函数作为参数，或是将函数作为返回值的函数。（eg. 数组的sort方法、回调函数作为参数...）
+
+​		Node的事件的处理方式基于高阶函数的特性来完成的。在自定义事件实例中，通过为相同事件注册不同的回调函数，可以很灵活地处理业务逻辑。
+
+```js
+var emitter = new events.EventEmitter()
+emitter.on('event_foo', function () {
+	// TODO
+})
+```
+
+​		高阶函数在JavaScript中比比皆是，其中ECMAScript5中提供的一些数组方法（forEach()、map()、reduce()、reduceRight()、filter()、every()、some()）十分典型。
+
+#### 偏函数
+
+​		偏函数用法是指创建一个调用另外一个部分——参数或变量已经预置的函数——的函数的用法。
+
+```js
+var toString = Object.prototype.toString
+
+var isType = function (type) {
+	return function (obj) {
+		return toString.call(obj) === `[object ${type}]` 
+	}
+}
+
+var isString = isType('String')
+var isFunction = isType('Function')
+```
+
+​		可以看出，引入isType()函数后，创建isString()、isFunction()函数就变得简单多了。这种通过指定部分参数来产生一个**新**的**定制函数**的形式就是**偏函数**。
+
+
+
+应用：这个函数可以根据传入的times参数和具体方法，生成一个需要调用多次才真正执行实际函数的函数。
+
+```js
+_.after = function (times, func) {
+	if(times <= 0) return func()
+    return function () {
+        if(--times < 1) {
+            return func.apply(this, arguments)
+        }
+    }
+}
+```
+
+### 异步编程的优势与难点
+
+#### 优势
+
+- 基于事件驱动的非阻塞I/O模型，使CPU和I/O并不互相依赖等待，更好的资源利用
+- 作为处理I/O密集问题的能手，Node得益于V8性能也很强
+- 针对海量请求单独作用在单线程的情况，如果单个计算超过10ms可以用setImmediate()调度，合理分配，充分发挥CPU和I/O资源的优势
+
+#### 难点
+
+1. 异常处理：异步编程的try/catch并不适用，因为callback在下一个Tick才会取出执行。Node约定将异常作为回调函数的第一个实参传回：
+
+   ```js
+   var async = function (callback) {
+   	process.nextTick(function() {
+   		var results = something
+   		if(errror) {
+   			return callback(error)   // 异常
+   		}
+   		callback(null, results)      // 正常
+   	})
+   }
+   
+   try {
+       req.body = Json.parse(buf, options.riviver)
+   } catch (err) {
+       err.body = buf
+       err.status = 400
+       return callback(err)
+   }
+   callback()
+   ```
+
+2. 函数嵌套过深
+
+3. 阻塞代码：node没有线程沉睡功能，以下的例子while会持续占用CPU进行判断，其实setTimeout()效果会更好。
+
+   ```js
+   va start = new Date()
+   while(new Date()-start<1000) {
+   	// TODO
+   }
+   // 需要阻塞执行的代码
+   ```
+
+4. 多线程编程：单个Node进程实质上并没有充分利用多核CPU，浏览器的web worker和Node的child_process和cluster模块实现了对于多核CPU的利用
+
+5. 异步转同步
+
+### 异步编程的解决方案
+
+#### 事件发布/订阅模式
+
+```js
+// 订阅
+emitter.on('event1', function(message) {
+	console.log(message)
+})
+
+// 发布
+emitter.emit('event1', 'Hello World!')
+```
+
+- 如果对一个事件添加了超过10个侦听器，将会得到一条警告。这一处设计与Node自身单线程运行有关，设计者认为侦听器太多可能导致内存泄漏，所以存在这样一条警告。调用emitter.setMaxListeners(0)；可以将这个限制去掉。另一方面，由于事件发布会引起一系列侦听器执行，如果事件相关的侦听器过多，可能存在过多占用CPU的情景。
+- 为了处理异常，EventEmitter对象对error事件进行了特殊对待。如果运行期间的错误触发了error事件，EventEmitter会检查是否有对error事件添加过侦听器。如果添加了，这个错误将会交由该侦听器处理，否则这个错误将会作为异常抛出。如果外部没有捕获这个异常，将会引起线程退出。一个健壮的EventEmitter实例应该对error事件做处理
+
+::: tip 利用事件队列解决雪崩问题
+
+​		我们利用了once()方法，将所有请求的回调都压入**事件队列**中，利用其执行一次就会将监视器移除的特点，保证每一个回调只会被执行一次。
+
+​		对于相同的SQL语句，保证在同一个查询开始到结束的过程中永远**只有一次**。SQL在进行查询时，新到来的相同调用只需在队列中等待数据就绪即可，一旦查询结束，得到的结果可以被这些调用**共同使用**。
+
+​		这种方式能节省重复的数据库调用产生的开销。由于Node单线程执行的原因，此处无须担心状态同步问题。这种方式其实也可以应用到其他远程调用的场景中，即使外部没有缓存策略，也能有效节省重复开销。
+
+​		此处可能因为存在侦听器过多引发的警告，需要调用setMaxListeners(0)移除掉警告，或者设更大的警告阈值。
+
+:::
+
+```js
+var proxy = new events.EventEmitter()
+var status = 'ready'
+var select = function(callback) {
+    proxy.once('selected', callback)  // 单次请求时间内只会被调用一次
+    if(status==='ready') {
+        status = 'pending'
+        db.select('SQL', function(res){
+            proxy.emit('selected', res)
+            status = 'ready'
+        })
+    }
+}
+```
+
+::: tip 多异步之间的协作方案
+
+​		由于多个异步场景中回调函数的执行并不能保证顺序，且回调函数之间互相没有任何交集，所以需要借助一个第三方函数和第三方变量来处理异步协作的结果。通常，我们把这个用于检测次数的变量叫做哨兵变量。
+
+:::
+
+```js
+// 渲染页面所需要的 模板读取、数据读取 和 本地化资源读取
+var count = 0;
+var results = {};
+var done = function (key, value) {
+    results[key] = value;
+    count++;
+    if (count === 3) {
+        // 渲染页面
+        render(results);
+    }
+};
+
+fs.readFile(template_path, "utf8", function (err, template) {
+    done("template", template);
+});
+db.query(sql, function (err, data) {
+    done("data", data);
+});
+l10n.get(function (err, resources) {
+    done("resources", resources);
+});
+```
+
+```js
+var after = function (times, callback) {
+    var count = 0, results = {};
+    return function (key, value) {
+        results[key] = value;
+        count++;
+        if (count === times) {
+            callback(results);
+        }
+    };
+};
+
+var done = after(times, render);
+```
+
+上述方案实现了多对一的目的。如果业务继续增长，我们依然可以继续利用发布/订阅方式来完成多对多的方案，相关代码如下：
+
+```js
+var emitter = new events.Emitter();
+var done = after(times, render);
+
+emitter.on("done", done);
+emitter.on("done", other);
+
+fs.readFile(template_path, "utf8", function (err, template) {
+	emitter.emit("done", "template", template);
+});
+db.query(sql, function (err, data) {
+	emitter.emit("done", "data", data);
+});
+l10n.get(function (err, resources) {
+	emitter.emit("done", "resources", resources);
+});
+```
+
+#### Promise/Deferred模式
+
+#### 流程控制库
+
+### 异步并发控制
+
+#### bagpipe的解决方案
+
+#### async的解决方案
+
+### Promise解决回调地狱
+
+- 把每个异步函数都封装在promise对象里面，然后通过promise的链式调用来传递数据，从而避免了回调地狱。
+- 这样的代码可读性和维护性要好上不少，但很显然代码量增加了一些，就是每个函数的封装过程，但node里的util库中的`promisify`函数提供了将满足node回调规则的函数自动转换为promise对象的功能，若没有对异步操作的复杂订制，可以使用这个函数减少代码量
+
+```js
+function promisifyAsyncFunc(){
+   return new Promise((resolve,reject)=>{
+       fs.read('./test1.txt'.(err.doc)=>{
+           if(err)reject(err)
+           else resolve(doc)
+       })
+   })
+}
+
+
+function promisifyAsyncFunc2(input){
+   return new Promise((resolve,reject)=>{
+       let output1 = someFunc(input)
+       fs.read('./test2.txt'.(err.doc)=>{
+           if(err)reject(err)
+           else resolve({
+               output1,
+               doc
+           })
+       })
+   })
+}
+
+
+function promisifyAsyncFunc3({output1,doc}){
+   return new Promise((resolve,reject)=>{
+       let outpu2 = someFunc2(doc)
+       fs.write('./output.txt',output1+output2,(err)=>{
+                   // err capture
+       })
+   })
+}
+
+// some other prmisify function
+promisifyAsyncFunc()
+.then(promisifyAsyncFunc2)
+.then(promisifyAsyncFunc3)
+//.then()
+```
+
+#### Generator
+
+Generator并不是最终的异步解决方案，而是Promise向最终方案演进的中间产物，但是其中利用到的迭代器设计模式值得我们学习和参考。这里不对这种方法多做介绍，因为有了async，一般就不再使用Generator了。
+
+#### async/await
+
+async/await其实是Generator的**语法糖**，但是因为使用的时候使异步编程似乎完全变成了同步编程。
+
+```js
+async function main(){
+   const ret = await someAsynFunc();
+   const ret2 = await otherAsyncFunc(ret)
+   return someSyncFunc(ret,ret2)
+}
+```
+
+1. 定义一个函数，函数申明前加上一个`async`关键字，说明这个函数内部有需要同步执行的异步函数。
+2. 此函数需要同步执行的异步函数必须**返回**的是**promise对象**，就是我们之前用promise包裹的那个形式。
+3. 在需同步执行的异步函数调用表达式前加上`await`关键字，这时函数会同步执行并将promise对象**resolve**出来的数据传递给等号之前的变量。
+
+#### async/await改写promisify.js文件
+
+```js
+const promisify = require('util').promisify  //引入promisify函数，简化promise代码
+const read = promisify(fs.read)
+const write = promisify(fs.write)
+
+async function callAsyncSync(){
+   const res1 = await read('./test1.txt')
+   const res2 = await read('./test2.txt')
+   const output1 = someFunc(res1)
+   const output2 = someFunc(res2)
+   write('./output.txt',output1+output2)
+   return
+}
+```
+
+试想这么一种场景：
+
+> - 我们需要从多个数据库中读取数据，读取完成的顺序无所谓.
+> - 我们需要在多次数据读取全部完成之后再从每个数据中筛选出某种相同的属性
+> - 再对这些属性进行一些自定义操作，得到结果数据
+> - 最后将结果数据插入某个数据库
+
+假设每一步的具体实现函数全部已经编写完成，所有异步的函数都已经封装成promise，那么用原生js组装以上四步代码需要怎么写？
+
+我粗略估计一下可能需要二十行左右，而且代码的可读性不会很好，这里我简单介绍一个库:RxJS，中文名为响应式JS。
+
+**响应式编程**发展已久，许多语言都有实现相应的库，对应的名字也以Rx开头，比如RxJava。
+
+不说RxJS的设计原理，它的使用都牵涉到多种设计模式和技术，包括观察者模式，管道模式，函数式编程等，可以说这是一个上手难度相当大的技术，但它带来的编程体验是相当的好，这里我给出使用RxJS实现以上四步的代码:
+
+```js
+const Ob = require('rxjs/Rx').Observerble   //Rxjs的核心观察者对象
+const promiseArray = require('./readDatabase') //封装好的读数据库函数数组
+const myfilter = require('./filter')//数据属性过滤函数
+const operation = require('./operation')//自定义的逻辑操作
+const insert = require('./insert')//数据库插入函数
+
+Ob.forkJoin(...promiseArray.map(v=>Ob.fromPromise(v)))
+   .filter(myfilter)
+   .switchMap(operations)
+   .subscribe(insert)
+```
+
