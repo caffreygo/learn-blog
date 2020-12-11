@@ -10,6 +10,28 @@ git config --global user.email "userEmail"
 git config --list    查看所有配置
 ```
 
+## 多个账号
+
+![](../img/git/acount.png)
+
+config内容：
+
+```shell
+# 个人账号
+Host jinrui
+HostName github.com
+User git
+IdentityFile ~/.ssh/id_rsa
+
+# 公司账号
+Host kooboo
+HostName github.com
+User git
+IdentityFile ~/.ssh/kooboo
+```
+
+git clone git@github.com:caffreygo/abc.git    ===>   git clone jinrui:caffreygo/abc.git 
+
 ## 理论
 
 ### 三棵树
