@@ -1,9 +1,14 @@
 module.exports = {
   base: "/",
-  title: "CaffreyGo",
-  description: "Something just like thiss",
+  title: "Jerry Chen",
+  description: "Jerry Chen的博客",
   head: [["link", { rel: "icon", href: "/gift.png" }]],
+  markdown: {
+    lineNumbers: false,
+  },
   themeConfig: {
+    lastUpdated: "最后更新时间",
+    sidebar: "auto",
     nav: [
       {
         text: "TypeScript",
@@ -28,6 +33,10 @@ module.exports = {
       { text: "Node", link: "/node/" },
       { text: "Webpack", link: "/webpack/" },
       { text: "React", link: "/react/" },
+      {
+        text: "Vue源码分析",
+        link: "/vue/responsive/",
+      },
       { text: "JavaScript", link: "/javascript/" },
       { text: "Git", link: "/git/" },
       {
@@ -46,6 +55,13 @@ module.exports = {
       "/book/": ["designPattern", "dataStructures"],
       "/webpack/": ["", "step-2", "step-3", "step-4", "step-5"],
       "/react/": ["", "redux", "note"],
+      "/vue/": [
+        {
+          title: "响应式原理",
+          collapsable: false,
+          children: ["responsive/"],
+        },
+      ],
       "/node/": [""],
       "/http/": [""],
       "/algorithm/": [""],
