@@ -33,10 +33,6 @@ module.exports = {
       { text: "Node", link: "/node/" },
       { text: "Webpack", link: "/webpack/" },
       { text: "React", link: "/react/" },
-      {
-        text: "Vue源码分析",
-        link: "/vue/responsive/",
-      },
       { text: "JavaScript", link: "/javascript/" },
       { text: "Git", link: "/git/" },
       {
@@ -48,6 +44,10 @@ module.exports = {
         ],
       },
       { text: "Github", link: "https://github.com/caffreygo" },
+      {
+        text: "Vue源码课程",
+        link: "https://ustbhuangyi.github.io/vue-analysis/v2/prepare/",
+      },
     ],
     sidebar: {
       "/typescript/grammar/": ["", "advanced", "final"],
@@ -55,13 +55,6 @@ module.exports = {
       "/book/": ["designPattern", "dataStructures"],
       "/webpack/": ["", "step-2", "step-3", "step-4", "step-5"],
       "/react/": ["", "redux", "note"],
-      "/vue/": [
-        {
-          title: "响应式原理",
-          collapsable: false,
-          children: ["responsive/"],
-        },
-      ],
       "/node/": [""],
       "/http/": [""],
       "/algorithm/": [""],
