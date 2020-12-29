@@ -58,7 +58,7 @@ module.exports = {
       "/node/": [""],
       "/http/": [""],
       "/algorithm/": [""],
-      "/javascript/": ["", "demo"],
+      "/javascript/": ["", "mdn","demo"],
       "/git/": [""],
       "/basic/": [""],
     },
