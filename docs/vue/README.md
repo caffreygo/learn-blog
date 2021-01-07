@@ -1,5 +1,30 @@
 # Vue
 
+## 组件事件代理
+
+```js
+const events = eventNames
+	.map(evt=> evt.toLocalLowerCase())
+	.map(eventName=> ({
+        completeName: 'Plotly_'+eventName,
+        handler: context => (...args) => {
+            context.$emit.apply(context, [eventName, ...args])
+        }
+    }))
+```
+
+```js
+mounted() {
+    Plotly.newPlot(this.$el, this.data, ...)
+	events.forEach(evt => {
+        // this.$el  Plotly的Dom元素.on(event, handler)
+        this.$el.on(evt.completeName, evt.handler(this))
+    })
+}
+```
+
+
+
 ## 事件
 
 - 单次点击触发两次事件：`@click=“handleClick1()，habdleClick2()”`
