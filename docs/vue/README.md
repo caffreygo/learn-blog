@@ -23,38 +23,6 @@ mounted() {
 }
 ```
 
-
-
-## 事件
-
-- 单次点击触发两次事件：`@click=“handleClick1()，habdleClick2()”`
-- 不响应子元素的点击：`@click.self`
-- `@scroll.passive`增加滚动性能（解决chrome性能警告）
-- 键盘修饰符`@keydown.enter deleye`
-- 鼠标修饰符`@click.left right middle`
-- 精确修饰符, 单独点击ctrl触发`@clock.ctrl.exact`
-
-### V-model修饰符
-
-`v-model. lazy number trim` 
-
-## 组件
-
-### 局部组件
-
- `components: { name: componentObj }`
-
-### 全局组件
-
-`app. component(name, configObj) `
-
-```js
-const component = {
-	data() {},
-    template: '<div>child component</div>'
-}
-```
-
 ## NPM组件发布
 
 https://www.npmjs.com/package/kl-test-data
@@ -180,3 +148,115 @@ npm login
 npm publish
 ```
 
+## 事件
+
+- 单次点击触发两次事件：`@click=“handleClick1()，habdleClick2()”`
+- 不响应子元素的点击：`@click.self`
+- `@scroll.passive`增加滚动性能（解决chrome性能警告）
+- 键盘修饰符`@keydown.enter deleye`
+- 鼠标修饰符`@click.left right middle`
+- 精确修饰符, 单独点击ctrl触发`@clock.ctrl.exact`
+
+### V-model修饰符
+
+`v-model. lazy number trim` 
+
+## 组件
+
+### 局部组件
+
+ `components: { name: componentObj }`
+
+### 全局组件
+
+`app. component(name, configObj) `
+
+```js
+const component = {
+	data() {},
+    template: '<div>child component</div>'
+}
+```
+
+### Function类型的传值
+
+![](./img/functionProp.png)
+
+### validator
+
+![](./img/validator.png)
+
+### 对象多属性传值
+
+```js
+data() {
+    return {
+        params: {
+            a: 1,
+            b: 2
+        }
+    }
+}
+```
+
+下面两种形式等价，直接`v-bind`传递，适合需要多个参数传递给子组件的情况
+
+```html
+<child v-bind="params" />
+
+<child :a="params.a" :b="params.b" />
+```
+
+### 驼峰属性名
+
+```html
+<child data-hello="hello" />
+```
+
+子组件使用`dataHello`使用该参数，html不能传**dataHello**这样的属性，只能用**data-hello**
+
+### Non-props | $attrs
+
+::: tip Non-props
+
+1. 父组件向子组件传递属性的时候，子组件不写props属性接受的这些属性；
+2. 子组件在接受到这些属性后，会把属性放着子组件**最外层**的**DOM标签**下；
+3. 可以设置**inheritAttrs**不写入到DOM (组件的**根元素 继承特性**);
+4. 应用：class样式
+5. 当子组件根节点不止一个时，将不会自动继承这些属性，可以通过`$attrs`获取
+
+:::
+
+- 父组件
+
+  ```html
+  <child msg="hello" />
+  ```
+
+- 子组件
+
+  ```
+  app.component('child', {
+  	template: `<div>child component</div>`
+  })
+  ```
+
+- 渲染效果
+
+  ```html
+  <div msg="hello">child component</div>
+  ```
+
+- 有多个根节点时不会写入，使用`$attrs`得到Non-props
+
+  ```js
+  app.component('child', {
+      template: `
+          <div :msg="$attrs.msg">child component</div>
+          <div v-bind="$attrs">child component</div>
+          <div>child component</div>
+  `
+  })
+  ```
+
+  
