@@ -33,6 +33,7 @@ module.exports = {
       { text: "Node", link: "/node/" },
       { text: "Webpack", link: "/webpack/" },
       { text: "React", link: "/react/" },
+      { text: "Vue", link: "/vue/" },
       { text: "JavaScript", link: "/javascript/" },
       { text: "Git", link: "/git/" },
       {
@@ -55,6 +56,7 @@ module.exports = {
       "/book/": ["designPattern", "dataStructures"],
       "/webpack/": ["", "step-2", "step-3", "step-4", "step-5"],
       "/react/": ["", "redux", "note"],
+      "/vue/": [""],
       "/node/": [""],
       "/http/": [""],
       "/algorithm/": [""],
