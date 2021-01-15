@@ -34,7 +34,7 @@ module.exports = merge(commonConfig, prodConfig);
 
 以上配置完毕后，让我们使用`npm run build`打包看一看生成了哪些文件，`dist`目录的打包结果如下：
 
-```text
+```shell
 |-- dist
 |   |-- index.html
 |   |-- main.f28cbac9bec3756acdbe.js

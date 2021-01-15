@@ -350,7 +350,7 @@ module.exports = {
 
 这样配置后，我们使用`npm run build`打包命令，它的打包输出结果为：
 
-```text
+```shell
         Asset       Size  Chunks             Chunk Names
   index.html  462 bytes          [emitted]
     lodash.js   1.46 KiB       1  [emitted]  lodash
