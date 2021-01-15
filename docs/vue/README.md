@@ -161,7 +161,7 @@ npm publish
 
 `v-model. lazy number trim` 
 
-## 组件
+## 组件基础
 
 ### 局部组件
 
@@ -281,7 +281,8 @@ app.component('child', {
 
 :::
 
-emits还可以是一个对象，每个事件名都是一个**函数**，对emit事件的参数进行校验
+- emits还可以是一个对象，每个事件名都是一个**函数**，对emit事件的参数进行校验 （返回一个布尔值以指示事件**是否有效**）
+- 当属性值设置未null表示没有校验
 
 ```js
 app.component('counter', {
@@ -433,5 +434,31 @@ app.component('counter', {
 
 // 组件渲染
 const vm = app.mount('#root');
+```
+
+#### 自定义参数的修饰符
+
+对于带参数的 `v-model` 绑定，生成的 prop 名称将为 `arg + "Modifiers"`：
+
+父组件： 
+
+```html
+<my-component v-model:foo.capitalize="bar"></my-component>
+```
+
+子组件通过 this**.fooModifiers** 访问:
+
+```js
+app.component('my-component', {
+  props: ['foo', 'fooModifiers'],
+  template: `
+    <input type="text" 
+      :value="foo"
+      @input="$emit('update:foo', $event.target.value)">
+  `,
+  created() {
+    console.log(this.fooModifiers) // { capitalize: true }
+  }
+})
 ```
 
