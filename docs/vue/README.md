@@ -259,4 +259,179 @@ data() {
   })
   ```
 
-  
+
+### emits 校验
+
+::: tip emits
+
+emits表示组件将向外触发的事件列表，如果触发的事件不在emits数组里,开发环境下会抛出警告。
+
+```js
+app.component('child', {
+    props: ['count'],
+    emits: ['add'],
+    methods: {
+      handleClick() {
+          this.$emit('add', this.count + 3)
+      }  
+    },
+	template: `<div @click="handleClick">{{ count }}</div>`
+})
+```
+
+:::
+
+emits还可以是一个对象，每个事件名都是一个**函数**，对emit事件的参数进行校验
+
+```js
+app.component('counter', {
+    props: ['count'],
+    emits: {
+        add: (count) => {
+            if(count > 0) {
+                return true
+            }
+            return false
+        }
+    },
+    methods: {
+      handleClick() {
+          this.$emit('add', this.count + 3)
+      }  
+    },
+	template: `<div @click="handleClick">{{ count }}</div>`
+})
+```
+
+## v-model
+
+#### 父组件
+
+```js
+const app = Vue.createApp({
+    data() {
+        return { count: 1 }
+    },
+    template:'<counter v-model="count" />'
+})
+```
+
+#### 子组件
+
+- 子组件通过**update:modelValue**接收v-model的传递的值
+- 子组件向外触发的事件名必须是**update:modelValue**
+
+```js
+app.component('counter', {
+    props: ['modelValue'],
+    methods: {
+      handleClick() {
+          this.$emit('update:modelValue', this.modelValue + 3)
+      }  
+    },
+	template: `<div @click="handleClick">{{ modelValue }}</div>`
+})
+```
+
+### v-model 自定义参数名
+
+如果不希望使用**modelValue**作为参数名：
+
+- 父组件：**v-model:app**
+
+```js
+const app = Vue.createApp({
+    data() {
+        return { count: 1 }
+    },
+    template:'<counter v-model:app="count" />'
+})
+```
+
+- 子组件：**update:app**
+
+```js
+app.component('counter', {
+    props: ['app'],
+    methods: {
+      handleClick() {
+          this.$emit('update:app', this.modelValue + 3)
+      }  
+    },
+	template: `<div @click="handleClick">{{ app }}</div>`
+})
+```
+
+### v-model 多个属性
+
+```js
+// 父组件
+const app = Vue.createApp({
+    data() {
+        return { 
+            count: 1,
+            count1: 2,
+        }
+    },
+    template:'<counter v-model:count="count" v-model:count1="count1" />'
+})
+
+// 子组件
+app.component('counter', {
+    props: ['count','count1'],
+    methods: {
+        handleClick() {
+            this.$emit('update:count', this.count + 3)
+        },
+        handleClick1() {
+            this.$emit('update:count1', this.count1 + 3)
+        }
+    },
+    template: `
+        <div @click="handleClick">{{ count }}</div>
+        <div @click="handleClick1">{{ count1 }}</div>
+`
+})
+```
+
+### v-model 修饰符 modelModifiers
+
+requirement: 希望通过自定义修饰符 uppercase 自动将改变后的数据大写
+
+```js
+// 父组件
+const app = Vue.createApp({
+    data() {
+        return { 
+            count: 'a',
+        }
+    },
+    template:'<counter v-model.uppercase="count" />'
+})
+
+// 子组件
+app.component('counter', {
+    props: {
+        'modelValue': String,
+        'modelModifiers': {
+            // 不传递修饰符的时候，默认修饰符是个空对象,组件可以通过this.modelModifiers访问
+            default: () => ({}),
+        }
+    },
+    methods: {
+      handleClick() {
+          let newValue = this.modelValue + 'b';
+          if(this.modelModifiers.uppercase) {
+              // 如果有uppercase修饰符，调用字符串toUpperCase方法将首字母大写
+              newValue = newValue.toUpperCase()
+          }
+          this.$emit('update:modelValue', newValue)
+      }  
+    },
+	template: `<div @click="handleClick">{{ modelValue }}</div>`
+})
+
+// 组件渲染
+const vm = app.mount('#root');
+```
+
