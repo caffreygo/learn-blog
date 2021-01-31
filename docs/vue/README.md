@@ -463,3 +463,84 @@ app.component('my-component', {
 ```
 
 ## 插槽
+
+### 基础插槽
+
+- slot 插槽
+
+- 父模板里面调用的数据属性，使用的都是父模板里面的数据
+- 子模板里面调用的数据属性，使用的都是子模板里面的数据
+- 默认值：`<slot>default value</slot>`在未传递插槽内容的时候显示
+
+```js
+// 父组件
+const app = Vue.createApp({
+    data() {
+        return {
+            text: '提交'
+        }
+    },
+    template:`
+        <myform>
+            <div>{{text}}</div>
+        </myform>
+        <myform>
+            <button>{{text}}</button>
+        </myform>
+	`
+})
+
+// 子组件  （插槽是不能绑定事件的，可以在插槽外面加一个标签监听）
+app.component('myform', {
+    methods: {
+      handleClick() {
+          alert(123)
+      }  
+    },
+	template: `
+        <div>
+            <input />
+            <span @click="handleClick">
+                <slot>default value</slot>
+            </span>
+        </div>
+	`
+})
+
+const vm = app.mount('#root');
+```
+
+### 具名插槽
+
+- 父组件 `v-slot:name`
+- 子组件 `<slot name="name"></slot>`
+
+```js
+// 父组件
+const app = Vue.createApp({
+    template:`
+        <layout>
+			<template v-slot:header>
+				<div>header</div>
+			</template>
+			<template v-slot:footer>
+				<div>header</div>
+			</template>
+        </layout>>
+	`
+})
+
+// 子组件  （插槽是不能绑定事件的，可以在插槽外面加一个标签监听）
+app.component('layout', {
+	template: `
+        <div>
+			<slot name="header"></slot>
+            <div>content</div>
+			<slot name="footer"></slot>
+        </div>
+	`
+})
+
+const vm = app.mount('#root');
+```
+
