@@ -530,7 +530,7 @@ const app = Vue.createApp({
 	`
 })
 
-// 子组件  （插槽是不能绑定事件的，可以在插槽外面加一个标签监听）
+// 子组件
 app.component('layout', {
 	template: `
         <div>
@@ -544,3 +544,79 @@ app.component('layout', {
 const vm = app.mount('#root');
 ```
 
+### 作用域插槽
+
+#### 插槽简写  #slotName
+
+```html
+<template v-slot:header>
+    <div>header</div>
+</template>
+<template v-slot:footer>
+    <div>header</div>
+</template>
+```
+
+简写：
+
+```html
+<template #header>
+    <div>header</div>
+</template>
+<template #footer>
+    <div>header</div>
+</template>
+```
+
+#### 作用域插槽
+
+::: tip 
+
+- 当子组件渲染的内容需要由父组件决定的时候
+- 因为父组件只能使用自己作用域内的数据，实现在父组件内去调用子组件的数据
+
+:::
+
+- 子组件将item数据传递给item属性
+- 父组件使用slot时，通过`v-slot="slotProps"`的**数据对象**接收使用
+
+```js
+// 父组件
+const app = Vue.createApp({
+    template:`
+        <list v-slot="slotProps">
+        	<div>{{ slotProps.item }}</div>    // 传递给子组件的slot
+        </list>
+	`
+})
+
+// 子组件
+app.component('list', {
+    data() {
+        return {
+            list: [1,2,3]
+        }
+    }
+	template: `
+        <div>
+            <slot v-for="item in list" :item="item"/>
+        </div>
+	`
+})
+
+const vm = app.mount('#root');
+```
+
+::: tip 对象结构语法
+
+```js
+const app = Vue.createApp({
+    template:`
+        <list v-slot="{ item }">
+        	<div>{{ item }}</div>
+        </list>
+	`
+})
+```
+
+:::
