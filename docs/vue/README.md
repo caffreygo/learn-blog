@@ -620,3 +620,212 @@ const app = Vue.createApp({
 ```
 
 :::
+
+## 动态组件和异步组件
+
+### 动态组件
+
+- 根据数据的变化，结合`component`标签来随时动态切换组件
+- 可以结合使用`keep-alive`组件，来保留组件切换前的状态
+
+```js
+// 父组件
+const app = Vue.createApp({
+    data() {
+        return {
+            componentName: 'common-item'
+        }
+    },
+    template:`
+		<keep-alive>
+			<component :is="componentName" />
+		</keep-alive>
+		<button @click="handleClick">切换</button>
+	`,
+    methods: {
+        handleClick() {
+            this.componentName = this.componentName==='common-item'?'input-item':'common-item'
+        }
+    }
+})
+
+// 子组件
+app.component('common-item', {
+	template: `
+        <div>common-item</div>
+	`
+})
+
+app.component('input-item', {
+	template: `
+        <div>input-item</div>
+	`
+})
+
+const vm = app.mount('#root');
+```
+
+### 异步组件
+
+调用**Vue.defineAsyncComponent（fn）**方法，参数函数返回一个**Promise**
+
+```js
+const AsyncCommonItem = Vue.defineAsyncComponent(() => {
+    return new Promise((resolve, reject) => {
+        setTimeout(()=> {
+            resolve({
+                template: `<div>this is an async component</div>`
+            })
+        },4000)
+    });
+});
+
+// 父组件
+const app = Vue.createApp({
+    data() {
+        return {
+            componentName: "common-item",
+        };
+    },
+    template: `
+        <div>
+        <common-item />
+        <async-common-item />
+        </div>
+	`,
+});
+
+// 子组件
+app.component("common-item", {
+    template: `
+<div>common-item</div>
+`,
+});
+
+app.component("async-common-item", AsyncCommonItem);
+
+const vm = app.mount("#root");
+```
+
+## v-once
+
+表示标签只会被渲染一次，后续即使数据发生了变化也不会再更新视图
+
+- 第一个div标签内初始数据未1，点击不会更新
+- 第二个div伴随着点击，数据会更新
+
+```js
+const app = Vue.createApp({
+    data() {
+        return {
+            count: 1,
+        };
+    },
+    template: `
+        <div @click="count += 1" v-once>
+            {{count}}
+        </div>
+        <div>{{count}}</div>
+	`,
+});
+
+const vm = app.mount("#root");
+```
+
+## Provide & Inject
+
+组件嵌套多级时（**跨组件的多级传递**），数据传递繁琐：
+
+```js
+const app = Vue.createApp({
+    data() {
+        return {
+            count: 1,
+        };
+    },
+    template: `
+    <div>
+    	<child :count="count" />
+    </div>
+`,
+});
+app.component('child', {
+    props: ['count'],
+    template: `<child-child :count="count"/>`
+})
+
+app.component('child-child', {
+    props: ['count'],
+    template: `<div>{{count}}</div>`
+})
+
+const vm = app.mount("#root");
+```
+
+### Provide搭配Inject
+
+```js
+const app = Vue.createApp({
+    data() {
+        return {
+            count: 1,
+        };
+    },
+    provide: {
+        count: 1,
+    },
+    template: `
+    <div>
+    	<child :count="count" />
+    </div>
+`,
+});
+app.component('child', {
+    template: `<child-child />`
+})
+
+app.component('child-child', {
+    inject: ['count'],
+    template: `<div>{{count}}</div>`
+})
+
+const vm = app.mount("#root");
+```
+
+### 传递data的数据
+
+- 如果想传递data里面的数据，需要把**provide**改写成**函数**形式；
+- provide提供的数据**不是响应式**的，点击之后`child-child`组件不会发生改变；
+
+```js
+const app = Vue.createApp({
+    data() {
+        return {
+            count: 1,
+        };
+    },
+    provide() {
+        return {
+            count: this.count
+        }
+    },
+    template: `
+    <div>
+        <div>{{count}}</div>
+        <child :count="count" />
+        <button @click="count += 1">Add</button>
+    </div>
+`,
+});
+app.component('child', {
+    template: `<child-child />`
+})
+
+app.component('child-child', {
+    inject: ['count'],
+    template: `<div>{{count}}</div>`
+})
+
+const vm = app.mount("#root");
+```
+
