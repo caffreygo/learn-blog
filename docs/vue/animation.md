@@ -1,5 +1,7 @@
 # Vue中的动画
 
+https://cn.vuejs.org/v2/guide/transitions.html
+
 ## Vue基础动画和过渡
 
 - 过渡：状态的变化过程
@@ -8,6 +10,8 @@
 ### 动画animation
 
 通过 `@keyframes` 定义一个动画，然后使用css3的 **animations** 使用该动画
+
+![](./img/animation2.gif)
 
 ```css
 @keyframes leftToRight {
@@ -31,7 +35,7 @@ const app = Vue.createApp({
     data() {
         return {
             animate: {
-                animation: true
+                animation: false
             }
         }
     },
@@ -43,7 +47,7 @@ const app = Vue.createApp({
     template: `
         <div>
         <div :class="animate">hello world</div>
-        <button @click="handleClick">切换</button>
+        <button @click="handleClick">d动画</button>
         </div>
 	`
 });
@@ -52,6 +56,8 @@ const vm = app.mount('#root');
 ```
 
 ### 过渡transition
+
+![](./img/animation1.gif)
 
 通过 **transition** 的css属性定义状态、时间和效果
 
@@ -102,7 +108,7 @@ const vm = app.mount('#root');
 
 :::
 
-![transition](../img/vue/transition.jpg)
+![transition](./img/transition.jpg)
 
 ### 入场出场过渡
 
@@ -111,6 +117,8 @@ const vm = app.mount('#root');
 `v-if`和`v-show`都可以使用transition标签实现效果
 
 :::
+
+![](./img/animation3.gif)
 
 ```css
 /* 单元素，单组件的入场出场 */
@@ -168,7 +176,8 @@ const vm = app.mount("#root");
   </transition>
   ```
 
-  
+
+![](./img/animation4.gif)
 
 ```css
 @keyframes shake {
@@ -225,6 +234,8 @@ const vm = app.mount("#root");
 
 Animate.css: https://animate.style/ 
 
+![](./img/animation5.gif)
+
 1. Head头部引入animate.css
 
    ```html
@@ -255,6 +266,8 @@ Animate.css: https://animate.style/
 - :duration="1000" 将过渡和动画时间都设置为1s结束，:duration="{enter:1000, leave:3000}"入场1s出场3s
 
 :::
+
+![](./img/animation6.gif)
 
 ```css
 @keyframes shake {
@@ -288,8 +301,11 @@ Animate.css: https://animate.style/
 - 通过钩子函数定义各个时间点的样式变化函数：`before-enter`、`enter`、`after-enter`
 - @enter(el, done) 调用done函数停止动画，然后触发@after-enter
 - css动画性能一般会比js动画好一些
+- `before-leave`、`leave`、`after-leave`
 
 使用**生命周期钩子**实现js的动画效果
+
+![](./img/animation7.gif)
 
 ```js
 const app = Vue.createApp({
@@ -339,5 +355,162 @@ const app = Vue.createApp({
 });
 
 const vm = app.mount('#root');
+```
+
+## 多个元素和组件切换
+
+- 切换效果主要借助于`v-if`和`v-else`，切换时展示效果；
+- 组件可以使用动态组件`component`切换
+- mode="out-in"实现先隐藏再展示（避免出场入场动画同时显示）
+- appear属性实现初始加载时也有动画
+
+![](./img/animation8.gif)
+
+1. 过渡样式效果定义
+
+   ```css
+   .v-leave-to,
+   .v-enter-from {
+       opacity: 0;
+   }
+   .v-enter-active,
+   .v-leave-active {
+       transition: opacity 1s ease-in;
+   }
+   .v-leave-from,
+   .v-enter-to {
+       opacity: 1;
+   }
+   ```
+
+2. 组件或元素切换
+
+   ```js
+   const ComponentA = {
+       template: "<div>hello world</div>",
+   };
+   
+   const ComponentB = {
+       template: "<div>bye world</div>",
+   };
+   
+   const app = Vue.createApp({
+       data() {
+           return { component: "component-a" };
+       },
+       methods: {
+           handleClick() {
+               if (this.component === "component-a") {
+                   this.component = "component-b";
+               } else {
+                   this.component = "component-a";
+               }
+           },
+       },
+       components: {
+           "component-a": ComponentA,
+           "component-b": ComponentB,
+       },
+       template: `
+       <div>
+           <transition mode="out-in" appear>
+           	<component :is="component" />
+           </transition>
+           <button @click="handleClick">切换</button>
+       </div>
+   `,
+   });
+   
+   const vm = app.mount("#root");
+   ```
+
+## 列表动画
+
+![](./img/listAnimation.gif)
+
+1. 定义**入场动画**（**v-enter**）和**移动过渡**效果的样式名（**v-move）**
+
+   ```css
+   .v-enter-from {
+       opacity: 0;
+       transform: translateY(30px);
+   }
+   .v-enter-active {
+       transition: all .5s ease-in;
+   }
+   .v-enter-to {
+       opacity: 1;
+       transform: translateY(0);
+   }
+   .v-move {
+       transition: all .5s ease-in;
+   }
+   .list-item {
+       display: inline-block;
+       margin-right: 10px;
+   }
+   ```
+
+2. 增加列表项
+
+   ```js
+   const app = Vue.createApp({
+       data() {
+           return { list: [1, 2, 3] }
+       },
+       methods: {
+           handleClick() {
+               this.list.unshift(this.list.length + 1);
+           },
+       },
+       template: `
+       <div>
+           <transition-group>
+           	<span class="list-item" v-for="item in list" :key="item">{{item}}</span>
+           </transition-group>
+           <button @click="handleClick">增加</button>
+       </div>
+   `
+   });
+   
+   const vm = app.mount('#root');
+   ```
+
+## 状态动画
+
+状态动画实际上就是通过js的数据变化处理
+
+![](./img/stateAnimation.gif)
+
+```js
+const app = Vue.createApp({
+    data() {
+        return {
+            number: 1,
+            animateNumber: 1,
+        };
+    },
+    methods: {
+        handleClick() {
+            this.number = 10;
+            if (this.animateNumber < this.number) {
+                const animation = setInterval(() => {
+                    this.animateNumber += 1;
+                    if (this.animateNumber === 10) {
+                        clearInterval(animation);
+                    }
+                },100);
+            }
+        },
+    },
+    template: `
+    <div>
+    	<div>{{animateNumber}}</div>
+    	<button @click="handleClick">增加</button>
+    </div>
+`,
+});
+
+const vm = app.mount("#root");
 ```
 
