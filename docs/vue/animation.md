@@ -98,7 +98,7 @@ const vm = app.mount('#root');
 
 ## 单元素组件动画和过渡
 
-::: Transition
+::: tip Transition
 
 ​	Vue内置了Transition组件帮助我们快速实现动画和过渡
 
@@ -112,7 +112,7 @@ const vm = app.mount('#root');
 
 ### 入场出场过渡
 
-::: tips
+::: tip 
 
 `v-if`和`v-show`都可以使用transition标签实现效果
 
@@ -258,7 +258,7 @@ Animate.css: https://animate.style/
 
 ## 动画+过渡
 
-::: tips
+::: tip 
 
 - v-enter-from包含在active内，设置过渡初始为red,active过程将使用过渡效果转化为黑色
 - v-enter-from默认为黑色，设置过渡期间为红色即可，(?)最终还是黑色
