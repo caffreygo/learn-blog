@@ -184,3 +184,200 @@ const app = Vue.createApp({
 const vm = app.mount('#root');
 ```
 
+## Teleport传送门功能
+
+Teleport组件能够将组件内的内容挂载到其它确定的DOM节点下，并且模板内能够使用当前组件的数据
+
+以下demo实现了一个简单的蒙层组件：
+
+```js
+const app = Vue.createApp({
+    data() {
+        return {
+            show: false,
+            message: 'hello'
+        }
+    },
+    methods: {
+        handleBtnClick() {
+            this.show = !this.show;
+        }
+    },
+    template: `
+    <div class="area">
+        <button @click="handleBtnClick">按钮</button>
+        <teleport to="#hello">
+        	<div class="mask" v-show="show">{{message}}</div>
+        </teleport>
+    </div>
+`
+});
+
+const vm = app.mount('#root');
+```
+
+css:
+
+```css
+.area {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 300px;
+    background: green;
+}
+.mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #000;
+    opacity: 0.5;
+    color: #fff;
+    font-size: 100px;
+}
+```
+
+## render函数
+
+render函数返回virtual dom，除了使用**h**函数生成vnode之外，也可以直接写vnode节点返回
+
+```js
+// render function
+// template -> render -> h -> 虚拟DOM（JS对象）-> 真实 DOM -> 展示到页面上
+const app = Vue.createApp({
+    template: `
+    <my-title :level="2">
+    	hello dell
+    </my-title>
+`
+});
+
+app.component('my-title', {
+    props: ['level'],
+    render() {
+        const { h } = Vue;
+        return h('h' + this.level, {}, [
+            this.$slots.default(),
+            h('h4', {}, 'dell')
+        ])
+    }
+})
+
+const vm = app.mount('#root');
+```
+
+直接返回vnode:
+
+```js
+render(h, context) {
+    const { icon, title } = context.props;
+    const vnodes = [];
+
+    if (icon) {
+        if (icon.includes("el-icon")) {
+            vnodes.push(<i class={[icon, "sub-el-icon"]} />);
+    	} else {
+        	vnodes.push(<svg-icon icon-class={icon} />);
+		}
+	}
+
+	if (title) {
+    	vnodes.push(<span slot="title">{title}</span>);
+	}
+	return vnodes;
+}
+```
+
+## 插件的定义和使用
+
+### 插件介绍
+
+- 插件plugin可以是一个包含install方法的对象，也可以直接是install这个函数
+- 参数app是Vue实例，options是插件使用时传入的参数`app.use(pluginName, options)`
+- plugin 插件, 也是把通用性的功能封装起来
+- vue全局属性：**app.config.globalProperties**
+
+```js
+const myPlugin = {
+    install(app, options) {
+        app.provide('name', 'Dell Lee');
+        app.directive('focus', {
+            mounted(el) {
+                el.focus();
+            }
+        })
+        app.mixin({
+            mounted(){
+                console.log('mixin')
+            }
+        })
+        app.config.globalProperties.$sayHello = 'hello world';
+    }
+}
+
+const app = Vue.createApp({
+    template: `
+		<my-title />
+	`
+});
+
+app.component('my-title', {
+    inject: ['name'],
+    mounted() {
+        console.log(this.$sayHello);
+    },
+    template: `<div>{{name}}<input v-focus /></div>`
+})
+
+app.use(myPlugin, { name: 'dell'});
+
+const vm = app.mount('#root');
+```
+
+### 数据校验插件
+
+- 属性内增加**rules**属性，可以通过**this.$options.rules**获取
+- 插件内使用mixin在created对需要校验的属性增加watcher，不符合validator时打印错误信息
+
+```js
+const app = Vue.createApp({
+    data() {
+        return { name: 'dell', age: 23}
+    },
+    rules: {
+        age: {
+            validate: age => age > 25,
+            message: 'too young, to simple'
+        },
+        name: {
+            validate: name => name.length >= 4,
+            message: 'name too short'
+        }
+    },
+    template: `
+		<div>name:{{name}}, age:{{age}}</div>
+	`
+});
+
+const validatorPlugin = (app, options) => {
+    app.mixin({
+        created() {
+            for(let key in this.$options.rules) {
+                const item = this.$options.rules[key];
+                this.$watch(key, (value) => {
+                    const result = item.validate(value);
+                    if(!result) console.log(item.message);
+                })
+            }
+        }
+    })
+}
+
+app.use(validatorPlugin);
+const vm = app.mount('#root');
+```
+
