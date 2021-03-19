@@ -2,7 +2,7 @@ module.exports = {
   base: "/",
   title: "Jerry Chen",
   description: "Jerry Chen的博客",
-  head: [["link", { rel: "icon", href: "/gift.png" }]],
+  head: [["link", { rel: "icon", href: "/icon.png" }]],
   markdown: {
     lineNumbers: false,
   },
@@ -39,6 +39,7 @@ module.exports = {
         items: [
           { text: "Vue.js基础", link: "/vue/basic" },
           { text: "Vue.js动画", link: "/vue/animation" },
+          { text: "高级语法", link: "/vue/advanced" },
         ],
       },
       { text: "JavaScript", link: "/javascript/" },
@@ -63,7 +64,7 @@ module.exports = {
       "/book/": ["designPattern", "dataStructures"],
       "/webpack/": ["", "step-2", "step-3", "step-4", "step-5"],
       "/react/": ["", "redux", "note"],
-      "/vue/": ["basic", "animation"],
+      "/vue/": ["basic", "animation", "advanced"],
       "/node/": [""],
       "/http/": [""],
       "/algorithm/": [""],
