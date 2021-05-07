@@ -156,7 +156,94 @@ var max = Math.max.apply(null, numbers); /* 基本等同于 Math.max(numbers[0],
 var min = Math.min.apply(null, numbers);
 ```
 
+## Javascript私有变量
 
+### 构造函数
+
+- 在构造函数内部定义了**私有变量**name
+- 定义了**特权方法**getName setName
+- 特权方法作为闭包有权访问name
+- 每个实例的name都是独立的
+- 每个实例的特权方法也是重新创建的，无法共享，这也是缺点所在
+
+```js
+function Person(name) {
+	this.getName = function() {
+		return name;
+	};
+	this.setName = function(value) {
+		name = value;
+	}
+}
+
+var tc = new Person('tc');
+var dj = new Person('dj');
+tc.getName(); // tc
+dj.getName(); // dj
+```
+
+### 静态私有变量
+
+- 立即执行函数创建了一个私有作用域
+- name为私有变量
+- Person没有使用函数声明，而是**函数表达式**，是因为函数声明只能定义局部函数，在这里是定义私有方法才用的 Person没有用var定义，默认为**全局变量**
+- 特权方法定义在原型上，所以可以被**实例共享**
+- 但是私有变量被所有实例共享，一个实例改变了私有变量，其他实例均受影响，所以这也是缺点
+
+```js
+(function() {
+	var name = '';
+
+	Person = function(value) {
+		name = value;
+	};
+
+	Person.prototype.getName = function() {
+		return name;
+	};
+
+	Person.prototype.setName = function(value) {
+		name = value;
+	};
+
+})();
+
+var tc = new Person('tc');
+tc.getName();  // tc
+
+var dj = new Person('dj');
+tc.getName(); // dj
+```
+
+优点： 公有方法是所有实例共享的 缺点： 私有变量是静态的（由所有实例共享）
+
+### 模块模式
+
+之前的模式都使用了new操作符，所以是用于自定义类型创建私有变量和特权方法的。 模块模式则是为单例创建私有变量和特权方法的。
+
+- 立即执行函数返回一个对象
+- 这个对象提供特权方法的接口api
+
+```js
+var person = (function() {
+
+	// 初始化
+	// 私有变量
+	var name = 'tc';
+
+	return {
+		getName: function() {
+			return name;
+		},
+		setName: function(value) {
+			name = value;
+		}
+	}
+
+})();
+```
+
+这种模式在为单例进行初始化，同时维护私有变量时非常有用。
 
 ## ES6 module
 

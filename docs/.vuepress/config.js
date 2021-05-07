@@ -37,6 +37,7 @@ module.exports = {
         text: "Vue",
         ariaLabel: "Vue.js",
         items: [
+          { text: "Vue.js@2.0", link: "/vue/vue" },
           { text: "Vue.js基础", link: "/vue/basic" },
           { text: "Vue.js动画", link: "/vue/animation" },
           { text: "高级语法", link: "/vue/advanced" },
@@ -65,7 +66,7 @@ module.exports = {
       "/book/": ["designPattern", "dataStructures"],
       "/webpack/": ["", "step-2", "step-3", "step-4", "step-5"],
       "/react/": ["", "redux", "note"],
-      "/vue/": ["basic", "animation", "advanced", "compositionApi"],
+      "/vue/": ["vue", "basic", "animation", "advanced", "compositionApi"],
       "/node/": [""],
       "/http/": [""],
       "/algorithm/": [""],
