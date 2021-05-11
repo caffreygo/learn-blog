@@ -270,3 +270,106 @@ methodsToPatch.forEach((method) => {
 
 ![](./img/initData.png)
 
+## props处理
+
+### props规范化
+
+::: tip
+
+- props规范化：把各种不是规范格式的形式，规范化为规范格式，方便`Vue.js`在后续的过程中处理`props`
+- `props`规范化的过程发生在`this._init()`方法中的`mergeOptions`合并配置中，调用normalizeProps，针对数组和对象进行不同的处理
+
+:::
+
+```javascript
+function normalizeProps (options: Object, vm: ?Component) {
+  const props = options.props
+  if (!props) return
+  const res = {}
+  let i, val, name
+  if (Array.isArray(props)) {
+    i = props.length
+    while (i--) {
+      val = props[i]
+      if (typeof val === 'string') {
+        name = camelize(val)
+        res[name] = { type: null }
+      } else if (process.env.NODE_ENV !== 'production') {
+        // 如果prop不是字符串表示的键名，报错
+        warn('props must be strings when using array syntax.')
+      }
+    }
+  } else if (isPlainObject(props)) {
+    for (const key in props) {
+      val = props[key]
+      name = camelize(key)
+      res[name] = isPlainObject(val)
+        ? val
+        : { type: val }
+    }
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn(
+      `Invalid value for option "props": expected an Array or an Object, ` +
+      `but got ${toRawType(props)}.`,
+      vm
+    )
+  }
+  options.props = res
+}
+```
+
+- 数组：类型检测、驼峰处理、生成固定键值对的对象
+
+  ```js
+  // 规范化前
+  export default {
+    props: ['age', 'nick-name']
+  }
+  
+  // 规范化后
+  export default {
+    props: {
+      age: {
+        type: null
+      },
+      nickName: {
+        type: null
+      }
+    }
+  }
+  ```
+
+- 对象：遍历驼峰处理、直接使用普通对象值或者创建`{ type: Type }`格式的对象
+
+  ```js
+  // 规范化前
+  export default {
+    props: {
+      name: String,
+      age: Number
+    }
+  }
+  
+  // 规范化后
+  export default {
+    props: {
+      name: {
+        type: String
+      },
+      age: {
+        type: Number
+      }
+    }
+  }
+  ```
+
+### props初始化
+
+![](./img/initProps.png)
+
+::: tip props响应式
+
+​		在开发环境下，props的响应式劫持了setter方法
+​		这样做是为了保证props为**单项数据流：**既我们不能在子组件中直接修改父组件传递的props值
+
+::: 
