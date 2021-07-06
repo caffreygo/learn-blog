@@ -79,6 +79,8 @@ export function initState(vm) {
 
 ### Observer 数据劫持
 
+模板使用数据等同于组件使用数据，所以当数据发生变化时，会将通知发送到组件，然后组件内部再通过虚拟DOM重新渲染
+
 ```js
 // src/obserber/index.js
 class Observer {
